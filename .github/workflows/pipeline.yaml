@@ -1,0 +1,42 @@
+name: Build
+on:
+  pull_request:
+
+jobs:
+
+  nightly-clippy:
+    name: Nightly clippy (wasm32)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          target: wasm32-unknown-unknown
+          components: clippy
+          override: true
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: -p vertigo-forms --all-features --target wasm32-unknown-unknown -- -Dwarnings
+          name: Vertigo-forms Clippy Output
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: -p vertigo-forms-storybook -p vertigo-forms-example-form --all-features --target wasm32-unknown-unknown -- -Dwarnings
+          name: Storybook/Examples Clippy Output
+
+  nightly-tests:
+    name: Nightly tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --all-features

@@ -1,0 +1,13 @@
+[package]
+name = "vertigo-forms-storybook"
+version = "0.1.0"
+authors = ["Michał Pokrywka <wolfmoon@o2.pl>"]
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+vertigo = "0.3"
+# vertigo = { path = "../../vertigo/crates/vertigo", version = "0.3.1" }
+vertigo-forms = { path = ".." }
