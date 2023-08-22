@@ -20,6 +20,7 @@ pub fn switch() -> DomNode {
                 params={SwitchParams {
                     on_symbol: html_entities::Theta.to_string(),
                     off_symbol: html_entities::Omicron.to_string(),
+                    ..Default::default()
                 }}
             />
             " " { toggle_value }
