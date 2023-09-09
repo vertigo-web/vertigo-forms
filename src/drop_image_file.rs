@@ -1,4 +1,5 @@
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as BASE_64};
+use std::rc::Rc;
 use vertigo::{DomNode, DropFileItem, DropFileEvent, Value, css, dom, computed_tuple, Computed, bind, Css};
 
 /// Box that allows to accept image files on it, connected to `Value<Option<DropFileItem>>`.
@@ -10,6 +11,7 @@ pub struct DropImageFile {
 
 #[derive(Clone)]
 pub struct DropImageFileParams {
+    pub callback: Option<Rc<dyn Fn(DropFileItem)>>,
     pub revert_label: String,
     pub cancel_label: String,
     pub no_image_text: String,
@@ -20,6 +22,7 @@ pub struct DropImageFileParams {
 impl Default for DropImageFileParams {
     fn default() -> Self {
         Self {
+            callback: None,
             revert_label: "Revert".to_string(),
             cancel_label: "Cancel".to_string(),
             no_image_text: "No image".to_string(),
@@ -86,12 +89,17 @@ impl DropImageFile {
         );
 
         let item = self.item.clone();
+        let callback = self.params.callback.clone();
         let on_dropfile = move |event: DropFileEvent| {
-            item.change(|current| {
-                for file in event.items.into_iter() {
-                    *current = Some(file);
+            for file in event.items.into_iter() {
+                if let Some(callback) = callback.as_deref() {
+                    callback(file);
+                } else {
+                    item.change(|current| {
+                        *current = Some(file);
+                    });
                 }
-            });
+            }
         };
 
         let dropzone_css = self.params.dropzone_css.clone().extend(self.params.dropzone_add_css.clone());
