@@ -5,7 +5,7 @@ use vertigo_forms::{SearchPanel, SearchPanelParams};
 pub fn search_panel() -> DomNode {
     let query = Value::default();
 
-    // AutoMap takes query and mocks server response by ding some computation,
+    // AutoMap takes query and mocks server response by doing some computation,
     // this is counting the words
     let cache: AutoMap<String, Computed<Resource<Vec<String>>>> = AutoMap::new(
         |_, query: &String| {

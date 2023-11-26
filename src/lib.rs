@@ -1,21 +1,21 @@
-use std::{collections::HashMap, str::FromStr, fmt::Display};
+use std::{collections::HashMap, fmt::Display, str::FromStr};
 
 mod drop_image_file;
 mod input;
 mod search_panel;
-mod select_search;
 mod select;
+mod select_search;
 mod switch;
 mod tabs;
 
 pub use {
-    drop_image_file::{DropImageFile, DropImageFileParams, name_to_mime, image_as_uri},
-    input::Input,
+    drop_image_file::{image_as_uri, name_to_mime, DropImageFile, DropImageFileParams},
+    input::{Input, InputWithButton, InputWithButtonParams},
     search_panel::{SearchPanel, SearchPanelParams, SearchResult},
-    select_search::{SelectSearch, SelectSearchParams},
     select::Select,
+    select_search::{SelectSearch, SelectSearchParams},
     switch::{Switch, SwitchParams},
-    tabs::{Tabs, Tab, TabsHeaderParams, TabsHeader, TabsContent},
+    tabs::{Tab, Tabs, TabsContent, TabsHeader, TabsHeaderParams},
 };
 
 pub type ValidationErrors = HashMap<String, String>;
@@ -38,13 +38,17 @@ pub fn nonify(value: String) -> Option<String> {
     Some(value).filter(|v| !v.trim().is_empty())
 }
 
-pub fn parse_optional<T>(value: String, field: &'static str, errors: &mut ValidationErrors) -> Option<T>
+pub fn parse_optional<T>(
+    value: String,
+    field: &'static str,
+    errors: &mut ValidationErrors,
+) -> Option<T>
 where
     T: FromStr,
     <T as FromStr>::Err: Display,
 {
     match nonify(value) {
         Some(value) => parse(value, field, errors),
-        None => None
+        None => None,
     }
 }

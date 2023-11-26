@@ -13,4 +13,4 @@ edition = "2021"
 [dependencies]
 base64 = "0.21"
 either = "1.8"
-vertigo = "0.3"
+vertigo = "0.4"

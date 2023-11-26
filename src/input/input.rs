@@ -1,4 +1,4 @@
-use vertigo::{bind, dom, Value, DomNode};
+use vertigo::{bind, dom, DomNode, Value};
 
 /// Input connected to provided `Value<String>`.
 pub struct Input {

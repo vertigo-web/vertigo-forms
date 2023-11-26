@@ -8,6 +8,5 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-vertigo = "0.3"
-# vertigo = { path = "../../../vertigo/crates/vertigo", version = "0.3.1" }
+vertigo = "0.4"
 vertigo-forms = { path = "../.." }

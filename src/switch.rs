@@ -32,6 +32,20 @@ impl SwitchParams {
 }
 
 /// Simple toggle control connected to `Value<bool>`.
+/// 
+/// Example:
+/// ```
+/// use vertigo::{Value, dom};
+/// use vertigo_forms::{Switch, SwitchParams};
+///
+/// let toggle_value = Value::new(false);
+/// dom! {
+///     <Switch
+///         value={&toggle_value}
+///         params={}
+///     />
+/// };
+/// ```
 pub struct Switch {
     pub value: Value<bool>,
     pub params: SwitchParams,
