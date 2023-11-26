@@ -1,6 +1,28 @@
 use vertigo::{bind, dom, DomNode, Value};
 
 /// Simple Select component based on vector of T values.
+/// 
+/// Example:
+/// ```
+/// use vertigo::{DomNode, dom, Value};
+/// use vertigo_forms::Select;
+/// 
+/// let value = Value::new("foo".to_string());
+/// let options = Value::new(
+///     vec![
+///         "foo".to_string(),
+///         "bar".to_string(),
+///         "baz".to_string(),
+///     ]
+/// );
+/// 
+/// dom! {
+///     <Select
+///         value={value.clone()}
+///         options={options}
+///     />
+/// };
+/// ```
 pub struct Select<T> {
     pub value: Value<T>,
     pub options: Value<Vec<T>>
