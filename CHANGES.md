@@ -5,4 +5,10 @@
 
 ### Added
 
-* `Input`, `InputWithButton`, `Switch`, `Select`, `SelectSearch`, `SearchPanel`, `DropImageFile`, `Tabs`
+* `Input`, `InputWithButton`,
+* `Switch`,
+* `Select`, `SelectSearch`,
+* `SearchPanel`,
+* `DropImageFile`,
+* `Tabs`,
+* `Login`

@@ -1,12 +1,12 @@
 use vertigo::{bind, dom, DomNode, Value};
 
 /// Simple Select component based on vector of T values.
-/// 
+///
 /// Example:
 /// ```
 /// use vertigo::{DomNode, dom, Value};
 /// use vertigo_forms::Select;
-/// 
+///
 /// let value = Value::new("foo".to_string());
 /// let options = Value::new(
 ///     vec![
@@ -15,7 +15,7 @@ use vertigo::{bind, dom, DomNode, Value};
 ///         "baz".to_string(),
 ///     ]
 /// );
-/// 
+///
 /// dom! {
 ///     <Select
 ///         value={value.clone()}

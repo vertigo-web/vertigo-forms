@@ -2,6 +2,7 @@ use std::{collections::HashMap, fmt::Display, str::FromStr};
 
 mod drop_image_file;
 mod input;
+pub mod login;
 mod search_panel;
 mod select;
 mod select_search;
