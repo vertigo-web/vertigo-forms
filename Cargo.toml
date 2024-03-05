@@ -11,6 +11,6 @@ authors = ["Michał Pokrywka <wolfmoon@o2.pl>"]
 edition = "2021"
 
 [dependencies]
-base64 = "0.21"
+base64 = "0.22"
 either = "1.8"
-vertigo = "0.4"
+vertigo = ">=0.4"
