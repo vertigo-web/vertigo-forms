@@ -1,4 +1,4 @@
-use vertigo::{bind, dom, DomNode, Value};
+use vertigo::{bind, dom, Computed, DomNode, Value};
 
 /// Simple Select component based on vector of T values.
 ///
@@ -23,9 +23,9 @@ use vertigo::{bind, dom, DomNode, Value};
 ///     />
 /// };
 /// ```
-pub struct Select<T> {
+pub struct Select<T: Clone> {
     pub value: Value<T>,
-    pub options: Value<Vec<T>>
+    pub options: Computed<Vec<T>>,
 }
 
 impl<T> Select<T>

@@ -5,20 +5,20 @@ use vertigo::{bind, computed_tuple, dom, transaction, Css, DomNode, Value};
 /// ```
 /// use vertigo::{dom, Value};
 /// use vertigo_forms::InputWithButton;
-/// 
+///
 /// let my_value = Value::<String>::default();
-/// 
+///
 /// dom! {
 ///     <InputWithButton value={my_value} params={} />
 /// };
 /// ```
-/// 
+///
 /// ```
 /// use vertigo::{css, dom, Value};
 /// use vertigo_forms::{InputWithButton, InputWithButtonParams};
-/// 
+///
 /// let my_value = Value::new("Initial text".to_string());
-/// 
+///
 /// dom! {
 ///     <InputWithButton
 ///         value={my_value}

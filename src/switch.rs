@@ -32,7 +32,7 @@ impl SwitchParams {
 }
 
 /// Simple toggle control connected to `Value<bool>`.
-/// 
+///
 /// Example:
 /// ```
 /// use vertigo::{Value, dom};
