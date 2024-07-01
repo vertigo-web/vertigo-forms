@@ -11,9 +11,9 @@ mod tabs;
 
 pub use {
     drop_image_file::{image_as_uri, name_to_mime, DropImageFile, DropImageFileParams},
-    input::{Input, InputWithButton, InputWithButtonParams},
+    input::{Input, InputWithButton, InputWithButtonParams, ListInput},
     search_panel::{SearchPanel, SearchPanelParams, SearchResult},
-    select::Select,
+    select::{MultiDropDown, MultiDropDownParams, MultiSelect, Select},
     select_search::{SelectSearch, SelectSearchParams},
     switch::{Switch, SwitchParams},
     tabs::{Tab, Tabs, TabsContent, TabsHeader, TabsHeaderParams},

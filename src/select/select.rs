@@ -25,7 +25,7 @@ use vertigo::{bind, dom, Computed, DomNode, Value};
 /// ```
 pub struct Select<T: Clone> {
     pub value: Value<T>,
-    pub options: Computed<Vec<T>>,
+    pub options: Computed<Vec<T>>
 }
 
 impl<T> Select<T>
