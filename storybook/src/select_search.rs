@@ -17,6 +17,12 @@ pub fn select_search() -> DomNode {
     let selected_value = computed_tuple!(value, options)
         .map(|(value, options)| options.get(&value).cloned().unwrap_or_default());
 
+    let hints = options.render_list(|(key, _)| key.to_string(), |(_key, value)| {
+        dom! {
+            <li>{value.split(' ').next().unwrap_or_default()}</li>
+        }
+    });
+
     dom! {
         <p>
             "Select value: "
@@ -28,5 +34,7 @@ pub fn select_search() -> DomNode {
         </p>
         <p>"Selected key: " {value}</p>
         <p>"Selected value: " {selected_value}</p>
+        <h4>"Hints:"</h4>
+        <ul>{hints}</ul>
     }
 }
