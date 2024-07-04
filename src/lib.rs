@@ -16,7 +16,7 @@ pub use {
     select::Select,
     select_search::{SelectSearch, SelectSearchParams},
     switch::{Switch, SwitchParams},
-    tabs::{Tab, Tabs, TabsContent, TabsHeader, TabsHeaderParams},
+    tabs::{Tab, Tabs, TabsContent, TabsHeader, TabsHeaderParams, CurrentTab},
 };
 
 pub type ValidationErrors = HashMap<String, String>;

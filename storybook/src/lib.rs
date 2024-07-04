@@ -1,6 +1,6 @@
-use std::rc::Rc;
-use vertigo::{css, main, Value, DomNode, dom};
-use vertigo_forms::{Tab, TabsHeaderParams, TabsHeader, TabsContent};
+use std::{fmt, rc::Rc};
+use vertigo::{css, dom, main, router::Router, Computed, Context, DomNode, ToComputed, Value};
+use vertigo_forms::{CurrentTab, Tab, TabsContent, TabsHeader, TabsHeaderParams};
 
 mod input;
 mod switch;
@@ -14,6 +14,33 @@ fn render() -> DomNode {
     #[derive(Clone, PartialEq, Eq, Hash)]
     enum TabRoute {
         Input, Switch, Select, SelectSearch, SearchPanel, DropFile,
+    }
+
+    impl From<String> for TabRoute {
+        fn from(path: String) -> Self {
+            match path.as_str() {
+                "/input" => Self::Input,
+                "/switch" => Self::Switch,
+                "/select" => Self::Select,
+                "/select_search" => Self::SelectSearch,
+                "/search_panel" => Self::SearchPanel,
+                "/drop_file" => Self::DropFile,
+                _ => Self::Input,
+            }
+        }
+    }
+
+    impl fmt::Display for TabRoute {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self {
+                Self::Input => write!(f, "/input"),
+                Self::Switch => write!(f, "/switch"),
+                Self::Select => write!(f, "/select"),
+                Self::SelectSearch => write!(f, "/select_search"),
+                Self::SearchPanel => write!(f, "/search_panel"),
+                Self::DropFile => write!(f, "/drop_file"),
+            }
+        }
     }
 
     let tabs = vec![
@@ -54,7 +81,26 @@ fn render() -> DomNode {
         },
     ];
 
-    let current_tab = Value::new(TabRoute::Switch);
+    #[derive(PartialEq, Clone)]
+    pub struct MyCurrentTab(pub Router::<TabRoute>);
+
+    impl ToComputed<TabRoute> for MyCurrentTab {
+        fn to_computed(&self) -> Computed<TabRoute> {
+            self.0.route.to_computed()
+        }
+    }
+
+    impl CurrentTab<TabRoute> for MyCurrentTab {
+        fn set(&self, value: TabRoute) {
+            Router::set(&self.0, value)
+        }
+
+        fn get(&self, context: &Context) -> TabRoute {
+            self.0.route.get(context)
+        }
+    }
+
+    let current_tab = MyCurrentTab(Router::<TabRoute>::new_history_router());
 
     let css_tab_content = css!("
         border: solid 1px black;
@@ -81,7 +127,7 @@ fn render() -> DomNode {
                 />
                 <div css={css_tab_content}>
                     <TabsContent
-                        current_tab={current_tab}
+                        current_tab={current_tab.to_computed()}
                         tabs={tabs}
                     />
                 </div>

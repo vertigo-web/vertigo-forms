@@ -1,5 +1,23 @@
 use std::rc::Rc;
-use vertigo::{css, Css, dom, DomNode, Value, DomElement, bind};
+use vertigo::{bind, css, dom, Computed, Context, Css, DomElement, DomNode, ToComputed, Value};
+
+pub trait CurrentTab<T>: PartialEq {
+    fn set(&self, value: T);
+    fn get(&self, context: &Context) -> T;
+}
+
+impl<T> CurrentTab<T> for Value<T>
+where
+    T: Clone + PartialEq + 'static
+{
+    fn set(&self, value: T) {
+        Value::set(self, value)
+    }
+
+    fn get(&self, context: &Context) -> T {
+        Value::get(self, context)
+    }
+}
 
 #[derive(Clone)]
 pub struct Tab<K> {
@@ -38,28 +56,33 @@ impl<K> Default for TabsHeaderParams<K> {
 }
 
 /// `TabsHeader` and `TabsContent` rendered next to each other.
-pub struct Tabs<K> {
-    pub current_tab: Value<K>,
+pub struct Tabs<R: CurrentTab<K>, K: Clone> {
+    pub current_tab: R,
     pub tabs: Vec<Tab<K>>,
     pub params: TabsHeaderParams<K>,
 }
 
-impl<K> Tabs<K>
+impl<R, K> Tabs<R, K>
 where
+    R: CurrentTab<K> + ToComputed<K> + Clone + 'static,
     K: Clone + PartialEq + 'static,
 {
     pub fn mount(self) -> DomNode {
         let Self { current_tab, tabs, params } = self;
 
+        let current_computed = current_tab.to_computed();
+
+        let header = TabsHeader::<R, K> {
+            current_tab,
+            tabs: tabs.clone(),
+            params,
+        }.mount();
+
         dom! {
             <div>
-                <TabsHeader
-                    current_tab={current_tab.clone()}
-                    tabs={tabs.clone()}
-                    params={params}
-                />
+                {header}
                 <TabsContent
-                    current_tab={current_tab}
+                    current_tab={current_computed}
                     tabs={tabs}
                 />
             </div>
@@ -68,14 +91,15 @@ where
 }
 
 /// Nagivation bar for TabContent.
-pub struct TabsHeader<K> {
-    pub current_tab: Value<K>,
+pub struct TabsHeader<R: CurrentTab<K>, K: Clone> {
+    pub current_tab: R,
     pub tabs: Vec<Tab<K>>,
     pub params: TabsHeaderParams<K>,
 }
 
-impl<K> TabsHeader<K>
+impl<R, K> TabsHeader<R, K>
 where
+    R: CurrentTab<K> + ToComputed<K> + Clone + 'static,
     K: Clone + PartialEq + 'static,
 {
     pub fn mount(self) -> DomNode {
@@ -85,7 +109,7 @@ where
         let header_active_item_add_css = params.header_active_item_add_css;
 
         // let current_tab_clone = current_tab.clone();
-        current_tab.clone().render_value(move |current_tab_val| {
+        current_tab.to_computed().render_value(move |current_tab_val| {
             let header = DomElement::new("ul")
                 .css(params.header_css.clone());
 
@@ -120,8 +144,8 @@ where
 }
 
 /// Renders content controlled by TabsHeader bar.
-pub struct TabsContent<K> {
-    pub current_tab: Value<K>,
+pub struct TabsContent<K: Clone> {
+    pub current_tab: Computed<K>,
     pub tabs: Vec<Tab<K>>,
 }
 
