@@ -16,7 +16,7 @@ pub use {
     select::{MultiDropDown, MultiDropDownParams, MultiSelect, Select},
     select_search::{SelectSearch, SelectSearchParams},
     switch::{Switch, SwitchParams},
-    tabs::{Tab, Tabs, TabsContent, TabsHeader, TabsHeaderParams},
+    tabs::{Tab, Tabs, TabsContent, TabsContentMapped, TabsHeader, TabsParams},
 };
 
 pub type ValidationErrors = HashMap<String, String>;

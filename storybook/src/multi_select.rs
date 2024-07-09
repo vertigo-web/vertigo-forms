@@ -1,7 +1,7 @@
 use vertigo::{DomNode, dom, Value};
 use vertigo_forms::MultiSelect;
 
-pub fn multi_select() -> DomNode {
+pub fn multi_select()-> DomNode {
     let value = Value::new(vec!["foo".to_string()]);
     let options = Value::new(
         vec![
