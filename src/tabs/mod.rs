@@ -5,20 +5,22 @@ use vertigo::{bind, css, dom, Computed, Css, DomElement, DomNode, Reactive, ToCo
 pub struct Tab<K> {
     pub key: K,
     pub name: String,
-    pub render: Rc<dyn Fn() -> DomNode>,
+    pub render: Rc<dyn Fn(&K) -> DomNode>,
 }
 
 pub type RenderHeaderFunc<K> = Rc<dyn Fn(&Tab<K>) -> DomNode>;
 
-pub struct TabsHeaderParams<K> {
+#[derive(Clone)]
+pub struct TabsParams<K> {
     pub render_header_item: Option<RenderHeaderFunc<K>>,
     pub header_css: Css,
     pub header_item_css: Css,
     pub header_item_add_css: Css,
     pub header_active_item_add_css: Css,
+    pub content_css: Css,
 }
 
-impl<K> Default for TabsHeaderParams<K> {
+impl<K> Default for TabsParams<K> {
     fn default() -> Self {
         Self {
             render_header_item: None,
@@ -32,8 +34,9 @@ impl<K> Default for TabsHeaderParams<K> {
             header_item_css: css!("
                 cursor: pointer;
             "),
-            header_item_add_css: css!(""),
-            header_active_item_add_css: css!(""),
+            header_item_add_css: Css::default(),
+            header_active_item_add_css: Css::default(),
+            content_css: Css::default(),
         }
     }
 }
@@ -42,7 +45,7 @@ impl<K> Default for TabsHeaderParams<K> {
 pub struct Tabs<R: Reactive<K>, K: Clone> {
     pub current_tab: R,
     pub tabs: Vec<Tab<K>>,
-    pub params: TabsHeaderParams<K>,
+    pub params: TabsParams<K>,
 }
 
 impl<R, K> Tabs<R, K>
@@ -55,18 +58,17 @@ where
 
         let current_computed = current_tab.to_computed();
 
-        let header = TabsHeader::<R, K> {
-            current_tab,
-            tabs: tabs.clone(),
-            params,
-        }.mount();
-
         dom! {
             <div>
-                {header}
+                <TabsHeader
+                    {&current_tab}
+                    tabs={tabs.clone()}
+                    params={params.clone()}
+                />
                 <TabsContent
                     current_tab={current_computed}
                     tabs={tabs}
+                    {params}
                 />
             </div>
         }
@@ -77,7 +79,7 @@ where
 pub struct TabsHeader<R: Reactive<K>, K: Clone> {
     pub current_tab: R,
     pub tabs: Vec<Tab<K>>,
-    pub params: TabsHeaderParams<K>,
+    pub params: TabsParams<K>,
 }
 
 impl<R, K> TabsHeader<R, K>
@@ -130,6 +132,7 @@ where
 pub struct TabsContent<K: Clone> {
     pub current_tab: Computed<K>,
     pub tabs: Vec<Tab<K>>,
+    pub params: TabsParams<K>,
 }
 
 impl<K> TabsContent<K>
@@ -137,13 +140,46 @@ where
     K: Clone + PartialEq + 'static,
 {
     pub fn mount(self) -> DomNode {
-        let Self { current_tab, tabs} = self;
+        let Self { current_tab, tabs, params } = self;
 
         current_tab.render_value(move |current_tab| {
-            match tabs.iter().find(|tab| tab.key == current_tab).cloned() {
-                Some(tab) => (tab.render)(),
-                _ => dom! { <p>"Non-existent tab set"</p> }
-            }
+            render_tab_content(&current_tab, &current_tab, &tabs, &params)
         })
+    }
+}
+
+/// Renders content controlled by TabsHeader bar,
+/// but allows to map groups of possible values to single tab,
+/// handy when using Tabs component connected with routing
+pub struct TabsContentMapped<K: Clone> {
+    pub current_tab: Computed<K>,
+    pub tabs: Vec<Tab<K>>,
+    pub tab_map: Rc<dyn Fn(K) -> K>,
+    pub params: TabsParams<K>,
+}
+
+impl<K> TabsContentMapped<K>
+where
+    K: Clone + PartialEq + 'static,
+{
+    pub fn mount(self) -> DomNode {
+        let Self { current_tab, tabs, tab_map, params} = self;
+
+        current_tab.render_value(move |current_tab| {
+            render_tab_content(&current_tab, &tab_map(current_tab.clone()), &tabs, &params)
+        })
+    }
+}
+
+fn render_tab_content<K: PartialEq + Clone>(current_tab: &K, effective_tab: &K, tabs: &[Tab<K>], params: &TabsParams<K>) -> DomNode {
+    let inner = match tabs.iter().find(|tab| &tab.key == effective_tab).cloned() {
+        Some(tab) => (tab.render)(current_tab),
+        _ => dom! { <p>"Non-existent tab set"</p> }
+    };
+
+    dom! {
+        <div css={params.content_css.clone()}>
+            {inner}
+        </div>
     }
 }

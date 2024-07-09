@@ -14,5 +14,5 @@ edition = "2021"
 base64 = "0.22"
 either = "1.8"
 # vertigo = "0.5"
-vertigo = { git = "https://github.com/vertigo-web/vertigo", branch = "reactive-trait" }
+vertigo = { git = "https://github.com/vertigo-web/vertigo", branch = "impl-jsjson-for-unit-type" }
 # vertigo = { path = "../vertigo/crates/vertigo" }

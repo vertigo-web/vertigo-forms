@@ -9,6 +9,6 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 # vertigo = "0.5"
-vertigo = { git = "https://github.com/vertigo-web/vertigo", branch = "reactive-trait" }
+vertigo = { git = "https://github.com/vertigo-web/vertigo", branch = "impl-jsjson-for-unit-type" }
 # vertigo = { path = "../../../vertigo/crates/vertigo" }
 vertigo-forms = { path = "../.." }
