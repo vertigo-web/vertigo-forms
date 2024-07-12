@@ -13,6 +13,5 @@ edition = "2021"
 [dependencies]
 base64 = "0.22"
 either = "1.8"
-# vertigo = "0.5"
-vertigo = { git = "https://github.com/vertigo-web/vertigo", branch = "impl-jsjson-for-unit-type" }
-# vertigo = { path = "../vertigo/crates/vertigo" }
+vertigo = "0.6"
+# vertigo = { git = "https://github.com/vertigo-web/vertigo" }
