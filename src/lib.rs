@@ -3,6 +3,7 @@ use std::{collections::HashMap, fmt::Display, str::FromStr};
 mod drop_image_file;
 mod input;
 pub mod login;
+mod popup;
 mod search_panel;
 mod select;
 mod select_search;
@@ -12,6 +13,7 @@ mod tabs;
 pub use {
     drop_image_file::{image_as_uri, name_to_mime, DropImageFile, DropImageFileParams},
     input::{Input, InputWithButton, InputWithButtonParams, ListInput},
+    popup::{Popup, PopupOnHover, PopupParams},
     search_panel::{SearchPanel, SearchPanelParams, SearchResult},
     select::{MultiDropDown, MultiDropDownParams, MultiSelect, Select},
     select_search::{SelectSearch, SelectSearchParams},

@@ -4,6 +4,7 @@ use vertigo_forms::{Tab, Tabs, TabsParams};
 
 mod drop_image_file;
 mod input;
+mod popup;
 mod multi_drop_down;
 mod multi_select;
 mod search_panel;
@@ -17,6 +18,7 @@ fn render() -> DomNode {
     #[derive(Clone, PartialEq, Eq, Hash)]
     enum TabRoute {
         Input,
+        Popup,
         MultiSelect,
         MultiDropDown,
         Switch,
@@ -31,6 +33,7 @@ fn render() -> DomNode {
         fn from(path: String) -> Self {
             match path.as_str() {
                 "/input" => Self::Input,
+                "/popup" => Self::Popup,
                 "/multi_select" => Self::MultiSelect,
                 "/multi_drop_down" => Self::MultiDropDown,
                 "/switch" => Self::Switch,
@@ -48,6 +51,7 @@ fn render() -> DomNode {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             match self {
                 Self::Input => write!(f, "/input"),
+                Self::Popup => write!(f, "/popup"),
                 Self::MultiSelect => write!(f, "/multi_select"),
                 Self::MultiDropDown => write!(f, "/multi_drop_down"),
                 Self::Switch => write!(f, "/switch"),
@@ -65,6 +69,11 @@ fn render() -> DomNode {
             key: TabRoute::Input,
             name: "Input".to_string(),
             render: Rc::new(|_| input::input()),
+        },
+        Tab {
+            key: TabRoute::Popup,
+            name: "Popup".to_string(),
+            render: Rc::new(|_| popup::popup()),
         },
         Tab {
             key: TabRoute::Switch,
