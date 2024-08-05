@@ -15,7 +15,8 @@ impl ListInput {
 
         let on_input = bind!(value, |new_value: String| {
             value.set(
-                new_value.split(',')
+                new_value
+                    .split(',')
                     .filter_map(|v| {
                         let v = v.trim();
                         if v.is_empty() {
@@ -24,7 +25,7 @@ impl ListInput {
                             Some(v.to_string())
                         }
                     })
-                    .collect()
+                    .collect(),
             );
         });
 

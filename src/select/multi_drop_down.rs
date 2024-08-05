@@ -16,7 +16,7 @@ pub struct MultiDropDown<T: Clone + 'static> {
 
 impl<T> MultiDropDown<T>
 where
-    T: Clone + From<String> + PartialEq + ToString + 'static
+    T: Clone + From<String> + PartialEq + ToString + 'static,
 {
     pub fn mount(self) -> DomNode {
         let opened = Value::new(false);
@@ -33,7 +33,7 @@ where
         "};
         let drop_down_content_css = content_css.extend(self.params.drop_down_content_css);
 
-        let content = opened.render_value(move |opened|
+        let content = opened.render_value(move |opened| {
             if opened {
                 dom! {
                     <div css={drop_down_content_css.clone()}>
@@ -46,7 +46,7 @@ where
             } else {
                 dom! { <div/> }
             }
-        );
+        });
 
         let on_click = bind!(opened, || opened.change(|o| *o = !*o));
 

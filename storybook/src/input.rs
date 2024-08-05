@@ -1,4 +1,4 @@
-use vertigo::{DomNode, dom, Value};
+use vertigo::{dom, DomNode, Value};
 use vertigo_forms::{Input, InputWithButton, ListInput};
 
 pub fn input() -> DomNode {

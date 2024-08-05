@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use vertigo::{DomNode, dom, Value, AutoMap, Computed, Resource};
+use vertigo::{dom, AutoMap, Computed, DomNode, Resource, Value};
 use vertigo_forms::{SearchPanel, SearchPanelParams};
 
 pub fn search_panel() -> DomNode {
@@ -7,14 +7,13 @@ pub fn search_panel() -> DomNode {
 
     // AutoMap takes query and mocks server response by doing some computation,
     // this is counting the words
-    let cache: AutoMap<String, Computed<Resource<Vec<String>>>> = AutoMap::new(
-        |_, query: &String| {
+    let cache: AutoMap<String, Computed<Resource<Vec<String>>>> =
+        AutoMap::new(|_, query: &String| {
             let query = query.clone();
-            Computed::from(move |_| Resource::Ready(
-                query.split_whitespace().map(|s| s.to_string()).collect()
-            ))
-        }
-    );
+            Computed::from(move |_| {
+                Resource::Ready(query.split_whitespace().map(|s| s.to_string()).collect())
+            })
+        });
 
     let render_results: Rc<dyn Fn(Rc<Vec<String>>) -> DomNode> = Rc::new(|result| {
         let count = result.len();

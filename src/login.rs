@@ -22,21 +22,21 @@ pub struct LoginParams {
 impl Default for LoginParams {
     fn default() -> Self {
         Self {
-            css: css!("
+            css: css! {"
                 width: 250px;
                 margin: auto;
                 padding: 10px;
                 margin-bottom: 10px;
-            "),
+            "},
             add_css: Css::default(),
-            line_css: css!("
+            line_css: css! {"
                 min-height: 1em;
                 margin-bottom: 5px;
-            "),
+            "},
             line_add_css: Css::default(),
-            submit_css: css!("
+            submit_css: css! {"
                 margin-top: 15px;
-            "),
+            "},
             submit_add_css: Css::default(),
             error_message: Rc::new(|err| err),
         }
@@ -45,7 +45,11 @@ impl Default for LoginParams {
 
 impl<T: Clone + PartialEq + 'static> Login<T> {
     pub fn mount(&self) -> DomNode {
-        let Self { on_submit, token_result, params } = self;
+        let Self {
+            on_submit,
+            token_result,
+            params,
+        } = self;
 
         let username = Value::<String>::default();
         let password = Value::<String>::default();
@@ -64,30 +68,32 @@ impl<T: Clone + PartialEq + 'static> Login<T> {
 
         let css = params.css.clone().extend(params.add_css.clone());
         let line_css = params.line_css.clone().extend(params.line_add_css.clone());
-        let submit_css = params.submit_css.clone().extend(params.submit_add_css.clone());
+        let submit_css = params
+            .submit_css
+            .clone()
+            .extend(params.submit_add_css.clone());
         let error_message = params.error_message.clone();
 
-        let message_div = bind!(line_css, token_result.render_value(move |token_result| {
-            let css_error = line_css.clone().push_str("
-                color: red;
-            ");
+        let message_div = bind!(
+            line_css,
+            token_result.render_value(move |token_result| {
+                let css_error = line_css.clone().push_str("color: red;");
 
-            match token_result {
-                Some(Resource::Loading) => dom! {
-                    <div css={line_css.clone()}>"Logging in..."</div>
-                },
-                Some(Resource::Error(err)) => dom! {
-                    <div css={css_error}>{error_message(err)}</div>
-                },
-                _ => dom! {
-                    <div css={line_css.clone()} />
-                },
-            }
-        }));
-
-        let on_username_change = bind!(username, |new_value: String|
-            username.set(new_value)
+                match token_result {
+                    Some(Resource::Loading) => dom! {
+                        <div css={line_css.clone()}>"Logging in..."</div>
+                    },
+                    Some(Resource::Error(err)) => dom! {
+                        <div css={css_error}>{error_message(err)}</div>
+                    },
+                    _ => dom! {
+                        <div css={line_css.clone()} />
+                    },
+                }
+            })
         );
+
+        let on_username_change = bind!(username, |new_value: String| username.set(new_value));
 
         let username_div = dom! {
             <div css={line_css.clone()}>
@@ -96,9 +102,7 @@ impl<T: Clone + PartialEq + 'static> Login<T> {
             </div>
         };
 
-        let on_password_change = bind!(password, |new_value|
-            password.set(new_value)
-        );
+        let on_password_change = bind!(password, |new_value| password.set(new_value));
 
         let password_div = dom! {
             <div css={line_css}>

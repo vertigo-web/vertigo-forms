@@ -4,9 +4,9 @@ use vertigo_forms::{Tab, Tabs, TabsParams};
 
 mod drop_image_file;
 mod input;
-mod popup;
 mod multi_drop_down;
 mod multi_select;
+mod popup;
 mod search_panel;
 mod select;
 mod select_search;
@@ -78,12 +78,12 @@ fn render() -> DomNode {
         Tab {
             key: TabRoute::Switch,
             name: "Switch".to_string(),
-            render: Rc::new(|_|switch::switch()),
+            render: Rc::new(|_| switch::switch()),
         },
         Tab {
             key: TabRoute::Select,
             name: "Select".to_string(),
-            render: Rc::new(|_|select::select()),
+            render: Rc::new(|_| select::select()),
         },
         Tab {
             key: TabRoute::MultiSelect,
@@ -93,22 +93,22 @@ fn render() -> DomNode {
         Tab {
             key: TabRoute::MultiDropDown,
             name: "MultiDropDown".to_string(),
-            render: Rc::new(|_|multi_drop_down::multi_drop_down()),
+            render: Rc::new(|_| multi_drop_down::multi_drop_down()),
         },
         Tab {
             key: TabRoute::SelectSearch,
             name: "Select/Search".to_string(),
-            render: Rc::new(|_|select_search::select_search()),
+            render: Rc::new(|_| select_search::select_search()),
         },
         Tab {
             key: TabRoute::SearchPanel,
             name: "Search Panel".to_string(),
-            render: Rc::new(|_|search_panel::search_panel()),
+            render: Rc::new(|_| search_panel::search_panel()),
         },
         Tab {
             key: TabRoute::Tabs,
             name: "Tabs".to_string(),
-            render: Rc::new(|_|tabs::tabs()),
+            render: Rc::new(|_| tabs::tabs()),
         },
         Tab {
             key: TabRoute::DropFile,

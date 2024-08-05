@@ -9,7 +9,7 @@ pub enum MyView {
     View1SubView1,
     View1SubView2,
     View2SubView1,
-    View2SubView2
+    View2SubView2,
 }
 
 pub fn tabs() -> DomNode {
@@ -25,23 +25,27 @@ pub fn tabs() -> DomNode {
         Tab {
             key: MyView::View1,
             name: "View 1".to_string(),
-            render: Rc::new(move |curr| dom! {
-                <p>"View 1 content"</p>
-                <p>"Current view: " {curr}</p>
-                <button on_click={change_subtab_1(MyView::View1SubView1)}>"Go to sub view 1.1"</button>
-                <button on_click={change_subtab_1(MyView::View1SubView2)}>"Go to sub view 1.2"</button>
-            })
+            render: Rc::new(move |curr| {
+                dom! {
+                    <p>"View 1 content"</p>
+                    <p>"Current view: " {curr}</p>
+                    <button on_click={change_subtab_1(MyView::View1SubView1)}>"Go to sub view 1.1"</button>
+                    <button on_click={change_subtab_1(MyView::View1SubView2)}>"Go to sub view 1.2"</button>
+                }
+            }),
         },
         Tab {
             key: MyView::View2SubView1,
             name: "View 2".to_string(),
-            render: Rc::new(move |curr| dom! {
-                <p>"View 2 content"</p>
-                <p>"Current view: " {curr}</p>
-                <button on_click={change_subtab_2(MyView::View2SubView1)}>"Go to sub view 2.1"</button>
-                <button on_click={change_subtab_2(MyView::View2SubView2)}>"Go to sub view 2.2"</button>
-                <button on_click={change_subtab_2(MyView::View1)}>"Go back to view 1"</button>
-            })
+            render: Rc::new(move |curr| {
+                dom! {
+                    <p>"View 2 content"</p>
+                    <p>"Current view: " {curr}</p>
+                    <button on_click={change_subtab_2(MyView::View2SubView1)}>"Go to sub view 2.1"</button>
+                    <button on_click={change_subtab_2(MyView::View2SubView2)}>"Go to sub view 2.2"</button>
+                    <button on_click={change_subtab_2(MyView::View1)}>"Go back to view 1"</button>
+                }
+            }),
         },
     ];
 

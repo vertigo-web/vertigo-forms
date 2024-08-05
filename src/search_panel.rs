@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use vertigo::{Value, dom, Resource, bind, AutoMap, DomNode, ToComputed, };
+use vertigo::{bind, dom, AutoMap, DomNode, Resource, ToComputed, Value};
 
 pub trait SearchResult {
     fn is_empty(&self) -> bool;
@@ -51,30 +51,44 @@ where
     K: ToComputed<Resource<Rc<T>>> + Clone + 'static,
 {
     pub fn mount(self) -> DomNode {
-        let Self { query, cache, render_results, params } = self;
+        let Self {
+            query,
+            cache,
+            render_results,
+            params,
+        } = self;
         let prompt = params.prompt.clone();
         let content = query.render_value(move |query| {
-            let SearchPanelParams { min_chars, prompt: _, hint, loading_text, empty_text } = params.clone();
+            let SearchPanelParams {
+                min_chars,
+                prompt: _,
+                hint,
+                loading_text,
+                empty_text,
+            } = params.clone();
             if query.len() < min_chars {
                 let msg = hint.replace("{min_chars}", &min_chars.to_string());
                 return dom! { <div>{msg}</div> };
             }
             let render_results = render_results.clone();
-            let content = cache.get(&query).to_computed().render_value(move |books| match books {
-                Resource::Loading => dom! { <div>{loading_text.clone()}</div> },
-                Resource::Ready(dataset) => {
-                    if !dataset.is_empty() {
-                        render_results(dataset)
-                    } else {
-                        dom! {
-                            <div>{empty_text.clone()}</div>
+            let content = cache
+                .get(&query)
+                .to_computed()
+                .render_value(move |books| match books {
+                    Resource::Loading => dom! { <div>{loading_text.clone()}</div> },
+                    Resource::Ready(dataset) => {
+                        if !dataset.is_empty() {
+                            render_results(dataset)
+                        } else {
+                            dom! {
+                                <div>{empty_text.clone()}</div>
+                            }
                         }
                     }
-                },
-                Resource::Error(err) => {
-                    dom! { <div>{err}</div> }
-                }
-            });
+                    Resource::Error(err) => {
+                        dom! { <div>{err}</div> }
+                    }
+                });
             dom! { <div>{content}</div> }
         });
 
