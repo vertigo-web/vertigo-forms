@@ -25,12 +25,12 @@ use vertigo::{bind, dom, Computed, DomNode, Value};
 /// ```
 pub struct Select<T: Clone> {
     pub value: Value<T>,
-    pub options: Computed<Vec<T>>
+    pub options: Computed<Vec<T>>,
 }
 
 impl<T> Select<T>
 where
-    T: Clone + From<String> + PartialEq + ToString + 'static
+    T: Clone + From<String> + PartialEq + ToString + 'static,
 {
     pub fn mount(&self) -> DomNode {
         let Self { value, options } = self;
@@ -38,8 +38,9 @@ where
             value.set(new_value.into());
         });
 
-        let list = bind!(options, value.render_value(move |value|
-            options.render_list(
+        let list = bind!(
+            options,
+            value.render_value(move |value| options.render_list(
                 |item| item.to_string(),
                 move |item| {
                     let text_item = item.to_string();
@@ -49,8 +50,8 @@ where
                         dom! { <option value={&text_item}>{text_item}</option> }
                     }
                 }
-            )
-        ));
+            ))
+        );
 
         dom! {
             <select {on_change}>

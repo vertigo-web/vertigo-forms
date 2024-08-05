@@ -53,10 +53,9 @@ pub fn Popup(visible: Computed<bool>, content: DomNode, params: PopupParams) {
 pub fn PopupOnHover(element: DomNode, content: DomNode, params: PopupParams) {
     let popup_css = popup_css();
 
-    let operator_css = operator_css()
-        .extend(css!{"
-            :hover [popup_css] { visibility: visible; }
-        "});
+    let operator_css = operator_css().extend(css! {"
+        :hover [popup_css] { visibility: visible; }
+    "});
 
     dom! {
         <div css={operator_css}>

@@ -1,6 +1,8 @@
-use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as BASE_64};
+use base64::{engine::general_purpose::STANDARD_NO_PAD as BASE_64, Engine as _};
 use std::rc::Rc;
-use vertigo::{DomNode, DropFileItem, DropFileEvent, Value, css, dom, computed_tuple, Computed, bind, Css};
+use vertigo::{
+    bind, computed_tuple, css, dom, Computed, Css, DomNode, DropFileEvent, DropFileItem, Value,
+};
 
 /// Box that allows to accept image files on it, connected to `Value<Option<DropFileItem>>`.
 pub struct DropImageFile {
@@ -26,7 +28,7 @@ impl Default for DropImageFileParams {
             revert_label: "Revert".to_string(),
             cancel_label: "Cancel".to_string(),
             no_image_text: "No image".to_string(),
-            dropzone_css: css!("
+            dropzone_css: css! {"
                 width: 400px;
                 height: 400px;
 
@@ -35,7 +37,7 @@ impl Default for DropImageFileParams {
                 justify-content: center;
 
                 padding: 10px;
-            "),
+            "},
             dropzone_add_css: css!(""),
         }
     }
@@ -43,11 +45,9 @@ impl Default for DropImageFileParams {
 
 impl DropImageFile {
     pub fn mount(&self) -> DomNode {
-        let base64_data = self.item.to_computed().map(|item| {
-            match item {
-                Some(item) => image_as_uri(&item),
-                None => "".to_string()
-            }
+        let base64_data = self.item.to_computed().map(|item| match item {
+            Some(item) => image_as_uri(&item),
+            None => "".to_string(),
         });
 
         let view_deps = computed_tuple!(
@@ -57,36 +57,34 @@ impl DropImageFile {
         );
         let item_clone = self.item.clone();
         let params = self.params.clone();
-        let image_view = view_deps.render_value(
-            move |(original, item, base64_date)| {
-                match item {
-                    Some(item) => {
-                        let message = format_line(&item);
-                        let image_css = css!("
-                            display: flex;
-                            flex-flow: column;
-                        ");
-                        let restore = bind!(item_clone, || item_clone.set(None));
-                        let restore_text = if original.is_some() {
-                            &params.revert_label
-                        } else {
-                            &params.cancel_label
-                        };
-                        dom! {
-                            <div css={image_css}>
-                                <button on_click={restore}>{restore_text}</button>
-                                <img src={base64_date} />
-                                { message }
-                            </div>
-                        }
-                    }
-                    None => match original {
-                        Some(original) => { dom! { <div><img src={original} /></div> } },
-                        None => dom! { <div>{&params.no_image_text}</div> }
-                    },
+        let image_view = view_deps.render_value(move |(original, item, base64_date)| match item {
+            Some(item) => {
+                let message = format_line(&item);
+                let image_css = css! {"
+                    display: flex;
+                    flex-flow: column;
+                "};
+                let restore = bind!(item_clone, || item_clone.set(None));
+                let restore_text = if original.is_some() {
+                    &params.revert_label
+                } else {
+                    &params.cancel_label
+                };
+                dom! {
+                    <div css={image_css}>
+                        <button on_click={restore}>{restore_text}</button>
+                        <img src={base64_date} />
+                        { message }
+                    </div>
                 }
             }
-        );
+            None => match original {
+                Some(original) => {
+                    dom! { <div><img src={original} /></div> }
+                }
+                None => dom! { <div>{&params.no_image_text}</div> },
+            },
+        });
 
         let item = self.item.clone();
         let callback = self.params.callback.clone();
@@ -102,7 +100,11 @@ impl DropImageFile {
             }
         };
 
-        let dropzone_css = self.params.dropzone_css.clone().extend(self.params.dropzone_add_css.clone());
+        let dropzone_css = self
+            .params
+            .dropzone_css
+            .clone()
+            .extend(self.params.dropzone_add_css.clone());
 
         dom! {
             <div css={dropzone_css} on_dropfile={on_dropfile}>

@@ -11,7 +11,7 @@ pub fn popup() -> DomNode {
             border-radius: 10px;
             padding: 0px 10px;
             background-color: white;
-        "}
+        "},
     };
 
     let content = dom! {

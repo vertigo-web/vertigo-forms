@@ -24,16 +24,16 @@ impl<K> Default for TabsParams<K> {
     fn default() -> Self {
         Self {
             render_header_item: None,
-            header_css: css!("
+            header_css: css! {"
                 display: flex;
                 flex-wrap: wrap;
                 gap: 10px;
                 margin: 0px;
                 padding: 0px;
-            "),
-            header_item_css: css!("
+            "},
+            header_item_css: css! {"
                 cursor: pointer;
-            "),
+            "},
             header_item_add_css: Css::default(),
             header_active_item_add_css: Css::default(),
             content_css: Css::default(),
@@ -54,7 +54,11 @@ where
     K: Clone + PartialEq + 'static,
 {
     pub fn mount(self) -> DomNode {
-        let Self { current_tab, tabs, params } = self;
+        let Self {
+            current_tab,
+            tabs,
+            params,
+        } = self;
 
         let current_computed = current_tab.to_computed();
 
@@ -88,43 +92,46 @@ where
     K: Clone + PartialEq + 'static,
 {
     pub fn mount(self) -> DomNode {
-        let Self { current_tab, tabs, params } = self;
+        let Self {
+            current_tab,
+            tabs,
+            params,
+        } = self;
 
         let header_item_css = params.header_item_css.extend(params.header_item_add_css);
         let header_active_item_add_css = params.header_active_item_add_css;
 
         // let current_tab_clone = current_tab.clone();
-        current_tab.to_computed().render_value(move |current_tab_val| {
-            let header = DomElement::new("ul")
-                .css(params.header_css.clone());
+        current_tab
+            .to_computed()
+            .render_value(move |current_tab_val| {
+                let header = DomElement::new("ul").css(params.header_css.clone());
 
-            tabs.iter().for_each(|tab| {
-                if let Some(render_header_item) = &params.render_header_item {
-                    // Custom item rendering
-                    header.add_child(render_header_item(tab));
-                } else {
-                    // Default item rendering
-                    let on_click = bind!(current_tab, tab
-                        || current_tab.set(tab.key.clone())
-                    );
-                    let header_item_css = if current_tab_val == tab.key {
-                        header_item_css.clone().extend(header_active_item_add_css.clone())
+                tabs.iter().for_each(|tab| {
+                    if let Some(render_header_item) = &params.render_header_item {
+                        // Custom item rendering
+                        header.add_child(render_header_item(tab));
                     } else {
-                        header_item_css.clone()
-                    };
-                    let item_css = css!("display: block;");
-                    header.add_child(
-                        dom! {
+                        // Default item rendering
+                        let on_click = bind!(current_tab, tab || current_tab.set(tab.key.clone()));
+                        let header_item_css = if current_tab_val == tab.key {
+                            header_item_css
+                                .clone()
+                                .extend(header_active_item_add_css.clone())
+                        } else {
+                            header_item_css.clone()
+                        };
+                        let item_css = css!("display: block;");
+                        header.add_child(dom! {
                             <li css={item_css}>
                                 <a  css={header_item_css} on_click={on_click}>{&tab.name}</a>
                             </li>
-                        }
-                    );
-                }
-            });
+                        });
+                    }
+                });
 
-            header.into()
-        })
+                header.into()
+            })
     }
 }
 
@@ -140,7 +147,11 @@ where
     K: Clone + PartialEq + 'static,
 {
     pub fn mount(self) -> DomNode {
-        let Self { current_tab, tabs, params } = self;
+        let Self {
+            current_tab,
+            tabs,
+            params,
+        } = self;
 
         current_tab.render_value(move |current_tab| {
             render_tab_content(&current_tab, &current_tab, &tabs, &params)
@@ -163,7 +174,12 @@ where
     K: Clone + PartialEq + 'static,
 {
     pub fn mount(self) -> DomNode {
-        let Self { current_tab, tabs, tab_map, params} = self;
+        let Self {
+            current_tab,
+            tabs,
+            tab_map,
+            params,
+        } = self;
 
         current_tab.render_value(move |current_tab| {
             render_tab_content(&current_tab, &tab_map(current_tab.clone()), &tabs, &params)
@@ -171,10 +187,15 @@ where
     }
 }
 
-fn render_tab_content<K: PartialEq + Clone>(current_tab: &K, effective_tab: &K, tabs: &[Tab<K>], params: &TabsParams<K>) -> DomNode {
+fn render_tab_content<K: PartialEq + Clone>(
+    current_tab: &K,
+    effective_tab: &K,
+    tabs: &[Tab<K>],
+    params: &TabsParams<K>,
+) -> DomNode {
     let inner = match tabs.iter().find(|tab| &tab.key == effective_tab).cloned() {
         Some(tab) => (tab.render)(current_tab),
-        _ => dom! { <p>"Non-existent tab set"</p> }
+        _ => dom! { <p>"Non-existent tab set"</p> },
     };
 
     dom! {
