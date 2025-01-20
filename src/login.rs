@@ -17,6 +17,10 @@ pub struct LoginParams {
     pub submit_css: Css,
     pub submit_add_css: Css,
     pub error_message: Rc<dyn Fn(String) -> String>,
+    pub username_label: String,
+    pub password_label: String,
+    pub button_label: String,
+    pub waiting_label: String,
 }
 
 impl Default for LoginParams {
@@ -39,6 +43,10 @@ impl Default for LoginParams {
             "},
             submit_add_css: Css::default(),
             error_message: Rc::new(|err| err),
+            username_label: "Username:".to_string(),
+            password_label: "Password:".to_string(),
+            button_label: "Login".to_string(),
+            waiting_label: "Logging in...".to_string(),
         }
     }
 }
@@ -73,6 +81,7 @@ impl<T: Clone + PartialEq + 'static> Login<T> {
             .clone()
             .extend(params.submit_add_css.clone());
         let error_message = params.error_message.clone();
+        let waiting_label = params.waiting_label.clone();
 
         let message_div = bind!(
             line_css,
@@ -81,7 +90,7 @@ impl<T: Clone + PartialEq + 'static> Login<T> {
 
                 match token_result {
                     Some(Resource::Loading) => dom! {
-                        <div css={line_css.clone()}>"Logging in..."</div>
+                        <div css={line_css.clone()}>{&waiting_label}</div>
                     },
                     Some(Resource::Error(err)) => dom! {
                         <div css={css_error}>{error_message(err)}</div>
@@ -97,7 +106,7 @@ impl<T: Clone + PartialEq + 'static> Login<T> {
 
         let username_div = dom! {
             <div css={line_css.clone()}>
-                <div>"Username:"</div>
+                <div>{&params.username_label}</div>
                 <input value={username.to_computed()} on_input={on_username_change} />
             </div>
         };
@@ -106,7 +115,7 @@ impl<T: Clone + PartialEq + 'static> Login<T> {
 
         let password_div = dom! {
             <div css={line_css}>
-                <div>"Password:"</div>
+                <div>{&params.password_label}</div>
                 <input value={password.to_computed()} on_input={on_password_change} type="password" />
             </div>
         };
@@ -117,7 +126,7 @@ impl<T: Clone + PartialEq + 'static> Login<T> {
                 { username_div }
                 { password_div }
                 <div css={submit_css}>
-                    <input type="submit" value="Login" on_click={move || submit()} />
+                    <input type="submit" value={&params.button_label} on_click={move || submit()} />
                 </div>
             </div>
         }
