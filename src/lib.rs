@@ -7,6 +7,7 @@ mod popup;
 mod search_panel;
 mod select;
 mod select_search;
+mod spinner;
 mod switch;
 mod tabs;
 
@@ -17,6 +18,7 @@ pub use {
     search_panel::{SearchPanel, SearchPanelParams, SearchResult},
     select::{MultiDropDown, MultiDropDownParams, MultiSelect, Select},
     select_search::{SelectSearch, SelectSearchParams},
+    spinner::Spinner,
     switch::{Switch, SwitchParams},
     tabs::{Tab, Tabs, TabsContent, TabsContentMapped, TabsHeader, TabsParams},
 };

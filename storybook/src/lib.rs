@@ -4,6 +4,7 @@ use vertigo_forms::{Tab, Tabs, TabsParams};
 
 mod drop_image_file;
 mod input;
+mod login;
 mod multi_drop_down;
 mod multi_select;
 mod popup;
@@ -27,6 +28,8 @@ fn render() -> DomNode {
         SearchPanel,
         Tabs,
         DropFile,
+        Login,
+        Spinner,
     }
 
     impl From<String> for TabRoute {
@@ -42,6 +45,8 @@ fn render() -> DomNode {
                 "/search_panel" => Self::SearchPanel,
                 "/tabs" => Self::Tabs,
                 "/drop_file" => Self::DropFile,
+                "/login" => Self::Login,
+                "/spinner" => Self::Spinner,
                 _ => Self::Input,
             }
         }
@@ -60,6 +65,8 @@ fn render() -> DomNode {
                 Self::SearchPanel => write!(f, "/search_panel"),
                 Self::Tabs => write!(f, "/tabs"),
                 Self::DropFile => write!(f, "/drop_file"),
+                Self::Login => write!(f, "/login"),
+                Self::Spinner => write!(f, "/spinner"),
             }
         }
     }
@@ -114,6 +121,16 @@ fn render() -> DomNode {
             key: TabRoute::DropFile,
             name: "Drop Image File".to_string(),
             render: Rc::new(|_| drop_image_file::drop_file()),
+        },
+        Tab {
+            key: TabRoute::Login,
+            name: "Login".to_string(),
+            render: Rc::new(|_| login::login()),
+        },
+        Tab {
+            key: TabRoute::Spinner,
+            name: "Spinner".to_string(),
+            render: Rc::new(|_| dom! { <vertigo_forms::Spinner /> }),
         },
     ];
 
