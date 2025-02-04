@@ -12,3 +12,4 @@
 * `DropImageFile`,
 * `Tabs`,
 * `Login`
+* `Spinner`
