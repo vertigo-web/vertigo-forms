@@ -1,5 +1,4 @@
 use std::rc::Rc;
-
 use vertigo::{component, dom, Computed, DomNode, Resource};
 
 use crate::Spinner;
