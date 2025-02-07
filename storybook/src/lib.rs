@@ -12,6 +12,7 @@ mod search_panel;
 mod select;
 mod select_search;
 mod switch;
+mod form;
 mod tabs;
 mod with_loader;
 
@@ -27,6 +28,7 @@ fn render() -> DomNode {
         Select,
         SelectSearch,
         SearchPanel,
+        Form,
         Tabs,
         DropFile,
         Login,
@@ -45,6 +47,7 @@ fn render() -> DomNode {
                 "/select" => Self::Select,
                 "/select_search" => Self::SelectSearch,
                 "/search_panel" => Self::SearchPanel,
+                "/form" => Self::Form,
                 "/tabs" => Self::Tabs,
                 "/drop_file" => Self::DropFile,
                 "/login" => Self::Login,
@@ -66,6 +69,7 @@ fn render() -> DomNode {
                 Self::Select => write!(f, "/select"),
                 Self::SelectSearch => write!(f, "/select_search"),
                 Self::SearchPanel => write!(f, "/search_panel"),
+                Self::Form => write!(f, "/form"),
                 Self::Tabs => write!(f, "/tabs"),
                 Self::DropFile => write!(f, "/drop_file"),
                 Self::Login => write!(f, "/login"),
@@ -115,6 +119,11 @@ fn render() -> DomNode {
             key: TabRoute::SearchPanel,
             name: "Search Panel".to_string(),
             render: Rc::new(|_| search_panel::search_panel()),
+        },
+        Tab {
+            key: TabRoute::Form,
+            name: "Form".to_string(),
+            render: Rc::new(|_| form::form()),
         },
         Tab {
             key: TabRoute::Tabs,
