@@ -7,10 +7,11 @@
 
 * `Input`, `InputWithButton`,
 * `Switch`,
-* `Select`, `SelectSearch`,
+* `Select`, `DictSelect`, `SelectSearch`, `MultiSelect`, `MultiDropDown`
 * `SearchPanel`,
 * `DropImageFile`,
 * `Tabs`,
 * `Login`
 * `Spinner`
 * `WithLoader`
+* `Form`
