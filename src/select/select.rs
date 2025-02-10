@@ -1,6 +1,6 @@
 use vertigo::{bind, dom, Computed, DomNode, Value};
 
-/// Simple Select component based on vector of T values.
+/// Simple Select component based on vector of `T` values.
 ///
 /// Example:
 /// ```
