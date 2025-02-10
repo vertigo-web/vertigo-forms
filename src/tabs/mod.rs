@@ -41,7 +41,7 @@ impl<K> Default for TabsParams<K> {
     }
 }
 
-/// `TabsHeader` and `TabsContent` rendered next to each other.
+/// [TabsHeader] and [TabsContent] rendered next to each other.
 pub struct Tabs<R: Reactive<K>, K: Clone> {
     pub current_tab: R,
     pub tabs: Vec<Tab<K>>,
@@ -79,7 +79,7 @@ where
     }
 }
 
-/// Nagivation bar for TabContent.
+/// Nagivation bar for [TabsContent].
 pub struct TabsHeader<R: Reactive<K>, K: Clone> {
     pub current_tab: R,
     pub tabs: Vec<Tab<K>>,
@@ -135,7 +135,7 @@ where
     }
 }
 
-/// Renders content controlled by TabsHeader bar.
+/// Renders content controlled by [TabsHeader] bar.
 pub struct TabsContent<K: Clone> {
     pub current_tab: Computed<K>,
     pub tabs: Vec<Tab<K>>,
@@ -159,9 +159,9 @@ where
     }
 }
 
-/// Renders content controlled by TabsHeader bar,
+/// Renders content controlled by [TabsHeader] bar,
 /// but allows to map groups of possible values to single tab,
-/// handy when using Tabs component connected with routing
+/// handy when using [Tabs] component connected with routing
 pub struct TabsContentMapped<K: Clone> {
     pub current_tab: Computed<K>,
     pub tabs: Vec<Tab<K>>,
