@@ -10,6 +10,7 @@ mod select_search;
 mod spinner;
 mod switch;
 mod tabs;
+mod with_loader;
 
 pub use {
     drop_image_file::{image_as_uri, name_to_mime, DropImageFile, DropImageFileParams},
@@ -21,6 +22,7 @@ pub use {
     spinner::Spinner,
     switch::{Switch, SwitchParams},
     tabs::{Tab, Tabs, TabsContent, TabsContentMapped, TabsHeader, TabsParams},
+    with_loader::{with_loader, WithLoader},
 };
 
 pub type ValidationErrors = HashMap<String, String>;

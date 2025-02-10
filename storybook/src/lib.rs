@@ -13,6 +13,7 @@ mod select;
 mod select_search;
 mod switch;
 mod tabs;
+mod with_loader;
 
 #[main]
 fn render() -> DomNode {
@@ -30,6 +31,7 @@ fn render() -> DomNode {
         DropFile,
         Login,
         Spinner,
+        WithLoader,
     }
 
     impl From<String> for TabRoute {
@@ -47,6 +49,7 @@ fn render() -> DomNode {
                 "/drop_file" => Self::DropFile,
                 "/login" => Self::Login,
                 "/spinner" => Self::Spinner,
+                "/with_loader" => Self::WithLoader,
                 _ => Self::Input,
             }
         }
@@ -67,6 +70,7 @@ fn render() -> DomNode {
                 Self::DropFile => write!(f, "/drop_file"),
                 Self::Login => write!(f, "/login"),
                 Self::Spinner => write!(f, "/spinner"),
+                Self::WithLoader => write!(f, "/with_loader"),
             }
         }
     }
@@ -131,6 +135,11 @@ fn render() -> DomNode {
             key: TabRoute::Spinner,
             name: "Spinner".to_string(),
             render: Rc::new(|_| dom! { <vertigo_forms::Spinner /> }),
+        },
+        Tab {
+            key: TabRoute::WithLoader,
+            name: "With Loader".to_string(),
+            render: Rc::new(|_| with_loader::with_loader()),
         },
     ];
 

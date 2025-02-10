@@ -13,3 +13,4 @@
 * `Tabs`,
 * `Login`
 * `Spinner`
+* `WithLoader`
