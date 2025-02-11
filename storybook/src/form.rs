@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use vertigo::{bind_rc, css, dom, transaction, DomNode, Value};
-use vertigo_forms::{Form, FormData, FormParams, FormSection};
+use vertigo_forms::{FieldsetStyle, Form, FormData, FormParams, FormSection};
 
 #[derive(Clone, PartialEq)]
 pub struct MyModel {
@@ -18,7 +18,8 @@ impl From<&MyModel> for FormData {
                 FormSection::new("Slug", "slug", &value.slug),
                 FormSection::new("Name", "name", &value.name),
                 FormSection::new("Dimensions", "dimension_x", &value.dimension_x)
-                    .add_field("dimension_y", &value.dimension_y),
+                    .add_field("dimension_y", &value.dimension_y)
+                    .set_fieldset_style(FieldsetStyle::Dimensions),
             ],
         }
     }
@@ -26,7 +27,6 @@ impl From<&MyModel> for FormData {
 
 impl From<Rc<FormData>> for MyModel {
     fn from(form_data: Rc<FormData>) -> Self {
-        // TODO: Really transaction here?
         transaction(|ctx| Self {
             slug: form_data.get("slug").get(ctx),
             name: form_data.get("name").get(ctx),
@@ -55,7 +55,7 @@ pub fn form() -> DomNode {
                 model={&&model}
                 {on_submit}
                 params={FormParams {
-                    add_css: css! {"width: 100px;"},
+                    add_css: css! {"width: 400px;"},
                     submit_label: "Apply".to_string(),
                     ..Default::default()
                 }}

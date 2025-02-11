@@ -1,14 +1,23 @@
 use std::rc::Rc;
 use vertigo::{DomElement, Value};
 
-// pub enum FieldKind {
-// }
+/// Presets for rendering fields in fieldset
+#[derive(Clone, Copy, Default, PartialEq)]
+pub enum FieldsetStyle {
+    /// Just one after another (piled)
+    #[default]
+    Plain,
+    /// Interspersed with "x" character
+    Dimensions,
+}
 
+#[derive(Default)]
 pub struct FormSection {
     pub label: String,
     pub fields: Vec<Field>,
     pub error: Option<String>,
     pub render: Option<Rc<dyn Fn(Vec<Field>) -> DomElement>>,
+    pub fieldset_style: FieldsetStyle,
 }
 
 pub struct Field {
@@ -31,8 +40,7 @@ impl FormSection {
                 value: Value::new(value.clone()),
                 original_value: value,
             }],
-            error: None,
-            render: None,
+            ..Default::default()
         }
     }
 
@@ -43,6 +51,11 @@ impl FormSection {
             value: Value::new(value.clone()),
             original_value: value,
         });
+        self
+    }
+
+    pub fn set_fieldset_style(mut self, fieldset_style: FieldsetStyle) -> Self {
+        self.fieldset_style = fieldset_style;
         self
     }
 }
