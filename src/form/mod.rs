@@ -17,8 +17,8 @@ impl Default for FormParams {
         Self {
             css: css! { "
                 display: grid;
-                grid-template-columns: 100px 1fr;
-                gap: 10px;
+                grid-template-rows: auto 1fr;
+                gap: 5px;
             " },
             add_css: Css::default(),
             submit_label: "Submit".to_string(),
@@ -44,20 +44,25 @@ where
             let values = section
                 .fields
                 .iter()
-                .map(|field| dom! { <NamedInput name={&field.key} value={field.value.clone()} /> });
+                .map(|field| dom! { <NamedInput name={&field.key} value={field.value.clone()} /> })
+                .intersperse_with(dom! { " x " });
 
             let label = &section.label;
             dom! {
-                <label id={label}>{label}</label>
-                <fieldset aria-labelledby={label}>
-                    {..values}
-                </fieldset>
+                <label css={css!("display: grid; grid-template-columns: subgrid; grid-column: span 2 / span 2;")}>
+                    {label}
+                    <div css={css!("display: flex;")}>
+                        {..values}
+                    </div>
+                </label>
             }
         } else if let Some(field) = section.fields.first() {
             let value = field.value.clone();
             dom! {
-                <label for={&field.key}>{&section.label}</label>
-                <NamedInput name={&field.key} {value} />
+                <label css={css!("display: grid; grid-template-columns: subgrid; grid-column: span 2 / span 2;")}>
+                    {&section.label}
+                    <NamedInput name={&field.key} {value} />
+                </label>
             }
         } else {
             dom! { <p /> }

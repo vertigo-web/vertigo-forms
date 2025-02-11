@@ -30,7 +30,7 @@ impl NamedInput {
         });
 
         dom! {
-            <input id={&name} aria-label={&name} {name} {value} {on_input} />
+            <input {name} {value} {on_input} />
         }
     }
 }
