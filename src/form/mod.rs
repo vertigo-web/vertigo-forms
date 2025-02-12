@@ -1,10 +1,10 @@
 use std::rc::Rc;
 use vertigo::{bind, component, css, dom, Css};
 
-use crate::input::NamedInput;
+use crate::{input::NamedInput, Select};
 
 mod form_data;
-pub use form_data::{Field, FieldsetStyle, FormData, FormSection};
+pub use form_data::{DataField, DataFieldValue, DataSection, FieldExport, FieldsetStyle, FormData, FormExport};
 
 pub struct FormParams {
     pub css: Css,
@@ -27,16 +27,29 @@ impl Default for FormParams {
 }
 
 #[component]
+pub fn Field<'a>(field: &'a DataField) {
+    match &field.value {
+        DataFieldValue::String(val) => {
+            dom! { <NamedInput name={&field.key} value={val.value.clone()} /> }
+        }
+        DataFieldValue::List(val) => {
+            dom! { <Select value={val.value.clone()} options={&val.dict} /> }
+        },
+        DataFieldValue::File(_val) => unimplemented!(),
+    }
+}
+
+#[component]
 pub fn Form<'a, T>(model: &'a T, on_submit: Rc<dyn Fn(T)>, params: FormParams)
 where
     FormData: From<&'a T>,
-    T: From<Rc<FormData>> + 'static,
+    T: From<FormExport> + 'static,
 {
     let form_data = Rc::new(FormData::from(model));
 
     let on_submit = bind!(form_data, || {
         let form_data = form_data.clone();
-        on_submit(T::from(form_data));
+        on_submit(T::from(form_data.export()));
     });
 
     let subgrid_css = css! {"
@@ -57,7 +70,7 @@ where
                 if section.fieldset_style == FieldsetStyle::Dimensions && i > 0 {
                     values.push(dom! { <span>"x"</span> });
                 }
-                values.push(dom! { <NamedInput name={&field.key} value={field.value.clone()} /> })
+                values.push(dom! { <Field {field} /> });
             }
 
             let label = &section.label;
@@ -70,11 +83,10 @@ where
                 </label>
             }
         } else if let Some(field) = section.fields.first() {
-            let value = field.value.clone();
             dom! {
                 <label css={&subgrid_css}>
                     {&section.label}
-                    <NamedInput name={&field.key} {value} />
+                    <Field {field} />
                 </label>
             }
         } else {

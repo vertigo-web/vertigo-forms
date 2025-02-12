@@ -1,7 +1,7 @@
 use std::{collections::HashMap, fmt::Display, str::FromStr};
 
 mod drop_image_file;
-mod form;
+pub mod form;
 mod input;
 pub mod login;
 mod popup;
@@ -15,7 +15,6 @@ mod with_loader;
 
 pub use {
     drop_image_file::{image_as_uri, name_to_mime, DropImageFile, DropImageFileParams},
-    form::{Field, Form, FormData, FormParams, FormSection, FieldsetStyle},
     input::{Input, InputWithButton, InputWithButtonParams, ListInput},
     popup::{Popup, PopupOnHover, PopupParams},
     search_panel::{SearchPanel, SearchPanelParams, SearchResult},
