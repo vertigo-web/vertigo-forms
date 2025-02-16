@@ -6,7 +6,7 @@
 //! See story book for examples.
 
 use std::rc::Rc;
-use vertigo::{bind, component, css, dom, Css};
+use vertigo::{bind_rc, component, css, dom, Css};
 
 use crate::{input::NamedInput, DictSelect, DropImageFile, DropImageFileParams, Select};
 
@@ -63,24 +63,33 @@ pub fn Field<'a>(field: &'a DataField) {
     }
 }
 
-/// Renders a form that upon "Save" allows to update a model with new values.
+/// Renders a form for provided model, that upon "Save" allows to update a model with new values.
 ///
 /// A model needs to implement conversion to [FormData] and from [FormExport] to interoperate with this component.
 ///
 /// See [FormData] for description how to manage form structure.
 #[component]
-pub fn Form<'a, T>(model: &'a T, on_submit: Rc<dyn Fn(T)>, params: FormParams)
+pub fn ModelForm<'a, T>(model: &'a T, on_submit: Rc<dyn Fn(T)>, params: FormParams)
 where
     FormData: From<&'a T>,
     T: From<FormExport> + 'static,
 {
     let form_data = Rc::new(FormData::from(model));
 
-    let on_submit = bind!(form_data, || {
-        let form_data = form_data.clone();
-        on_submit(T::from(form_data.export()));
+    let on_submit = bind_rc!(form_data, |form_export: FormExport| {
+        on_submit(T::from(form_export));
     });
 
+    Form {
+        form_data, on_submit, params
+    }.mount()
+}
+
+/// Renders a form for provided [FormData] that upon "Save" allows to grab updated fields from [FormExport].
+///
+/// See [FormData] for description how to manage form structure.
+#[component]
+pub fn Form(form_data: Rc<FormData>, on_submit: Rc<dyn Fn(FormExport)>, params: FormParams) {
     let subgrid_css = css! {"
         display: grid;
         grid-template-columns: subgrid;
@@ -121,6 +130,10 @@ where
         } else {
             dom! { <p /> }
         }
+    });
+
+    let on_submit = bind_rc!(form_data, || {
+        on_submit(form_data.export());
     });
 
     let form_css = params.css.extend(params.add_css.clone());
