@@ -6,7 +6,7 @@ use vertigo::{
 
 /// Box that allows to accept image files on it, connected to `Value<Option<DropFileItem>>`.
 pub struct DropImageFile {
-    pub original_link: Computed<Option<String>>,
+    pub original_link: Computed<Option<Rc<String>>>,
     pub item: Value<Option<DropFileItem>>,
     pub params: DropImageFileParams,
 }
@@ -19,6 +19,7 @@ pub struct DropImageFileParams {
     pub no_image_text: String,
     pub dropzone_css: Css,
     pub dropzone_add_css: Css,
+    pub img_css: Css,
 }
 
 impl Default for DropImageFileParams {
@@ -39,6 +40,7 @@ impl Default for DropImageFileParams {
                 padding: 10px;
             "},
             dropzone_add_css: css!(""),
+            img_css: css!(""),
         }
     }
 }
@@ -73,14 +75,14 @@ impl DropImageFile {
                 dom! {
                     <div css={image_css}>
                         <button on_click={restore}>{restore_text}</button>
-                        <img src={base64_date} />
+                        <img css={&params.img_css} src={base64_date} />
                         { message }
                     </div>
                 }
             }
             None => match original {
                 Some(original) => {
-                    dom! { <div><img src={original} /></div> }
+                    dom! { <div><img css={&params.img_css} src={original} /></div> }
                 }
                 None => dom! { <div>{&params.no_image_text}</div> },
             },

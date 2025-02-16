@@ -8,6 +8,6 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-vertigo = "0.6"
-# vertigo = { git = "https://github.com/vertigo-web/vertigo" }
+# vertigo = "0.6"
+vertigo = { git = "https://github.com/vertigo-web/vertigo" }
 vertigo-forms = { path = "../.." }

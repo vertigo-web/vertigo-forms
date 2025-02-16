@@ -22,11 +22,15 @@ where
 pub struct SelectSearchParams {
     /// Minimum number of letters to open dropdown
     pub min_chars: usize,
+    pub input_title: String,
 }
 
 impl Default for SelectSearchParams {
     fn default() -> Self {
-        Self { min_chars: 3 }
+        Self {
+            min_chars: 3,
+            input_title: "Enter phrase".to_string(),
+        }
     }
 }
 
@@ -222,7 +226,7 @@ where
             dom! {
                 <input
                     required="required"
-                    title="FixMe Title"
+                    title={&params.input_title}
                     value={displayed_value}
                     {on_input} {on_blur} {hook_key_down}
                 />
