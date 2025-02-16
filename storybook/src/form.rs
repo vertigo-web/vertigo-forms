@@ -1,5 +1,5 @@
 use vertigo::{bind_rc, component, css, dom, DomNode, Value};
-use vertigo_forms::form::{DataSection, FieldsetStyle, Form, FormData, FormExport, FormParams};
+use vertigo_forms::form::{DataSection, FieldsetStyle, FormData, FormExport, FormParams, ModelForm};
 
 pub fn form() -> DomNode {
     dom! {
@@ -59,7 +59,7 @@ pub fn Form1() {
         });
 
         dom! {
-            <Form
+            <ModelForm
                 model={&&model}
                 {on_submit}
                 params={FormParams {
@@ -173,7 +173,7 @@ pub fn Form2() {
         });
 
         dom! {
-            <Form
+            <ModelForm
                 model={&&model}
                 {on_submit}
                 params={FormParams {
