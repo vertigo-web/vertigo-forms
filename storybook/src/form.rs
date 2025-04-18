@@ -1,5 +1,7 @@
 use vertigo::{bind_rc, component, css, dom, DomNode, Value};
-use vertigo_forms::form::{DataSection, FieldsetStyle, FormData, FormExport, FormParams, ModelForm};
+use vertigo_forms::form::{
+    DataSection, FieldsetStyle, FormData, FormExport, FormParams, ModelForm,
+};
 
 pub fn form() -> DomNode {
     dom! {

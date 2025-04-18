@@ -39,6 +39,10 @@ where
     K: Clone + ToString + PartialEq + Eq + Hash + 'static,
     V: Clone + ToString + PartialEq + 'static,
 {
+    pub fn into_component(self) -> Self {
+        self
+    }
+
     pub fn mount(self) -> DomNode {
         let Self {
             value,
