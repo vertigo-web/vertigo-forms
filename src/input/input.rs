@@ -6,6 +6,10 @@ pub struct Input {
 }
 
 impl Input {
+    pub fn into_component(self) -> Self {
+        self
+    }
+
     pub fn mount(self) -> DomNode {
         let Self { value } = self;
 
@@ -22,6 +26,10 @@ pub struct NamedInput {
 }
 
 impl NamedInput {
+    pub fn into_component(self) -> Self {
+        self
+    }
+
     pub fn mount(self) -> DomNode {
         let Self { name, value } = self;
 

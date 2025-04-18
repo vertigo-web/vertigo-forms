@@ -46,6 +46,10 @@ impl Default for DropImageFileParams {
 }
 
 impl DropImageFile {
+    pub fn into_component(self) -> Self {
+        self
+    }
+
     pub fn mount(&self) -> DomNode {
         let base64_data = self.item.to_computed().map(|item| match item {
             Some(item) => image_as_uri(&item),

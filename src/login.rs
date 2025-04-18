@@ -52,6 +52,10 @@ impl Default for LoginParams {
 }
 
 impl<T: Clone + PartialEq + 'static> Login<T> {
+    pub fn into_component(self) -> Self {
+        self
+    }
+
     pub fn mount(&self) -> DomNode {
         let Self {
             on_submit,

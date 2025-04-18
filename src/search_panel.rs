@@ -50,6 +50,10 @@ where
     T: SearchResult + PartialEq + Clone + 'static,
     K: ToComputed<Resource<Rc<T>>> + Clone + 'static,
 {
+    pub fn into_component(self) -> Self {
+        self
+    }
+
     pub fn mount(self) -> DomNode {
         let Self {
             query,

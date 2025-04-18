@@ -8,6 +8,10 @@ pub struct ListInput {
 }
 
 impl ListInput {
+    pub fn into_component(self) -> Self {
+        self
+    }
+
     pub fn mount(self) -> DomNode {
         let Self { value } = self;
 

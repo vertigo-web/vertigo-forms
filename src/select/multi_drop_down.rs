@@ -18,6 +18,10 @@ impl<T> MultiDropDown<T>
 where
     T: Clone + From<String> + PartialEq + ToString + 'static,
 {
+    pub fn into_component(self) -> Self {
+        self
+    }
+
     pub fn mount(self) -> DomNode {
         let opened = Value::new(false);
         let button_label = opened.render_value(|opened| {

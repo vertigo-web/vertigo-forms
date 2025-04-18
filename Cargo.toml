@@ -12,7 +12,5 @@ edition = "2021"
 
 [dependencies]
 base64 = "0.22"
-either = "1.8"
-vertigo = "0.6"
-# vertigo = { git = "https://github.com/vertigo-web/vertigo" }
-# vertigo = { path = "../../rust/vertigo/crates/vertigo" }
+either = "1.15.0"
+vertigo = "0.7"
