@@ -16,7 +16,7 @@ See [Changelog](https://github.com/vertigo-web/vertigo/blob/master/CHANGES.md) f
 Dependencies:
 
 ```toml
-vertigo = "0.6"
+vertigo = "0.7"
 vertigo-forms = { git = "https://github.com/vertigo-web/vertigo-forms" }
 ```
 

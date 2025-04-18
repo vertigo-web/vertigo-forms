@@ -52,6 +52,10 @@ pub struct Switch {
 }
 
 impl Switch {
+    pub fn into_component(self) -> Self {
+        self
+    }
+
     pub fn mount(self) -> DomNode {
         let Self { value, params } = self;
 

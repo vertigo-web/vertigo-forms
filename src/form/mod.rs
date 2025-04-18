@@ -81,8 +81,11 @@ where
     });
 
     Form {
-        form_data, on_submit, params
-    }.mount()
+        form_data,
+        on_submit,
+        params,
+    }
+    .mount()
 }
 
 /// Renders a form for provided [FormData] that upon "Save" allows to grab updated fields from [FormExport].

@@ -53,6 +53,10 @@ where
     R: Reactive<K> + ToComputed<K> + Clone + 'static,
     K: Clone + PartialEq + 'static,
 {
+    pub fn into_component(self) -> Self {
+        self
+    }
+
     pub fn mount(self) -> DomNode {
         let Self {
             current_tab,
@@ -91,6 +95,10 @@ where
     R: Reactive<K> + ToComputed<K> + Clone + 'static,
     K: Clone + PartialEq + 'static,
 {
+    pub fn into_component(self) -> Self {
+        self
+    }
+
     pub fn mount(self) -> DomNode {
         let Self {
             current_tab,
@@ -146,6 +154,10 @@ impl<K> TabsContent<K>
 where
     K: Clone + PartialEq + 'static,
 {
+    pub fn into_component(self) -> Self {
+        self
+    }
+
     pub fn mount(self) -> DomNode {
         let Self {
             current_tab,
@@ -173,6 +185,10 @@ impl<K> TabsContentMapped<K>
 where
     K: Clone + PartialEq + 'static,
 {
+    pub fn into_component(self) -> Self {
+        self
+    }
+
     pub fn mount(self) -> DomNode {
         let Self {
             current_tab,

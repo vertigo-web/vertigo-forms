@@ -52,7 +52,7 @@ pub fn tabs() -> DomNode {
     dom! {
         <p>
             <TabsHeader
-                {&current_tab}
+                current_tab={&current_tab}
                 tabs={tabs.clone()}
                 params={}
             />
