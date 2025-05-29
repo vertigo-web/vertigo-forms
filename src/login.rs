@@ -14,6 +14,7 @@ pub struct LoginParams {
     pub add_css: Css,
     pub line_css: Css,
     pub line_add_css: Css,
+    pub input_css: Css,
     pub submit_css: Css,
     pub submit_add_css: Css,
     pub error_message: Rc<dyn Fn(String) -> String>,
@@ -38,6 +39,7 @@ impl Default for LoginParams {
                 margin-bottom: 5px;
             "},
             line_add_css: Css::default(),
+            input_css: Css::default(),
             submit_css: css! {"
                 margin-top: 15px;
             "},
@@ -111,7 +113,11 @@ impl<T: Clone + PartialEq + 'static> Login<T> {
         let username_div = dom! {
             <div css={line_css.clone()}>
                 <div>{&params.username_label}</div>
-                <input value={username.to_computed()} on_input={on_username_change} />
+                <input
+                    css={&params.input_css}
+                    value={username.to_computed()}
+                    on_input={on_username_change}
+                />
             </div>
         };
 
@@ -120,7 +126,12 @@ impl<T: Clone + PartialEq + 'static> Login<T> {
         let password_div = dom! {
             <div css={line_css}>
                 <div>{&params.password_label}</div>
-                <input value={password.to_computed()} on_input={on_password_change} type="password" />
+                <input
+                    css={&params.input_css}
+                    value={password.to_computed()}
+                    on_input={on_password_change}
+                    type="password"
+                />
             </div>
         };
 
