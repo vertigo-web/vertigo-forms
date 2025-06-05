@@ -1,4 +1,4 @@
-use vertigo::{bind, dom, Computed, DomNode, Value};
+use vertigo::{bind, component, dom, AttrGroup, Computed, Value};
 
 /// Simple Select component based on map of `i64`->`T` values.
 ///
@@ -23,44 +23,34 @@ use vertigo::{bind, dom, Computed, DomNode, Value};
 ///     />
 /// };
 /// ```
-pub struct DictSelect<T: Clone> {
-    pub value: Value<i64>,
-    pub options: Computed<Vec<(i64, T)>>,
-}
+#[component]
+pub fn DictSelect<T: Clone + From<String> + PartialEq + ToString + 'static>(
+    value: Value<i64>,
+    options: Computed<Vec<(i64, T)>>,
+    select: AttrGroup,
+) {
+    let on_change = bind!(value, |new_value: String| {
+        value.set(new_value.parse().unwrap_or_default());
+    });
 
-impl<T> DictSelect<T>
-where
-    T: Clone + From<String> + PartialEq + ToString + 'static,
-{
-    pub fn into_component(self) -> Self {
-        self
-    }
-
-    pub fn mount(&self) -> DomNode {
-        let Self { value, options } = self;
-        let on_change = bind!(value, |new_value: String| {
-            value.set(new_value.parse().unwrap_or_default());
-        });
-
-        let list = bind!(
-            options,
-            value.render_value(move |value| options.render_list(
-                |(key, _)| key.to_string(),
-                move |(key, item)| {
-                    let text_item = item.to_string();
-                    if key == &value {
-                        dom! { <option value={&key} selected="selected">{text_item}</option> }
-                    } else {
-                        dom! { <option value={&key}>{text_item}</option> }
-                    }
+    let list = bind!(
+        options,
+        value.render_value(move |value| options.render_list(
+            |(key, _)| key.to_string(),
+            move |(key, item)| {
+                let text_item = item.to_string();
+                if key == &value {
+                    dom! { <option value={&key} selected="selected">{text_item}</option> }
+                } else {
+                    dom! { <option value={&key}>{text_item}</option> }
                 }
-            ))
-        );
+            }
+        ))
+    );
 
-        dom! {
-            <select {on_change}>
-                {list}
-            </select>
-        }
+    dom! {
+        <select {on_change} {..select}>
+            {list}
+        </select>
     }
 }
