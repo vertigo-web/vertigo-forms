@@ -33,7 +33,7 @@ pub fn input() -> DomNode {
     let list_input = dom! {
         <h4>"ListInput"</h4>
         <p>
-            "Enter value: "
+            "Enter comma-separated values: "
             <ListInput value={value.clone()} />
         </p>
         <p>
