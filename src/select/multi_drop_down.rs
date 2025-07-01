@@ -52,7 +52,7 @@ where
             }
         });
 
-        let on_click = bind!(opened, || opened.change(|o| *o = !*o));
+        let on_click = bind!(opened, |_| opened.change(|o| *o = !*o));
 
         let base_css = css! {"
             position: relative;

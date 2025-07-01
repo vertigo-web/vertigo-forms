@@ -59,7 +59,7 @@ where
                         |item| item.to_string(),
                         bind!(toggle, |item| {
                             let text_item = item.to_string();
-                            let on_click = bind!(toggle, item, || toggle(&item));
+                            let on_click = bind!(toggle, item, |_| toggle(&item));
                             let css = if value.contains(item) {
                                 css! {"
                             border-style: inset;

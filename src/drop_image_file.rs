@@ -70,7 +70,7 @@ impl DropImageFile {
                     display: flex;
                     flex-flow: column;
                 "};
-                let restore = bind!(item_clone, || item_clone.set(None));
+                let restore = bind!(item_clone, |_| item_clone.set(None));
                 let restore_text = if original.is_some() {
                     &params.revert_label
                 } else {

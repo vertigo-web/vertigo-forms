@@ -59,7 +59,7 @@ impl Switch {
     pub fn mount(self) -> DomNode {
         let Self { value, params } = self;
 
-        let toggle = bind!(value, || transaction(|ctx| value.set(!value.get(ctx))));
+        let toggle = bind!(value, |_| transaction(|ctx| value.set(!value.get(ctx))));
 
         match params.display_type {
             DisplayType::Button => {
@@ -78,7 +78,7 @@ impl Switch {
             DisplayType::CheckBox => {
                 let value_clone = value.clone();
                 value.render_value(move |value_inner| {
-                    let toggle = bind!(value_clone, || transaction(
+                    let toggle = bind!(value_clone, |_| transaction(
                         |ctx| value_clone.set(!value_clone.get(ctx))
                     ));
                     if value_inner {

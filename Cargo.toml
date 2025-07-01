@@ -1,8 +1,5 @@
 [workspace]
-members = [
-    "storybook",
-    "examples/form",
-]
+members = ["storybook", "examples/form"]
 
 [package]
 name = "vertigo-forms"
@@ -14,3 +11,6 @@ edition = "2021"
 base64 = "0.22"
 either = "1.15.0"
 vertigo = "0.7"
+
+[patch.crates-io]
+vertigo = { git = "https://github.com/vertigo-web/vertigo", branch = "tailwind-support" }

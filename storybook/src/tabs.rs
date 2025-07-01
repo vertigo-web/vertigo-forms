@@ -17,7 +17,7 @@ pub fn tabs() -> DomNode {
 
     let change_subtab_1 = bind_rc!(current_tab, |new_tab: MyView| {
         let current_tab = current_tab.clone();
-        move || current_tab.set(new_tab.clone())
+        move |_| current_tab.set(new_tab.clone())
     });
     let change_subtab_2 = change_subtab_1.clone();
 
