@@ -68,7 +68,7 @@ impl InputWithButton {
             temp_value.set(Some(new_value));
         });
 
-        let on_click = bind!(value, temp_value, || {
+        let on_click = bind!(value, temp_value, |_| {
             transaction(|ctx| {
                 let new_value = temp_value.get(ctx);
                 if let Some(new_value) = new_value {

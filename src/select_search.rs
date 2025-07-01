@@ -118,7 +118,7 @@ where
                     for (opt_key, opt_value) in &inner_items {
                         // Prevent on blur on input
                         let on_mouse_down = || true;
-                        let on_click = bind!(value, filter, dropdown_opened, opt_key, || {
+                        let on_click = bind!(value, filter, dropdown_opened, opt_key, |_| {
                             value.set(opt_key.clone());
                             filter.set(None);
                             dropdown_opened.set(false);

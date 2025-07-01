@@ -121,7 +121,8 @@ where
                         header.add_child(render_header_item(tab));
                     } else {
                         // Default item rendering
-                        let on_click = bind!(current_tab, tab || current_tab.set(tab.key.clone()));
+                        let on_click =
+                            bind!(current_tab, tab | _ | current_tab.set(tab.key.clone()));
                         let header_item_css = if current_tab_val == tab.key {
                             header_item_css
                                 .clone()

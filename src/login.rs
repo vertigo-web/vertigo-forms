@@ -130,7 +130,7 @@ impl<T: Clone + PartialEq + 'static> Login<T> {
                 { username_div }
                 { password_div }
                 <div css={submit_css}>
-                    <input type="submit" value={&params.button_label} on_click={move || submit()} />
+                    <input type="submit" value={&params.button_label} on_click={move |_| submit()} />
                 </div>
             </div>
         }

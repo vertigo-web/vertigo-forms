@@ -25,7 +25,7 @@ fn render() -> DomNode {
         engine => form_data.engine,
         year => form_data.year
     )
-    .map(|(brand, model, engine, year)| format!("{} {}, {} ({})", brand, model, engine, year));
+    .map(|(brand, model, engine, year)| format!("{brand} {model}, {engine} ({year})"));
 
     dom! {
         <html>

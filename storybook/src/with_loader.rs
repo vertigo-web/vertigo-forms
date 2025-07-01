@@ -10,10 +10,10 @@ pub fn with_loader() -> DomNode {
         }
     });
 
-    let set_loading = bind!(resource, || resource.set(Resource::Loading));
-    let set_ready = bind!(resource, || resource
+    let set_loading = bind!(resource, |_| resource.set(Resource::Loading));
+    let set_ready = bind!(resource, |_| resource
         .set(Resource::Ready("Updated value".to_string())));
-    let set_error = bind!(resource, || resource
+    let set_error = bind!(resource, |_| resource
         .set(Resource::Error("Deliberate error".to_string())));
 
     dom! {
