@@ -1,4 +1,4 @@
-use vertigo::{bind, computed_tuple, dom, transaction, Css, DomNode, Value};
+use vertigo::{bind, component, computed_tuple, dom, transaction, AttrGroup, Value};
 
 /// Input connected to provided `Value<String>`.
 ///
@@ -23,64 +23,53 @@ use vertigo::{bind, computed_tuple, dom, transaction, Css, DomNode, Value};
 ///     <InputWithButton
 ///         value={my_value}
 ///         params={InputWithButtonParams {
-///                 input_css: css!("width: 300px;"),
 ///                 button_label: "Load".to_string(),
 ///                 ..Default::default()
 ///         }}
+///         input:css={css!("width: 300px;")}
 ///     />
 /// };
 /// ```
-pub struct InputWithButton {
-    pub value: Value<String>,
-    pub params: InputWithButtonParams,
+#[component]
+pub fn InputWithButton(
+    value: Value<String>,
+    params: InputWithButtonParams,
+    input: AttrGroup,
+    button: AttrGroup,
+) {
+    let temp_value = Value::<Option<String>>::default();
+    let display_value =
+        computed_tuple!(value, temp_value).map(|(value, temp_value)| temp_value.unwrap_or(value));
+
+    let on_input = bind!(temp_value, |new_value: String| {
+        temp_value.set(Some(new_value));
+    });
+
+    let on_click = bind!(value, temp_value, |_| {
+        transaction(|ctx| {
+            let new_value = temp_value.get(ctx);
+            if let Some(new_value) = new_value {
+                value.set(new_value);
+            }
+            temp_value.set(None);
+        })
+    });
+
+    dom! {
+        <input value={display_value} {on_input} {..input}/>
+        <button {on_click} {..button}>{params.button_label}</button>
+    }
 }
 
 #[derive(Clone)]
 pub struct InputWithButtonParams {
-    pub input_css: Css,
     pub button_label: String,
-    pub button_css: Css,
 }
 
 impl Default for InputWithButtonParams {
     fn default() -> Self {
         Self {
-            input_css: Css::default(),
             button_label: "OK".to_string(),
-            button_css: Css::default(),
-        }
-    }
-}
-
-impl InputWithButton {
-    pub fn into_component(self) -> Self {
-        self
-    }
-
-    pub fn mount(self) -> DomNode {
-        let Self { value, params } = self;
-
-        let temp_value = Value::<Option<String>>::default();
-        let display_value = computed_tuple!(value, temp_value)
-            .map(|(value, temp_value)| temp_value.unwrap_or(value));
-
-        let on_input = bind!(temp_value, |new_value: String| {
-            temp_value.set(Some(new_value));
-        });
-
-        let on_click = bind!(value, temp_value, |_| {
-            transaction(|ctx| {
-                let new_value = temp_value.get(ctx);
-                if let Some(new_value) = new_value {
-                    value.set(new_value);
-                }
-                temp_value.set(None);
-            })
-        });
-
-        dom! {
-            <input css={params.input_css} value={display_value} {on_input} />
-            <button css={params.button_css} {on_click}>{params.button_label}</button>
         }
     }
 }

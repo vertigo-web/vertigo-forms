@@ -8,7 +8,7 @@
 use std::rc::Rc;
 use vertigo::{bind_rc, component, css, dom, Css};
 
-use crate::{input::NamedInput, DictSelect, DropImageFile, DropImageFileParams, Select};
+use crate::{input::Input, DictSelect, DropImageFile, DropImageFileParams, Select};
 
 mod field;
 pub use field::{DataFieldValue, FieldExport, FormExport};
@@ -39,7 +39,7 @@ impl Default for FormParams {
 pub fn Field<'a>(field: &'a DataField) {
     match &field.value {
         DataFieldValue::String(val) => {
-            dom! { <NamedInput name={&field.key} value={val.value.clone()} /> }
+            dom! { <Input input:name={&&field.key} value={val.value.clone()} /> }
         }
         DataFieldValue::List(val) => {
             dom! { <Select value={val.value.clone()} options={&val.options} /> }
