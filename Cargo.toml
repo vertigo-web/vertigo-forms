@@ -10,7 +10,4 @@ edition = "2021"
 [dependencies]
 base64 = "0.22"
 either = "1.15.0"
-vertigo = "0.7"
-
-[patch.crates-io]
-vertigo = { git = "https://github.com/vertigo-web/vertigo", branch = "tailwind-support" }
+vertigo = "0.8"
