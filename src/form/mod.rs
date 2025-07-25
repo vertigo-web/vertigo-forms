@@ -8,10 +8,10 @@
 use std::rc::Rc;
 use vertigo::{bind_rc, component, css, dom, Css};
 
-use crate::{input::NamedInput, DictSelect, DropImageFile, DropImageFileParams, Select};
+use crate::{input::Input, DictSelect, DropImageFile, Select};
 
 mod field;
-pub use field::{DataFieldValue, FieldExport, FormExport};
+pub use field::{DataFieldValue, ImageValue, FieldExport, FormExport};
 mod form_data;
 pub use form_data::{DataField, DataSection, FieldsetStyle, FormData};
 
@@ -39,26 +39,31 @@ impl Default for FormParams {
 pub fn Field<'a>(field: &'a DataField) {
     match &field.value {
         DataFieldValue::String(val) => {
-            dom! { <NamedInput name={&field.key} value={val.value.clone()} /> }
+            dom! { <Input input:name={&&field.key} value={val.value.clone()} /> }
         }
         DataFieldValue::List(val) => {
             dom! { <Select value={val.value.clone()} options={&val.options} /> }
+        }
+        DataFieldValue::Bool(val) => {
+            let checked = val.value.map(|v| if v { "checked".to_string() } else { "".to_string() });
+            dom! { <input name={&&field.key} type="checkbox" checked={checked} /> }
         }
         DataFieldValue::Dict(val) => {
             dom! { <DictSelect value={val.value.clone()} options={&val.options} /> }
         }
         DataFieldValue::Image(val) => {
+            let params = val.component_params.clone().unwrap_or_default();
             dom! { <DropImageFile
                 item={val.value.clone()}
                 original_link={val.original_link.clone()}
-                params={DropImageFileParams {
-                    img_css: css! { "
-                        max-width: 400px;
-                        max-height: 350px;
-                    "},
-                    ..Default::default()
-                }}
+                {params}
             /> }
+        }
+        DataFieldValue::Custom(val) => {
+            (val.render)()
+        }
+        DataFieldValue::StaticCustom(render) => {
+            render()
         }
     }
 }
@@ -115,10 +120,12 @@ pub fn Form(form_data: Rc<FormData>, on_submit: Rc<dyn Fn(FormExport)>, params: 
             }
 
             let label = &section.label;
+            let custom_fieldset_css = section.fieldset_css.clone().unwrap_or_else(|| css! {""});
+
             dom! {
                 <label css={&subgrid_css}>
                     {label}
-                    <div css={&fieldset_flex_css}>
+                    <div css={&fieldset_flex_css} css={custom_fieldset_css}>
                         {..values}
                     </div>
                 </label>
