@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use vertigo::{bind_rc, component, css, dom, DomNode, Value};
 use vertigo_forms::form::{
     DataSection, FieldsetStyle, FormData, FormExport, FormParams, ModelForm,
@@ -31,6 +33,7 @@ impl From<&MyModel> for FormData {
                     .add_string_field("dimension_y", &value.dimension_y)
                     .set_fieldset_style(FieldsetStyle::Dimensions),
             )
+            .add_bottom_controls()
     }
 }
 
@@ -130,19 +133,25 @@ impl From<&MySecondModel> for FormData {
         ]
         .into();
 
-        Self {
-            sections: vec![
-                DataSection::with_string_field("First Name", "first_name", &value.first_name),
-                DataSection::with_string_field("Surname", "surname", &value.surname),
-                DataSection::new("Gender").add_list_field(
-                    "gender",
-                    value.gender.to_string(),
-                    gender_map,
-                ),
-                DataSection::new("Role").add_dict_field("role", value.role, role_map),
-                DataSection::new("Photo").add_image_field("photo", Some(&value.photo)),
-            ],
-        }
+        Self::default()
+            .with(DataSection::with_string_field(
+                "First Name",
+                "first_name",
+                &value.first_name,
+            ))
+            .with(DataSection::with_string_field(
+                "Surname",
+                "surname",
+                &value.surname,
+            ))
+            .with(DataSection::new("Gender").add_list_field(
+                "gender",
+                Some(value.gender.to_string()),
+                gender_map,
+            ))
+            .with(DataSection::new("Role").add_dict_field("role", Some(value.role), role_map))
+            .with(DataSection::new("Photo").add_image_field("photo", Some(&value.photo)))
+            .add_bottom_controls()
     }
 }
 
@@ -151,7 +160,7 @@ impl From<FormExport> for MySecondModel {
         Self {
             first_name: form_export.get_string("first_name"),
             surname: form_export.get_string("surname"),
-            gender: Gender::from(form_export.list_or_default("gender")),
+            gender: form_export.list_or_default("gender"),
             role: form_export.dict_or_default("role"),
             photo: form_export.image_url("photo"),
         }
@@ -180,7 +189,7 @@ pub fn Form2() {
                 {on_submit}
                 params={FormParams {
                     add_css: css! {"width: 400px;"},
-                    submit_label: "Apply".to_string(),
+                    submit_label: Rc::new("Apply".to_string()),
                     ..Default::default()
                 }}
             />

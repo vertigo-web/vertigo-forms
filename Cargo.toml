@@ -5,7 +5,7 @@ members = ["storybook", "examples/form"]
 name = "vertigo-forms"
 version = "0.1.0"
 authors = ["Michał Pokrywka <wolfmoon@o2.pl>"]
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 base64 = "0.22"

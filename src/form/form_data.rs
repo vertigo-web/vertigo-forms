@@ -1,5 +1,7 @@
 use std::{collections::HashMap, rc::Rc};
-use vertigo::{transaction, Computed, DomElement, Value};
+use vertigo::{transaction, Computed, Css, DomElement, Value};
+
+use crate::form::field::BoolValue;
 
 use super::{
     field::{DictValue, ImageValue, ListValue, StringValue},
@@ -39,12 +41,56 @@ use super::{
 #[derive(Default)]
 pub struct FormData {
     pub sections: Vec<DataSection>,
+    pub top_controls: ControlsConfig,
+    pub bottom_controls: ControlsConfig,
+}
+
+#[derive(Default)]
+pub struct ControlsConfig {
+    pub css: Option<Css>,
+    pub submit: bool,
+    pub delete: bool,
+}
+
+impl ControlsConfig {
+    pub fn full() -> Self {
+        Self {
+            css: None,
+            submit: true,
+            delete: true,
+        }
+    }
+
+    pub fn with_css(mut self, css: Css) -> Self {
+        self.css = Some(css);
+        self
+    }
 }
 
 impl FormData {
     /// Add new data section
     pub fn with(mut self, section: DataSection) -> Self {
         self.sections.push(section);
+        self
+    }
+
+    pub fn add_top_controls(mut self) -> Self {
+        self.top_controls = ControlsConfig::full();
+        self
+    }
+
+    pub fn add_top_controls_styled(mut self, css: Css) -> Self {
+        self.top_controls = ControlsConfig::full().with_css(css);
+        self
+    }
+
+    pub fn add_bottom_controls(mut self) -> Self {
+        self.bottom_controls = ControlsConfig::full();
+        self
+    }
+
+    pub fn add_bottom_controls_styled(mut self, css: Css) -> Self {
+        self.bottom_controls = ControlsConfig::full().with_css(css);
         self
     }
 
@@ -79,9 +125,12 @@ pub struct DataSection {
     pub error: Option<String>,
     pub render: Option<Rc<dyn Fn(Vec<DataField>) -> DomElement>>,
     pub fieldset_style: FieldsetStyle,
+    pub fieldset_css: Option<Css>,
+    pub new_group: bool,
 }
 
 /// A single field in form section.
+#[derive(Clone)]
 pub struct DataField {
     pub key: String,
     pub value: DataFieldValue,
@@ -116,6 +165,14 @@ impl DataSection {
         }
     }
 
+    pub fn add_field(mut self, key: impl Into<String>, value: DataFieldValue) -> Self {
+        self.fields.push(DataField {
+            key: key.into(),
+            value,
+        });
+        self
+    }
+
     /// Add another string field to form section (text input).
     pub fn add_string_field(
         mut self,
@@ -137,16 +194,16 @@ impl DataSection {
     pub fn add_list_field(
         mut self,
         key: impl Into<String>,
-        original_value: impl Into<String>,
+        original_value: Option<impl Into<String>>,
         options: Vec<String>,
     ) -> Self {
-        let value = original_value.into();
+        let value = original_value.map(|s| s.into());
         let options = Computed::from(move |_ctx| options.clone());
         self.fields.push(DataField {
             key: key.into(),
             value: DataFieldValue::List(ListValue {
-                value: Value::new(value.clone()),
-                original_value: Rc::new(value),
+                value: Value::new(value.clone().unwrap_or_default()),
+                original_value: value.map(Rc::new),
                 options,
             }),
         });
@@ -157,16 +214,33 @@ impl DataSection {
     pub fn add_dict_field(
         mut self,
         key: impl Into<String>,
-        original_value: i64,
+        original_value: Option<i64>,
         options: Vec<(i64, String)>,
     ) -> Self {
         let options = Computed::from(move |_ctx| options.clone());
         self.fields.push(DataField {
             key: key.into(),
             value: DataFieldValue::Dict(DictValue {
-                value: Value::new(original_value),
-                original_value: Rc::new(original_value),
+                value: Value::new(original_value.unwrap_or_default()),
+                original_value: original_value.map(Rc::new),
                 options,
+            }),
+        });
+        self
+    }
+
+    /// Add another bool field to form section (checkbox input).
+    pub fn add_bool_field(
+        mut self,
+        key: impl Into<String>,
+        original_value: Option<impl Into<bool>>,
+    ) -> Self {
+        let value = original_value.map(|b| b.into());
+        self.fields.push(DataField {
+            key: key.into(),
+            value: DataFieldValue::Bool(BoolValue {
+                value: Value::new(value.unwrap_or_default()),
+                original_value: value.map(Rc::new),
             }),
         });
         self
@@ -178,11 +252,13 @@ impl DataSection {
         key: impl Into<String>,
         original_value: Option<impl Into<String>>,
     ) -> Self {
+        let value = original_value.map(|l| l.into());
         self.fields.push(DataField {
             key: key.into(),
             value: DataFieldValue::Image(ImageValue {
                 value: Value::new(None),
-                original_link: original_value.map(|link| Rc::new(link.into())),
+                original_link: value.map(Rc::new),
+                component_params: None,
             }),
         });
         self
@@ -191,6 +267,18 @@ impl DataSection {
     /// Set [FieldsetStyle] for this section.
     pub fn set_fieldset_style(mut self, fieldset_style: FieldsetStyle) -> Self {
         self.fieldset_style = fieldset_style;
+        self
+    }
+
+    /// Set [Css] for fields container for this section.
+    pub fn set_fieldset_css(mut self, fieldset_css: Css) -> Self {
+        self.fieldset_css = Some(fieldset_css);
+        self
+    }
+
+    /// This section starts a new section group (Form adds a horizontal rule)
+    pub fn starts_new_group(mut self) -> Self {
+        self.new_group = true;
         self
     }
 }
