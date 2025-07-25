@@ -31,6 +31,7 @@ impl From<&MyModel> for FormData {
                     .add_string_field("dimension_y", &value.dimension_y)
                     .set_fieldset_style(FieldsetStyle::Dimensions),
             )
+            .add_bottom_controls()
     }
 }
 
@@ -130,19 +131,25 @@ impl From<&MySecondModel> for FormData {
         ]
         .into();
 
-        Self {
-            sections: vec![
-                DataSection::with_string_field("First Name", "first_name", &value.first_name),
-                DataSection::with_string_field("Surname", "surname", &value.surname),
-                DataSection::new("Gender").add_list_field(
-                    "gender",
-                    value.gender.to_string(),
-                    gender_map,
-                ),
-                DataSection::new("Role").add_dict_field("role", value.role, role_map),
-                DataSection::new("Photo").add_image_field("photo", Some(&value.photo)),
-            ],
-        }
+        Self::default()
+            .with(DataSection::with_string_field(
+                "First Name",
+                "first_name",
+                &value.first_name,
+            ))
+            .with(DataSection::with_string_field(
+                "Surname",
+                "surname",
+                &value.surname,
+            ))
+            .with(DataSection::new("Gender").add_list_field(
+                "gender",
+                value.gender.to_string(),
+                gender_map,
+            ))
+            .with(DataSection::new("Role").add_dict_field("role", value.role, role_map))
+            .with(DataSection::new("Photo").add_image_field("photo", Some(&value.photo)))
+            .add_bottom_controls()
     }
 }
 
