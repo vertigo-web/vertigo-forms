@@ -13,7 +13,8 @@ pub struct DropImageFile {
 
 #[derive(Clone)]
 pub struct DropImageFileParams {
-    pub callback: Option<Rc<dyn Fn(DropFileItem)>>,
+    /// Custom callback when new image dropped, leave empty to automatically set/unset `item`
+    pub callback: Option<Rc<dyn Fn(Option<DropFileItem>)>>,
     pub revert_label: String,
     pub cancel_label: String,
     pub no_image_text: String,
@@ -63,6 +64,7 @@ impl DropImageFile {
         );
         let item_clone = self.item.clone();
         let params = self.params.clone();
+        let callback = self.params.callback.clone();
         let image_view = view_deps.render_value(move |(original, item, base64_date)| match item {
             Some(item) => {
                 let message = format_line(&item);
@@ -70,7 +72,13 @@ impl DropImageFile {
                     display: flex;
                     flex-flow: column;
                 "};
-                let restore = bind!(item_clone, |_| item_clone.set(None));
+                let restore = bind!(item_clone, callback, |_| {
+                    if let Some(callback) = &callback {
+                        callback(None);
+                    } else {
+                        item_clone.set(None);
+                    }
+                });
                 let restore_text = if original.is_some() {
                     &params.revert_label
                 } else {
@@ -97,11 +105,9 @@ impl DropImageFile {
         let on_dropfile = move |event: DropFileEvent| {
             for file in event.items.into_iter() {
                 if let Some(callback) = callback.as_deref() {
-                    callback(file);
+                    callback(Some(file));
                 } else {
-                    item.change(|current| {
-                        *current = Some(file);
-                    });
+                    item.set(Some(file));
                 }
             }
         };
