@@ -1,4 +1,4 @@
-use vertigo::{bind, dom, transaction, DomNode, Value};
+use vertigo::{AttrGroup, bind, component, dom, transaction, Value};
 
 pub enum DisplayType {
     Button,
@@ -46,60 +46,52 @@ impl SwitchParams {
 ///     />
 /// };
 /// ```
-pub struct Switch {
-    pub value: Value<bool>,
-    pub params: SwitchParams,
-}
+#[component]
+pub fn Switch(
+    value: Value<bool>,
+    params: SwitchParams,
+    i: AttrGroup, // TODO: Use
+) {
+    let toggle = bind!(value, |_| transaction(|ctx| value.set(!value.get(ctx))));
 
-impl Switch {
-    pub fn into_component(self) -> Self {
-        self
-    }
-
-    pub fn mount(self) -> DomNode {
-        let Self { value, params } = self;
-
-        let toggle = bind!(value, |_| transaction(|ctx| value.set(!value.get(ctx))));
-
-        match params.display_type {
-            DisplayType::Button => {
-                let symbol = value.map(move |value| {
-                    if value {
-                        params.on_symbol.clone()
-                    } else {
-                        params.off_symbol.clone()
-                    }
-                });
-
-                dom! {
-                    <button on_click={toggle}>{symbol}</button>
+    match params.display_type {
+        DisplayType::Button => {
+            let symbol = value.map(move |value| {
+                if value {
+                    params.on_symbol.clone()
+                } else {
+                    params.off_symbol.clone()
                 }
-            }
-            DisplayType::CheckBox => {
-                let value_clone = value.clone();
-                value.render_value(move |value_inner| {
-                    let toggle = bind!(value_clone, |_| transaction(
-                        |ctx| value_clone.set(!value_clone.get(ctx))
-                    ));
-                    if value_inner {
-                        dom! {
-                            <input type="checkbox" on_click={toggle} checked="checked" />
-                        }
-                    } else {
-                        dom! {
-                            <input type="checkbox" on_click={toggle} />
-                        }
-                    }
-                })
+            });
 
-                // Following doesn't work as browsers reads attribute 'checked' only on first render
-                // let checked = value.map(move |value|
-                //     if value { Some("checked".to_string()) } else { None }
-                // );
-                // dom! {
-                //     <input type="checkbox" on_click={toggle} checked={checked} />
-                // }
+            dom! {
+                <button on_click={toggle} {..i}>{symbol}</button>
             }
+        }
+        DisplayType::CheckBox => {
+            let value_clone = value.clone();
+            value.render_value(move |value_inner| {
+                let toggle = bind!(value_clone, |_| transaction(
+                    |ctx| value_clone.set(!value_clone.get(ctx))
+                ));
+                if value_inner {
+                    dom! {
+                        <input type="checkbox" on_click={toggle} checked="checked" />
+                    }
+                } else {
+                    dom! {
+                        <input type="checkbox" on_click={toggle} />
+                    }
+                }
+            })
+
+            // Following doesn't work as browsers reads attribute 'checked' only on first render
+            // let checked = value.map(move |value|
+            //     if value { Some("checked".to_string()) } else { None }
+            // );
+            // dom! {
+            //     <input type="checkbox" on_click={toggle} checked={checked} />
+            // }
         }
     }
 }

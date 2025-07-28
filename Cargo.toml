@@ -11,3 +11,6 @@ edition = "2021"
 base64 = "0.22"
 either = "1.15.0"
 vertigo = "0.8"
+
+[patch.crates-io]
+vertigo = { git = "https://github.com/vertigo-web/vertigo", branch = "cloneable-attrgrups" }
