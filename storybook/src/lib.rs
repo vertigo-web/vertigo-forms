@@ -163,28 +163,29 @@ fn render() -> DomNode {
                     <Tabs
                         {&current_tab}
                         {tabs}
-                        params={TabsParams {
-                            header_item_add_css: css!(
-                                "
-                                border: 1px solid black;
-                                padding: 0px 10px;
-                            "
-                            ),
-                            header_active_item_add_css: css!(
-                                "
-                                background-color: lightgray;
-                            "
-                            ),
-                            content_css: css!(
-                                "
-                                border: solid 1px black;
-                                padding: 0px 10px;
-                                "
-                            ),
-                            ..Default::default()
-                        }}
+                        params={bordered_tabs()}
                     />
             </body>
         </html>
+    }
+}
+
+pub fn bordered_tabs() -> TabsParams {
+    TabsParams {
+        header_item_add_css: css! {"
+            border: 1px solid black;
+            padding: 0px 10px;
+        "},
+        header_active_item_add_css: css! {"
+            background-color: lightgray;
+        "},
+        content_css: css! {"
+            border: solid 1px black;
+            padding: 5px 10px;
+        "},
+        container_css: css! {"
+            margin: 10px;
+        "},
+        ..Default::default()
     }
 }

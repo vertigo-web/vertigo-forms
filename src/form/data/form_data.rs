@@ -1,11 +1,9 @@
 use std::{collections::HashMap, rc::Rc};
-use vertigo::{transaction, Computed, Css, DomElement, Value};
-
-use crate::form::field::BoolValue;
+use vertigo::{Computed, Css, DomElement, Value, transaction};
 
 use super::{
-    field::{DictValue, ImageValue, ListValue, StringValue},
     DataFieldValue, FormExport,
+    data_field::{BoolValue, DictValue, ImageValue, ListValue, MultiValue, StringValue},
 };
 
 /// Used to define structure of a [Form](super::Form).
@@ -41,6 +39,7 @@ use super::{
 #[derive(Default)]
 pub struct FormData {
     pub sections: Vec<DataSection>,
+    pub tabs: Vec<(String, Rc<Vec<DataSection>>)>,
     pub top_controls: ControlsConfig,
     pub bottom_controls: ControlsConfig,
 }
@@ -68,9 +67,15 @@ impl ControlsConfig {
 }
 
 impl FormData {
-    /// Add new data section
+    /// Add new data section (outside of tabs)
     pub fn with(mut self, section: DataSection) -> Self {
         self.sections.push(section);
+        self
+    }
+
+    /// Add new tab with sections
+    pub fn add_tab(mut self, tab_label: impl Into<String>, sections: Vec<DataSection>) -> Self {
+        self.tabs.push((tab_label.into(), Rc::new(sections)));
         self
     }
 
@@ -97,6 +102,13 @@ impl FormData {
     pub fn export(&self) -> FormExport {
         let mut hash_map = HashMap::new();
         transaction(|ctx| {
+            for (_, sections) in &self.tabs {
+                for section in sections.iter() {
+                    for field in &section.fields {
+                        hash_map.insert(field.key.clone(), field.value.export(ctx));
+                    }
+                }
+            }
             for section in &self.sections {
                 for field in &section.fields {
                     hash_map.insert(field.key.clone(), field.value.export(ctx));
@@ -165,6 +177,15 @@ impl DataSection {
         }
     }
 
+    /// Create a new form section with single optional string field.
+    pub fn with_opt_string_field(
+        label: impl Into<String>,
+        key: impl Into<String>,
+        original_value: &Option<String>,
+    ) -> Self {
+        Self::with_string_field(label, key, original_value.clone().unwrap_or_default())
+    }
+
     pub fn add_field(mut self, key: impl Into<String>, value: DataFieldValue) -> Self {
         self.fields.push(DataField {
             key: key.into(),
@@ -190,6 +211,15 @@ impl DataSection {
         self
     }
 
+    /// Add another optional string field to form section (text input).
+    pub fn add_opt_string_field(
+        self,
+        key: impl Into<String>,
+        original_value: &Option<String>,
+    ) -> Self {
+        self.add_string_field(key, original_value.clone().unwrap_or_default())
+    }
+
     /// Add another list field to form section (dropdown with options).
     pub fn add_list_field(
         mut self,
@@ -210,20 +240,52 @@ impl DataSection {
         self
     }
 
-    /// Add another dict field to form section (dropdown with options, value stored as integer).
-    pub fn add_dict_field(
-        mut self,
+    /// Add another dict field to form section based on static (non-reactive) dictionary
+    /// Renders dropdown with options, value are stored as integer.
+    pub fn add_static_dict_field(
+        self,
         key: impl Into<String>,
         original_value: Option<i64>,
         options: Vec<(i64, String)>,
     ) -> Self {
         let options = Computed::from(move |_ctx| options.clone());
+        self.add_dict_field(key, original_value, options)
+    }
+
+    /// Add another dict field to form section based on reactive dictionary
+    /// Renders dropdown with options, value are stored as integer.
+    pub fn add_dict_field(
+        mut self,
+        key: impl Into<String>,
+        original_value: Option<i64>,
+        options: Computed<Vec<(i64, String)>>,
+    ) -> Self {
         self.fields.push(DataField {
             key: key.into(),
             value: DataFieldValue::Dict(DictValue {
                 value: Value::new(original_value.unwrap_or_default()),
                 original_value: original_value.map(Rc::new),
                 options,
+            }),
+        });
+        self
+    }
+
+    /// Add multiselect field to form section (multiple search inputs, value stored as integer).
+    pub fn add_multiselect_field(
+        mut self,
+        key: impl Into<String>,
+        original_value: Vec<i64>,
+        options: Computed<HashMap<i64, String>>,
+        add_label: impl Into<String>,
+    ) -> Self {
+        self.fields.push(DataField {
+            key: key.into(),
+            value: DataFieldValue::Multi(MultiValue {
+                value: Value::new(original_value.iter().cloned().map(Value::new).collect()),
+                original_value: Rc::new(original_value),
+                options,
+                add_label: Rc::new(add_label.into()),
             }),
         });
         self

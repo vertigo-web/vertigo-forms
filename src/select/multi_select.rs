@@ -1,4 +1,4 @@
-use vertigo::{bind, bind_rc, css, dom, Computed, Css, DomNode, Value};
+use vertigo::{Computed, Css, DomNode, Value, bind, bind_rc, css, dom};
 
 /// Select component based on vector of `T` values,
 /// which allows to have multiple options selected at once.

@@ -3,6 +3,8 @@ use std::rc::Rc;
 use vertigo::{bind_rc, dom, DomNode, Value};
 use vertigo_forms::{Tab, TabsContentMapped, TabsHeader};
 
+use crate::bordered_tabs;
+
 #[derive(Clone, PartialEq)]
 pub enum MyView {
     View1,
@@ -54,7 +56,7 @@ pub fn tabs() -> DomNode {
             <TabsHeader
                 current_tab={&current_tab}
                 tabs={tabs.clone()}
-                params={}
+                params={bordered_tabs()}
             />
             <TabsContentMapped
                 current_tab={current_tab.to_computed()}
@@ -65,7 +67,7 @@ pub fn tabs() -> DomNode {
                         MyView::View2SubView1 | MyView::View2SubView2 => MyView::View2SubView1,
                     }
                 )}
-                params={}
+                params={bordered_tabs()}
             />
         </p>
     }

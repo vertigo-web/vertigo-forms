@@ -9,14 +9,14 @@ Blocks for building forms in [vertigo](https://crates.io/crates/vertigo).
 [![CI](https://github.com/vertigo-web/vertigo-forms/actions/workflows/pipeline.yaml/badge.svg)](https://github.com/vertigo-web/vertigo-forms/actions/workflows/pipeline.yaml)
 [![downloads](https://img.shields.io/crates/d/vertigo-forms.svg)](https://crates.io/crates/vertigo-forms)
 
-See [Changelog](https://github.com/vertigo-web/vertigo/blob/master/CHANGES.md) for recent features.
+See [Changelog](https://github.com/vertigo-web/vertigo-forms/blob/master/CHANGES.md) for recent features.
 
 ## Example
 
 Dependencies:
 
 ```toml
-vertigo = "0.7"
+vertigo = "0.8"
 vertigo-forms = { git = "https://github.com/vertigo-web/vertigo-forms" }
 ```
 

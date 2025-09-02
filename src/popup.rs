@@ -1,4 +1,4 @@
-use vertigo::{bind, component, css, dom, Computed, Css, DomNode};
+use vertigo::{Computed, Css, DomNode, bind, component, css, dom};
 
 #[derive(Clone, Default)]
 pub struct PopupParams {
@@ -24,16 +24,14 @@ fn operator_css() -> Css {
 pub fn Popup(visible: Computed<bool>, content: DomNode, params: PopupParams) {
     let popup_css = popup_css();
 
-    let operator_css = bind!(
+    let container_css = bind!(
         popup_css,
         params,
         visible.map(move |enabled| {
             let base_css = operator_css();
 
             if enabled {
-                base_css.extend(css! {"
-                    [popup_css] { visibility: visible; }
-                "})
+                base_css + css! {"[popup_css] { visibility: visible; }"}
             } else {
                 base_css
             }
@@ -41,8 +39,8 @@ pub fn Popup(visible: Computed<bool>, content: DomNode, params: PopupParams) {
     );
 
     dom! {
-        <div css={operator_css}>
-            <div css={popup_css.extend(params.css.clone())}>
+        <div css={container_css}>
+            <div css={popup_css + params.css}>
                 {content}
             </div>
         </div>
@@ -53,14 +51,12 @@ pub fn Popup(visible: Computed<bool>, content: DomNode, params: PopupParams) {
 pub fn PopupOnHover(element: DomNode, content: DomNode, params: PopupParams) {
     let popup_css = popup_css();
 
-    let operator_css = operator_css().extend(css! {"
-        :hover [popup_css] { visibility: visible; }
-    "});
+    let operator_css = operator_css() + css! {":hover [popup_css] { visibility: visible; }"};
 
     dom! {
         <div css={operator_css}>
             {element}
-            <div css={popup_css.extend(params.css)}>
+            <div css={popup_css + params.css}>
                 {content}
             </div>
         </div>

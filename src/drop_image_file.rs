@@ -1,7 +1,7 @@
-use base64::{engine::general_purpose::STANDARD_NO_PAD as BASE_64, Engine as _};
+use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as BASE_64};
 use std::rc::Rc;
 use vertigo::{
-    bind, computed_tuple, css, dom, Computed, Css, DomNode, DropFileEvent, DropFileItem, Value,
+    Computed, Css, DomNode, DropFileEvent, DropFileItem, Value, bind, computed_tuple, css, dom,
 };
 
 /// Box that allows to accept image files on it, connected to `Value<Option<DropFileItem>>`.
@@ -112,11 +112,7 @@ impl DropImageFile {
             }
         };
 
-        let dropzone_css = self
-            .params
-            .dropzone_css
-            .clone()
-            .extend(self.params.dropzone_add_css.clone());
+        let dropzone_css = &self.params.dropzone_css + &self.params.dropzone_add_css;
 
         dom! {
             <div css={dropzone_css} on_dropfile={on_dropfile}>

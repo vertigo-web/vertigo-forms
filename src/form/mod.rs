@@ -6,33 +6,18 @@
 //! See story book for examples.
 
 use std::rc::Rc;
-use vertigo::{AttrGroup, Css, Value, bind, bind_rc, component, css, dom, dom_element};
+use vertigo::{AttrGroup, Css, Value, bind, bind_rc, component, css, dom};
 
-use crate::{
-    DictSelect, DropImageFile, Select, Switch, SwitchParams, ValidationErrors, input::Input,
-};
+use crate::{TabsParams, ValidationErrors};
 
-mod field;
-pub use field::{DataFieldValue, FieldExport, FormExport, ImageValue, TextAreaValue};
-mod form_data;
-pub use form_data::{ControlsConfig, DataField, DataSection, FieldsetStyle, FormData};
+mod data;
+pub use data::*;
 
-pub type ValidateFunc<T> = Rc<dyn Fn(&T, Value<ValidationErrors>) -> bool>;
-
-#[derive(Default, Clone, PartialEq)]
-pub enum Operation {
-    #[default]
-    None,
-    Saving,
-    Success,
-    Error(String),
-}
+mod render;
+pub use render::*;
 
 #[derive(Clone)]
-pub struct FormParams<T>
-where
-    T: From<FormExport> + 'static,
-{
+pub struct FormParams<T: 'static> {
     pub css: Css,
     pub add_css: Css,
     pub add_section_css: Css,
@@ -44,12 +29,10 @@ where
     pub operation: Value<Operation>,
     pub saving_label: Rc<String>,
     pub saved_label: Rc<String>,
+    pub tabs_params: Option<TabsParams>,
 }
 
-impl<T> Default for FormParams<T>
-where
-    T: From<FormExport> + 'static,
-{
+impl<T: 'static> Default for FormParams<T> {
     fn default() -> Self {
         Self {
             css: css! { "
@@ -67,59 +50,8 @@ where
             operation: Default::default(),
             saving_label: Rc::new("Saving...".to_string()),
             saved_label: Rc::new("Saved".to_string()),
+            tabs_params: None,
         }
-    }
-}
-
-#[component]
-pub fn Field<'a>(field: &'a DataField) {
-    match &field.value {
-        DataFieldValue::String(val) => {
-            dom! { <Input input:name={&&field.key} value={val.value.clone()} /> }
-        }
-        DataFieldValue::TextArea(val) => {
-            let on_input = bind!(val.value, |new_value: String| {
-                value.set(new_value);
-            });
-            let el =
-                dom_element! { <textarea name={&&field.key} {on_input}>{&val.value}</textarea> };
-            if let Some(rows) = val.rows {
-                el.add_attr("rows", rows);
-            }
-            if let Some(cols) = val.cols {
-                el.add_attr("cols", cols);
-            }
-            el.into()
-        }
-        DataFieldValue::List(val) => {
-            dom! { <Select value={val.value.clone()} options={&val.options} /> }
-        }
-        DataFieldValue::Bool(val) => {
-            dom! {
-                <Switch i:name={&&field.key} value={&val.value} params={SwitchParams::checkbox()} />
-            }
-            // let key = field.key.clone();
-            // val.value.render_value(move |checked| {
-            //     let el = dom_element! { <input name={&key} type="checkbox" /> };
-            //     if checked {
-            //         el.add_attr("checked", "checked");
-            //     }
-            //     el.into()
-            // })
-        }
-        DataFieldValue::Dict(val) => {
-            dom! { <DictSelect value={val.value.clone()} options={&val.options} /> }
-        }
-        DataFieldValue::Image(val) => {
-            let params = val.component_params.clone().unwrap_or_default();
-            dom! { <DropImageFile
-                item={val.value.clone()}
-                original_link={val.original_link.clone()}
-                {params}
-            /> }
-        }
-        DataFieldValue::Custom(val) => (val.render)(),
-        DataFieldValue::StaticCustom(render) => render(),
     }
 }
 
@@ -165,6 +97,7 @@ pub fn ModelForm<'a, T>(
 /// See [FormData] for description how to manage form structure.
 ///
 /// Use `f` attribute group to pass anything to underlying <form> element (ex. `f:css="my_styles"`)
+/// Use `s` attribute group to pass anything to underlying section (<label> element) (ex. `s:css="my_styles"`)
 #[component]
 pub fn Form<T>(
     form_data: Rc<FormData>,
@@ -182,83 +115,8 @@ pub fn Form<T>(
         grid-template-columns: subgrid;
         grid-column: span 2 / span 2;
     "};
-    let section_css = subgrid_css.clone().extend(params.add_section_css.clone());
-
-    let fieldset_flex_css = css! {"
-        display: flex;
-        gap: 5px;
-    "};
 
     let validation_errors = params.validation_errors.clone();
-
-    let fields = form_data.sections.iter().flat_map(|section| {
-        let attrs = s.clone();
-        let custom_fieldset_css = section.fieldset_css.clone().unwrap_or_else(|| css! {""});
-
-        if section.fields.len() > 1 {
-            let mut values = vec![];
-            for (i, field) in section.fields.iter().enumerate() {
-                if section.fieldset_style == FieldsetStyle::Dimensions && i > 0 {
-                    values.push(dom! { <span>"x"</span> });
-                }
-                let val_error = {
-                    let field_key = field.key.to_owned();
-                    validation_errors.render_value_option(move |errs| {
-                        errs.get(&field_key).map(|err| dom! { <span>{err}</span> })
-                    })
-                };
-                values.push(dom! {
-                    <div css={css!{"display: flex; flex-flow: column nowrap;"}}>
-                        <Field {field} />
-                        <span css={css!{"color: red;"}}>{val_error}</span>
-                    </div>
-                });
-            }
-
-            let label = &section.label;
-
-            let section_rendered = dom! {
-                <label css={&section_css} {..attrs}>
-                    {label}
-                    <div css={&fieldset_flex_css} css={custom_fieldset_css}>
-                        {..values}
-                    </div>
-                </label>
-            };
-                // {..section.new_group.then(|| dom! { <hr css={css!{"width: 100%;"}}/> })}
-
-            if section.new_group {
-                vec![
-                    dom! {
-                        <hr css={css!{"width: 100%; grid-column: 1 / 3;"}}/>
-                    },
-                    section_rendered
-                ]
-            } else {
-                vec![
-                    section_rendered
-                ]
-            }
-        } else if let Some(field) = section.fields.first() {
-            let val_error = {
-                let field_key = field.key.to_owned();
-                validation_errors.render_value_option(move |errs| {
-                    errs.get(&field_key).map(|err| dom! { <span>{err}</span> })
-                })
-            };
-            vec![dom! {
-                <label css={&section_css} {..attrs}>
-                    {&section.label}
-                    <div css={css!{"display: flex; flex-flow: column nowrap;"}}>
-                        <Field {field} />
-                        <span css={css!{"color: red;"}}>{val_error}</span>
-                    </div>
-                </label>
-            }]
-        } else {
-            vec![dom! { <p /> }]
-        }
-    });
 
     let controls = |params: &FormParams<T>, c_config: &ControlsConfig| {
         let mut controls = vec![];
@@ -287,12 +145,17 @@ pub fn Form<T>(
             params.saving_label,
             params.saved_label,
             params.operation.render_value_option(move |oper| {
+                let mut css = ctrl_item_css.clone();
                 match oper {
-                    Operation::Saving => Some(&saving_label),
-                    Operation::Success => Some(&saved_label),
+                    Operation::Saving => Some(saving_label.clone()),
+                    Operation::Success => Some(saved_label.clone()),
+                    Operation::Error(err) => {
+                        css += css! {"color: red;"};
+                        Some(err)
+                    }
                     _ => None,
                 }
-                .map(|operation_str| dom! { <span css={&ctrl_item_css}>{operation_str}</span> })
+                .map(|operation_str| dom! { <span {css}>{operation_str}</span> })
             })
         );
 
@@ -301,7 +164,7 @@ pub fn Form<T>(
         } else {
             let mut css_controls = css!("grid-column: span 2;");
             if let Some(custom_css) = &c_config.css {
-                css_controls = css_controls.extend(custom_css.clone());
+                css_controls += custom_css;
             }
             Some(dom! {
                 <div css={css_controls}>
@@ -316,6 +179,26 @@ pub fn Form<T>(
     let top_controls = controls(&params, &form_data.top_controls);
     let bottom_controls = controls(&params, &form_data.bottom_controls);
 
+    let section_css = subgrid_css + params.add_section_css;
+
+    let fields = fields(
+        &form_data.sections,
+        &s,
+        validation_errors.clone(),
+        &section_css,
+    );
+
+    let tabs = tabs(
+        &form_data.tabs,
+        &params.tabs_params,
+        &s,
+        validation_errors.clone(),
+        &section_css,
+        &params.css.clone(),
+    );
+
+    let form_css = params.css + params.add_css;
+
     let on_submit = bind_rc!(form_data, validation_errors, || {
         params.operation.set(Operation::Saving);
         let model = form_data.export();
@@ -327,20 +210,13 @@ pub fn Form<T>(
         if valid {
             on_submit(model);
         }
-        // params.operation.change(|oper|
-        //     // Auto change operation value only if it was not modified by callback
-        //     if oper == &Operation::Saving {
-        //         *oper = Operation::Success;
-        //     }
-        // );
     });
-
-    let form_css = params.css.extend(params.add_css.clone());
 
     dom! {
         <form css={form_css} on_submit={on_submit} {..f}>
             {..top_controls}
             {..fields}
+            {..tabs}
             {..bottom_controls}
         </form>
     }

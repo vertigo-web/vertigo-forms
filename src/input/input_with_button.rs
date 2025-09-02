@@ -1,4 +1,4 @@
-use vertigo::{bind, component, computed_tuple, dom, transaction, AttrGroup, Value};
+use vertigo::{AttrGroup, Value, bind, component, computed_tuple, dom, transaction};
 
 /// Input connected to provided `Value<String>`.
 ///
