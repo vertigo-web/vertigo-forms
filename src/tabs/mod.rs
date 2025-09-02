@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use vertigo::{bind, css, dom, Computed, Css, DomElement, DomNode, Reactive, ToComputed};
+use vertigo::{Computed, Css, DomElement, DomNode, Reactive, ToComputed, bind, css, dom};
 
 #[derive(Clone)]
 pub struct Tab<K> {
@@ -8,22 +8,20 @@ pub struct Tab<K> {
     pub render: Rc<dyn Fn(&K) -> DomNode>,
 }
 
-pub type RenderHeaderFunc<K> = Rc<dyn Fn(&Tab<K>) -> DomNode>;
-
 #[derive(Clone)]
-pub struct TabsParams<K> {
-    pub render_header_item: Option<RenderHeaderFunc<K>>,
+pub struct TabsParams {
     pub header_css: Css,
     pub header_item_css: Css,
     pub header_item_add_css: Css,
     pub header_active_item_add_css: Css,
     pub content_css: Css,
+    pub container_css: Css,
 }
 
-impl<K> Default for TabsParams<K> {
+impl Default for TabsParams {
     fn default() -> Self {
         Self {
-            render_header_item: None,
+            // render_header_item: None,
             header_css: css! {"
                 display: flex;
                 flex-wrap: wrap;
@@ -37,6 +35,7 @@ impl<K> Default for TabsParams<K> {
             header_item_add_css: Css::default(),
             header_active_item_add_css: Css::default(),
             content_css: Css::default(),
+            container_css: Css::default(),
         }
     }
 }
@@ -45,7 +44,7 @@ impl<K> Default for TabsParams<K> {
 pub struct Tabs<R: Reactive<K>, K: Clone> {
     pub current_tab: R,
     pub tabs: Vec<Tab<K>>,
-    pub params: TabsParams<K>,
+    pub params: TabsParams,
 }
 
 impl<R, K> Tabs<R, K>
@@ -67,7 +66,7 @@ where
         let current_computed = current_tab.to_computed();
 
         dom! {
-            <div>
+            <div css={&params.container_css}>
                 <TabsHeader
                     {&current_tab}
                     tabs={tabs.clone()}
@@ -87,7 +86,7 @@ where
 pub struct TabsHeader<R: Reactive<K>, K: Clone> {
     pub current_tab: R,
     pub tabs: Vec<Tab<K>>,
-    pub params: TabsParams<K>,
+    pub params: TabsParams,
 }
 
 impl<R, K> TabsHeader<R, K>
@@ -106,7 +105,7 @@ where
             params,
         } = self;
 
-        let header_item_css = params.header_item_css.extend(params.header_item_add_css);
+        let header_item_css = params.header_item_css + params.header_item_add_css;
         let header_active_item_add_css = params.header_active_item_add_css;
 
         // let current_tab_clone = current_tab.clone();
@@ -116,27 +115,18 @@ where
                 let header = DomElement::new("ul").css(params.header_css.clone());
 
                 tabs.iter().for_each(|tab| {
-                    if let Some(render_header_item) = &params.render_header_item {
-                        // Custom item rendering
-                        header.add_child(render_header_item(tab));
+                    let on_click = bind!(current_tab, tab | _ | current_tab.set(tab.key.clone()));
+                    let header_item_css = if current_tab_val == tab.key {
+                        &header_item_css + &header_active_item_add_css
                     } else {
-                        // Default item rendering
-                        let on_click =
-                            bind!(current_tab, tab | _ | current_tab.set(tab.key.clone()));
-                        let header_item_css = if current_tab_val == tab.key {
-                            header_item_css
-                                .clone()
-                                .extend(header_active_item_add_css.clone())
-                        } else {
-                            header_item_css.clone()
-                        };
-                        let item_css = css!("display: block;");
-                        header.add_child(dom! {
-                            <li css={item_css}>
-                                <a  css={header_item_css} on_click={on_click}>{&tab.name}</a>
-                            </li>
-                        });
-                    }
+                        header_item_css.clone()
+                    };
+                    let item_css = css!("display: block;");
+                    header.add_child(dom! {
+                        <li css={item_css}>
+                            <a  css={header_item_css} on_click={on_click}>{&tab.name}</a>
+                        </li>
+                    });
                 });
 
                 header.into()
@@ -148,7 +138,7 @@ where
 pub struct TabsContent<K: Clone> {
     pub current_tab: Computed<K>,
     pub tabs: Vec<Tab<K>>,
-    pub params: TabsParams<K>,
+    pub params: TabsParams,
 }
 
 impl<K> TabsContent<K>
@@ -179,7 +169,7 @@ pub struct TabsContentMapped<K: Clone> {
     pub current_tab: Computed<K>,
     pub tabs: Vec<Tab<K>>,
     pub tab_map: Rc<dyn Fn(K) -> K>,
-    pub params: TabsParams<K>,
+    pub params: TabsParams,
 }
 
 impl<K> TabsContentMapped<K>
@@ -208,7 +198,7 @@ fn render_tab_content<K: PartialEq + Clone>(
     current_tab: &K,
     effective_tab: &K,
     tabs: &[Tab<K>],
-    params: &TabsParams<K>,
+    params: &TabsParams,
 ) -> DomNode {
     let inner = match tabs.iter().find(|tab| &tab.key == effective_tab).cloned() {
         Some(tab) => (tab.render)(current_tab),

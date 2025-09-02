@@ -1,8 +1,8 @@
 use either::Either;
 use std::{collections::HashMap, hash::Hash};
 use vertigo::{
-    bind, computed_tuple, css, dom, dom_element, transaction, Computed, DomNode, KeyDownEvent,
-    Value,
+    Computed, DomNode, KeyDownEvent, Value, bind, computed_tuple, css, dom, dom_element,
+    transaction,
 };
 
 /// Input that searches for entered query in provided item list, based on `HashMap<K, V>`.

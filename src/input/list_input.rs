@@ -1,4 +1,4 @@
-use vertigo::{bind, component, dom, AttrGroup, Value};
+use vertigo::{AttrGroup, Value, bind, component, dom};
 
 /// Input connected to provided `Value<Vec<String>>`.
 ///

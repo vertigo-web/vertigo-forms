@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use vertigo::{bind, bind_rc, css, dom, transaction, Css, DomNode, KeyDownEvent, Resource, Value};
+use vertigo::{Css, DomNode, KeyDownEvent, Resource, Value, bind, bind_rc, css, dom, transaction};
 
 pub type OnSubmit = Rc<dyn Fn(&str, &str)>;
 
@@ -80,12 +80,9 @@ impl<T: Clone + PartialEq + 'static> Login<T> {
             false
         });
 
-        let css = params.css.clone().extend(params.add_css.clone());
-        let line_css = params.line_css.clone().extend(params.line_add_css.clone());
-        let submit_css = params
-            .submit_css
-            .clone()
-            .extend(params.submit_add_css.clone());
+        let css = &params.css + &params.add_css;
+        let line_css = &params.line_css + &params.line_add_css;
+        let submit_css = &params.submit_css + &params.submit_add_css;
         let error_message = params.error_message.clone();
         let waiting_label = params.waiting_label.clone();
 

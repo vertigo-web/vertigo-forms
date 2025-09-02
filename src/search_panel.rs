@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use vertigo::{bind, dom, AutoMap, DomNode, Resource, ToComputed, Value};
+use vertigo::{AutoMap, DomNode, Resource, ToComputed, Value, bind, dom};
 
 pub trait SearchResult {
     fn is_empty(&self) -> bool;

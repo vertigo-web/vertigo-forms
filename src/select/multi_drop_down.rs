@@ -1,4 +1,4 @@
-use vertigo::{bind, css, dom, Computed, Css, DomNode, Value};
+use vertigo::{Computed, Css, DomNode, Value, bind, css, dom};
 
 use super::multi_select::MultiSelect;
 
@@ -35,12 +35,12 @@ where
             position: absolute;
             z-index: 1;
         "};
-        let drop_down_content_css = content_css.extend(self.params.drop_down_content_css);
+        let drop_down_content_css = content_css + self.params.drop_down_content_css;
 
         let content = opened.render_value(move |opened| {
             if opened {
                 dom! {
-                    <div css={drop_down_content_css.clone()}>
+                    <div css={&drop_down_content_css}>
                         <MultiSelect
                             value={&self.value}
                             options={&self.options}

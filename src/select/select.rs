@@ -1,4 +1,6 @@
-use vertigo::{bind, dom, Computed, DomNode, Value};
+use std::ops::Not;
+
+use vertigo::{Computed, DomNode, Value, bind, computed_tuple, dom};
 
 /// Simple Select component based on vector of `T` values.
 ///
@@ -42,6 +44,13 @@ where
             value.set(new_value.into());
         });
 
+        let empty = computed_tuple!(value, options).render_value_option(|(value, options)| {
+            options
+                .contains(&value)
+                .not()
+                .then(|| dom! { <option value="" selected="selected" /> })
+        });
+
         let list = bind!(
             options,
             value.render_value(move |value| options.render_list(
@@ -59,6 +68,7 @@ where
 
         dom! {
             <select {on_change}>
+                {empty}
                 {list}
             </select>
         }

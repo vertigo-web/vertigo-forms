@@ -1,4 +1,4 @@
-use vertigo::{AttrGroup, bind, component, dom, transaction, Value};
+use vertigo::{AttrGroup, Value, bind, component, dom, transaction};
 
 pub enum DisplayType {
     Button,

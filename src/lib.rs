@@ -14,7 +14,7 @@ mod tabs;
 mod with_loader;
 
 pub use {
-    drop_image_file::{image_as_uri, name_to_mime, DropImageFile, DropImageFileParams},
+    drop_image_file::{DropImageFile, DropImageFileParams, image_as_uri, name_to_mime},
     input::{Input, InputWithButton, InputWithButtonParams, ListInput},
     popup::{Popup, PopupOnHover, PopupParams},
     search_panel::{SearchPanel, SearchPanelParams, SearchResult},
@@ -23,7 +23,7 @@ pub use {
     spinner::Spinner,
     switch::{Switch, SwitchParams},
     tabs::{Tab, Tabs, TabsContent, TabsContentMapped, TabsHeader, TabsParams},
-    with_loader::{with_loader, WithLoader},
+    with_loader::{WithLoader, with_loader},
 };
 
 pub type ValidationErrors = HashMap<String, String>;
