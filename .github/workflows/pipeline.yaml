@@ -26,7 +26,7 @@ jobs:
       - uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          args: -p vertigo-forms-storybook -p vertigo-forms-example-form --all-features --target wasm32-unknown-unknown -- -Dwarnings
+          args: -p vertigo-forms-storybook -p vertigo-forms-example-manual-form -p vertigo-forms-example-model-form --all-features --target wasm32-unknown-unknown -- -Dwarnings
           name: Storybook/Examples Clippy Output
 
   nightly-tests:

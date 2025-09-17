@@ -38,8 +38,8 @@ pub struct MySecondModel {
     pub photo: String,
 }
 
-impl From<&MySecondModel> for FormData {
-    fn from(value: &MySecondModel) -> Self {
+impl From<MySecondModel> for FormData {
+    fn from(value: MySecondModel) -> Self {
         let gender_map = vec!["Male".to_string(), "Female".to_string()];
 
         let role_map = [
@@ -98,15 +98,15 @@ pub fn Form2() {
         photo: "https://picsum.photos/200".to_string(),
     });
 
-    let my_model_clone = my_second_model.clone();
-    let form = my_second_model.render_value(move |model| {
-        let on_submit = bind_rc!(my_model_clone, |new_model: MySecondModel| {
-            my_model_clone.set(new_model);
-        });
+    let on_submit = bind_rc!(my_second_model, |new_model: MySecondModel| {
+        my_second_model.set(new_model);
+    });
 
-        dom! {
+    dom! {
+        <div>
+            <h4>"Form 2:"</h4>
             <ModelForm
-                model={&&model}
+                model={my_second_model.clone()}
                 {on_submit}
                 params={FormParams {
                     add_css: css! {"width: 400px;"},
@@ -114,13 +114,6 @@ pub fn Form2() {
                     ..Default::default()
                 }}
             />
-        }
-    });
-
-    dom! {
-        <div>
-            <h4>"Form 2:"</h4>
-            {form}
             <h4>"Model 2:"</h4>
             <p>
                 {my_second_model.map(|m| m.first_name)}

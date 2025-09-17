@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use vertigo::{bind_rc, component, css, dom, Value};
+use vertigo::{Value, bind_rc, component, css, dom};
 use vertigo_forms::form::{
     DataFieldValue, DataSection, FormData, FormExport, FormParams, ModelForm, TextAreaValue,
 };
@@ -16,8 +16,8 @@ pub struct TModel {
     pub annotation: Option<String>,
 }
 
-impl From<&TModel> for FormData {
-    fn from(value: &TModel) -> Self {
+impl From<TModel> for FormData {
+    fn from(value: TModel) -> Self {
         Self::default()
             .add_tab(
                 "Basic",
@@ -54,35 +54,26 @@ impl From<FormExport> for TModel {
 
 #[component]
 pub fn TabbedForm() {
-    let my_model: Value<TModel> = Value::new(TModel {
+    let model: Value<TModel> = Value::new(TModel {
         first_name: "Johann".to_string(),
         last_name: "Gambolputty".to_string(),
         annotation: None,
     });
 
-    let my_model_clone = my_model.clone();
-    let form = my_model.render_value(move |model| {
-        let on_submit = bind_rc!(my_model_clone, |new_model: TModel| {
-            my_model_clone.set(new_model);
-        });
+    let on_submit = bind_rc!(model, |new_model: TModel| {
+        model.set(new_model);
+    });
 
-        dom! {
-            <ModelForm
-                model={&&model}
-                {on_submit}
+    dom! {
+        <div>
+            <h4>"Tabbed Form:"</h4>
+            <ModelForm {model} {on_submit}
                 params={FormParams {
                     add_css: css! {"width: 400px;"},
                     tabs_params: Some(bordered_tabs()),
                     ..Default::default()
                 }}
             />
-        }
-    });
-
-    dom! {
-        <div>
-            <h4>"Tabbed Form:"</h4>
-            {form}
         </div>
     }
 }

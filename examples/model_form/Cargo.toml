@@ -1,8 +1,8 @@
 [package]
-name = "vertigo-forms-example-form"
+name = "vertigo-forms-example-model-form"
 version = "0.1.0"
 authors = ["Michał Pokrywka <wolfmoon@o2.pl>"]
-edition = "2021"
+edition = "2024"
 
 [lib]
 crate-type = ["cdylib", "rlib"]

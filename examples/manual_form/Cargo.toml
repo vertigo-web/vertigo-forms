@@ -1,5 +1,5 @@
 [package]
-name = "vertigo-forms-storybook"
+name = "vertigo-forms-example-manual-form"
 version = "0.1.0"
 authors = ["Michał Pokrywka <wolfmoon@o2.pl>"]
 edition = "2024"
@@ -9,4 +9,4 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 vertigo = "0.8"
-vertigo-forms = { path = ".." }
+vertigo-forms = { path = "../.." }

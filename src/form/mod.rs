@@ -6,7 +6,7 @@
 //! See story book for examples.
 
 use std::rc::Rc;
-use vertigo::{AttrGroup, Css, Value, bind, bind_rc, component, css, dom};
+use vertigo::{AttrGroup, Computed, Css, Value, bind, bind_rc, component, css, dom};
 
 use crate::{TabsParams, ValidationErrors};
 
@@ -26,7 +26,7 @@ pub struct FormParams<T: 'static> {
     pub delete_label: Rc<String>,
     pub validate: Option<ValidateFunc<T>>,
     pub validation_errors: Value<ValidationErrors>,
-    pub operation: Value<Operation>,
+    pub operation: Option<Value<Operation>>,
     pub saving_label: Rc<String>,
     pub saved_label: Rc<String>,
     pub tabs_params: Option<TabsParams>,
@@ -63,33 +63,35 @@ impl<T: 'static> Default for FormParams<T> {
 ///
 /// Use `f` attribute group to pass anything to underlying <form> element (ex. `f:css="my_styles"`)
 #[component]
-pub fn ModelForm<'a, T>(
-    model: &'a T,
+pub fn ModelForm<T: Clone + PartialEq>(
+    model: Computed<T>,
     on_submit: Rc<dyn Fn(T)>,
     params: FormParams<T>,
     f: AttrGroup,
     s: AttrGroup,
 ) where
-    FormData: From<&'a T>,
+    FormData: From<T>,
     T: From<FormExport> + 'static,
 {
-    let form_data = Rc::new(FormData::from(model));
+    model.render_value(move |model| {
+        let form_data = Rc::new(FormData::from(model));
 
-    let on_submit = bind_rc!(form_data, |form_export: FormExport| {
-        on_submit(T::from(form_export));
-    });
+        let on_submit = bind_rc!(on_submit, form_data, |form_export: FormExport| {
+            on_submit(T::from(form_export));
+        });
 
-    let mut form_component = Form {
-        form_data,
-        on_submit,
-        params,
-    }
-    .into_component();
+        let mut form_component = Form {
+            form_data,
+            on_submit,
+            params: params.clone(),
+        }
+        .into_component();
 
-    form_component.f = f;
-    form_component.s = s;
+        form_component.f = f.clone();
+        form_component.s = s.clone();
 
-    form_component.mount()
+        form_component.mount()
+    })
 }
 
 /// Renders a form for provided [FormData] that upon "Save" allows to grab updated fields from [FormExport].
@@ -141,23 +143,25 @@ pub fn Form<T>(
         let errors = validation_errors
             .render_value_option(|errs| errs.get("submit").map(|err| dom! { <span>{err}</span> }));
 
-        let operation_str = bind!(
-            params.saving_label,
-            params.saved_label,
-            params.operation.render_value_option(move |oper| {
-                let mut css = ctrl_item_css.clone();
-                match oper {
-                    Operation::Saving => Some(saving_label.clone()),
-                    Operation::Success => Some(saved_label.clone()),
-                    Operation::Error(err) => {
-                        css += css! {"color: red;"};
-                        Some(err)
+        let operation_str = params.operation.as_ref().map(|operation| {
+            bind!(
+                params.saving_label,
+                params.saved_label,
+                operation.render_value_option(move |oper| {
+                    let mut css = ctrl_item_css.clone();
+                    match oper {
+                        Operation::Saving => Some(saving_label.clone()),
+                        Operation::Success => Some(saved_label.clone()),
+                        Operation::Error(err) => {
+                            css += css! {"color: red;"};
+                            Some(err)
+                        }
+                        _ => None,
                     }
-                    _ => None,
-                }
-                .map(|operation_str| dom! { <span {css}>{operation_str}</span> })
-            })
-        );
+                    .map(|operation_str| dom! { <span {css}>{operation_str}</span> })
+                })
+            )
+        });
 
         if controls.is_empty() {
             None
@@ -170,7 +174,7 @@ pub fn Form<T>(
                 <div css={css_controls}>
                     {..controls}
                     {errors}
-                    {operation_str}
+                    {..operation_str}
                 </div>
             })
         }
@@ -200,7 +204,10 @@ pub fn Form<T>(
     let form_css = params.css + params.add_css;
 
     let on_submit = bind_rc!(form_data, validation_errors, || {
-        params.operation.set(Operation::Saving);
+        params
+            .operation
+            .as_ref()
+            .inspect(|operation| operation.set(Operation::Saving));
         let model = form_data.export();
         let valid = if let Some(validate) = &params.validate {
             validate(&model.clone().into(), validation_errors.clone())

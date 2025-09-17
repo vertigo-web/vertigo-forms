@@ -13,8 +13,8 @@ pub struct MyModel {
     pub dimension_y: String,
 }
 
-impl From<&MyModel> for FormData {
-    fn from(value: &MyModel) -> Self {
+impl From<MyModel> for FormData {
+    fn from(value: MyModel) -> Self {
         Self::default()
             .with(DataSection::with_string_field("Slug", "slug", &value.slug))
             .with(DataSection::with_string_field("Name", "name", &value.name))
@@ -47,28 +47,21 @@ pub fn Form1() {
         dimension_y: "80".to_string(),
     });
 
-    let my_model_clone = my_model.clone();
-    let form = my_model.render_value(move |model| {
-        let on_submit = bind_rc!(my_model_clone, |new_model: MyModel| {
-            my_model_clone.set(new_model);
-        });
+    let on_submit = bind_rc!(my_model, |new_model: MyModel| {
+        my_model.set(new_model);
+    });
 
-        dom! {
+    dom! {
+        <div>
+            <h4>"Form 1:"</h4>
             <ModelForm
-                model={&&model}
+                model={my_model.clone()}
                 {on_submit}
                 params={FormParams {
                     add_css: css! {"width: 400px;"},
                     ..Default::default()
                 }}
             />
-        }
-    });
-
-    dom! {
-        <div>
-            <h4>"Form 1:"</h4>
-            {form}
             <h4>"Model 1:"</h4>
             <p>{my_model.map(|m| m.slug)} " / " {my_model.map(|m| m.name)}</p>
             <p>{my_model.map(|m| m.dimension_x)} "x" {my_model.map(|m| m.dimension_y)}</p>
