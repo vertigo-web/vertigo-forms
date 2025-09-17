@@ -5,6 +5,14 @@ members = ["storybook", "examples/manual_form", "examples/model_form"]
 name = "vertigo-forms"
 version = "0.1.0"
 authors = ["Michał Pokrywka <wolfmoon@o2.pl>"]
+description = "Building block for forms in vertigo"
+readme = "README.md"
+keywords = ["wasm", "web", "isomorphic", "reactive", "javascript"]
+homepage = "https://vertigo.znoj.pl"
+repository = "https://github.com/vertigo-web/vertigo-forms"
+documentation = "https://docs.rs/vertigo-forms/"
+categories = ["asynchronous", "gui", "wasm", "web-programming"]
+license = "MIT OR Apache-2.0"
 edition = "2024"
 
 [dependencies]
