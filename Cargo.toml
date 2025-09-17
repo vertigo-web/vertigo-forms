@@ -1,5 +1,5 @@
 [workspace]
-members = ["storybook", "examples/form"]
+members = ["storybook", "examples/manual_form", "examples/model_form"]
 
 [package]
 name = "vertigo-forms"
