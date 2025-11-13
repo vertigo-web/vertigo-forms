@@ -33,10 +33,11 @@ pub fn DictSelect<T: Clone + From<String> + PartialEq + ToString + 'static>(
         value.set(new_value.parse().unwrap_or_default());
     });
 
+    // Generate empty option only if initial value does not match any of provided options
     let empty = computed_tuple!(value, options).render_value_option(|(value, options)| {
         options
             .iter()
-            .any(|(key, _)| key != &value)
+            .all(|(key, _)| key != &value)
             .then(|| dom! { <option value="" selected="selected" /> })
     });
 
