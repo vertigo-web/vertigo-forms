@@ -8,5 +8,5 @@ edition = "2024"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-vertigo = "0.8"
+vertigo = "0.9"
 vertigo-forms = { path = "../.." }
