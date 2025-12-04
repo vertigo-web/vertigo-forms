@@ -5,7 +5,7 @@ Blocks for building forms in [vertigo](https://crates.io/crates/vertigo).
 [![crates.io](https://img.shields.io/crates/v/vertigo-forms)](https://crates.io/crates/vertigo-forms)
 [![Documentation](https://docs.rs/vertigo-forms/badge.svg)](https://docs.rs/vertigo-forms)
 ![MIT or Apache 2.0 licensed](https://img.shields.io/crates/l/vertigo-forms.svg)
-[![Dependency Status](https://deps.rs/crate/vertigo-forms/0.1.0/status.svg)](https://deps.rs/crate/vertigo-forms/0.1.0)
+[![Dependency Status](https://deps.rs/crate/vertigo-forms/0.1.1/status.svg)](https://deps.rs/crate/vertigo-forms/0.1.1)
 [![CI](https://github.com/vertigo-web/vertigo-forms/actions/workflows/pipeline.yaml/badge.svg)](https://github.com/vertigo-web/vertigo-forms/actions/workflows/pipeline.yaml)
 [![downloads](https://img.shields.io/crates/d/vertigo-forms.svg)](https://crates.io/crates/vertigo-forms)
 
@@ -16,7 +16,7 @@ See [Changelog](https://github.com/vertigo-web/vertigo-forms/blob/master/CHANGES
 Dependencies:
 
 ```toml
-vertigo = "0.8"
+vertigo = "0.9"
 vertigo-forms = "0.1"
 ```
 
