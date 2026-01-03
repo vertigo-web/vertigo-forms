@@ -1,5 +1,5 @@
 use std::{fmt, rc::Rc};
-use vertigo::{css, dom, main, router::Router, DomNode};
+use vertigo::{DomNode, css, dom, main, router::Router};
 use vertigo_forms::{Tab, Tabs, TabsParams};
 
 mod drop_image_file;

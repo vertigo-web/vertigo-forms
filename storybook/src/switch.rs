@@ -1,4 +1,4 @@
-use vertigo::{dom, html_entities, DomNode, Value};
+use vertigo::{DomNode, Value, dom, html_entities};
 use vertigo_forms::{Switch, SwitchParams};
 
 pub fn switch() -> DomNode {

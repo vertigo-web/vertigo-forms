@@ -1,5 +1,4 @@
 use std::rc::Rc;
-
 use vertigo::{AutoMap, DomNode, Resource, ToComputed, Value, bind, dom};
 
 pub trait SearchResult {

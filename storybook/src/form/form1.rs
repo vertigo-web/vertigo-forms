@@ -1,4 +1,4 @@
-use vertigo::{bind_rc, component, css, dom, Value};
+use vertigo::{Value, bind_rc, component, css, dom};
 use vertigo_forms::form::{
     DataSection, FieldsetStyle, FormData, FormExport, FormParams, ModelForm,
 };

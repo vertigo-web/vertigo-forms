@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use vertigo::{computed_tuple, dom, DomNode, Value};
+use vertigo::{DomNode, Value, computed_tuple, dom};
 use vertigo_forms::SelectSearch;
 
 pub fn select_search() -> DomNode {

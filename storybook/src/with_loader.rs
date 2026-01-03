@@ -1,4 +1,4 @@
-use vertigo::{bind, bind_rc, dom, DomNode, Resource, Value};
+use vertigo::{DomNode, Resource, Value, bind, bind_rc, dom};
 use vertigo_forms::WithLoader;
 
 pub fn with_loader() -> DomNode {
