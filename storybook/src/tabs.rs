@@ -1,6 +1,5 @@
 use std::rc::Rc;
-
-use vertigo::{bind_rc, dom, DomNode, Value};
+use vertigo::{DomNode, Value, bind_rc, dom};
 use vertigo_forms::{Tab, TabsContentMapped, TabsHeader};
 
 use crate::bordered_tabs;

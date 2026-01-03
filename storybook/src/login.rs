@@ -1,4 +1,4 @@
-use vertigo::{bind_rc, dom, DomNode, Resource, Value};
+use vertigo::{DomNode, Resource, Value, bind_rc, dom};
 use vertigo_forms::login::{Login, LoginParams};
 
 pub fn login() -> DomNode {

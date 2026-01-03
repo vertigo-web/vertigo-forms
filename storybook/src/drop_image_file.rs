@@ -1,6 +1,6 @@
 use std::rc::Rc;
-use vertigo::{css, dom, DomNode, DropFileItem, Value};
-use vertigo_forms::{image_as_uri, DropImageFile, DropImageFileParams};
+use vertigo::{DomNode, DropFileItem, Value, css, dom};
+use vertigo_forms::{DropImageFile, DropImageFileParams, image_as_uri};
 
 pub fn drop_file() -> DomNode {
     let value = Value::new(Some(Rc::new("https://picsum.photos/200".to_string()))).to_computed();

@@ -1,6 +1,5 @@
 use std::rc::Rc;
-
-use vertigo::{bind_rc, component, css, dom, Value};
+use vertigo::{Value, bind_rc, component, css, dom};
 use vertigo_forms::form::{DataSection, FormData, FormExport, FormParams, ModelForm};
 
 // Form example 2

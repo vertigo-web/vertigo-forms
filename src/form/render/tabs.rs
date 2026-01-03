@@ -1,5 +1,4 @@
 use std::rc::Rc;
-
 use vertigo::{AttrGroup, Css, DomNode, Value, dom};
 
 use crate::{

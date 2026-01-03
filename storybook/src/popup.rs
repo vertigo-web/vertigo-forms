@@ -1,4 +1,4 @@
-use vertigo::{css, dom, DomNode, Value};
+use vertigo::{DomNode, Value, css, dom};
 use vertigo_forms::{Popup, PopupOnHover, PopupParams, Switch};
 
 pub fn popup() -> DomNode {

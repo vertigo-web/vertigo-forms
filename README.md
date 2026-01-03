@@ -5,7 +5,7 @@ Blocks for building forms in [vertigo](https://crates.io/crates/vertigo).
 [![crates.io](https://img.shields.io/crates/v/vertigo-forms)](https://crates.io/crates/vertigo-forms)
 [![Documentation](https://docs.rs/vertigo-forms/badge.svg)](https://docs.rs/vertigo-forms)
 ![MIT or Apache 2.0 licensed](https://img.shields.io/crates/l/vertigo-forms.svg)
-[![Dependency Status](https://deps.rs/crate/vertigo-forms/0.1.1/status.svg)](https://deps.rs/crate/vertigo-forms/0.1.1)
+[![Dependency Status](https://deps.rs/crate/vertigo-forms/0.1.2/status.svg)](https://deps.rs/crate/vertigo-forms/0.1.2)
 [![CI](https://github.com/vertigo-web/vertigo-forms/actions/workflows/pipeline.yaml/badge.svg)](https://github.com/vertigo-web/vertigo-forms/actions/workflows/pipeline.yaml)
 [![downloads](https://img.shields.io/crates/d/vertigo-forms.svg)](https://crates.io/crates/vertigo-forms)
 
@@ -16,14 +16,14 @@ See [Changelog](https://github.com/vertigo-web/vertigo-forms/blob/master/CHANGES
 Dependencies:
 
 ```toml
-vertigo = "0.9"
+vertigo = "0.10"
 vertigo-forms = "0.1"
 ```
 
 Example 1:
 
 ```rust
-use vertigo::{computed_tuple, main, prelude::*};
+use vertigo::{computed_tuple, prelude::*};
 use vertigo_forms::{Input, Select};
 
 #[derive(Default)]
@@ -34,7 +34,7 @@ struct FormData {
     engine: Value<String>,
 }
 
-#[main]
+#[vertigo::main]
 fn render() -> DomNode {
     let form_data = FormData::default();
 
@@ -74,7 +74,7 @@ fn render() -> DomNode {
 Example 2:
 
 ```rust
-use vertigo::{bind_rc, main, prelude::*};
+use vertigo::{bind_rc, prelude::*};
 use vertigo_forms::form::{DataSection as DS, FormData, FormExport, ModelForm};
 
 #[derive(Clone, Default, PartialEq)]
@@ -112,7 +112,7 @@ impl From<FormExport> for Car {
     }
 }
 
-#[main]
+#[vertigo::main]
 fn render() -> DomNode {
     let car = Value::new(Car::default());
 

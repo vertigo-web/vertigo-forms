@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use vertigo::{dom, AutoMap, Computed, DomNode, Resource, Value};
+use vertigo::{AutoMap, Computed, DomNode, Resource, Value, dom};
 use vertigo_forms::{SearchPanel, SearchPanelParams};
 
 pub fn search_panel() -> DomNode {
