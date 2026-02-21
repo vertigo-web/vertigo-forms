@@ -8,7 +8,7 @@ pub struct MultiDropDownParams {
 }
 
 #[derive(Clone)]
-pub struct MultiDropDown<T: Clone + 'static> {
+pub struct MultiDropDown<T: Clone + PartialEq + 'static> {
     pub value: Value<Vec<T>>,
     pub options: Computed<Vec<T>>,
     pub params: MultiDropDownParams,

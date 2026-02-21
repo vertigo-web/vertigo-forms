@@ -1,6 +1,16 @@
 <!-- markdownlint-configure-file { "no-duplicate-heading": { "siblings_only": true } } -->
 
 <!-- markdownlint-disable-next-line first-line-h1 -->
+## 0.1.3 - Unreleased
+
+### Added
+
+* Added dynamic attributes to various components
+
+### Changed
+
+* Updated to vertigo 0.11
+
 ## 0.1.2 - 2026-01-05
 
 ### Changed

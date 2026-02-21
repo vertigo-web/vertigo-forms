@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use vertigo::{DomNode, Value, computed_tuple, dom};
+use vertigo::{DomNode, Value, computed_tuple, dom, render::render_list};
 use vertigo_forms::SelectSearch;
 
 pub fn select_search() -> DomNode {
@@ -30,7 +30,8 @@ pub fn select_search() -> DomNode {
     let selected_value = computed_tuple!(value, options)
         .map(|(value, options)| options.get(&value).cloned().unwrap_or_default());
 
-    let hints = options.render_list(
+    let hints = render_list(
+        &options,
         |(key, _)| key.to_string(),
         |(_key, value)| {
             dom! {

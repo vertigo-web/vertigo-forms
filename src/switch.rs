@@ -47,11 +47,7 @@ impl SwitchParams {
 /// };
 /// ```
 #[component]
-pub fn Switch(
-    value: Value<bool>,
-    params: SwitchParams,
-    i: AttrGroup, // TODO: Use
-) {
+pub fn Switch(value: Value<bool>, params: SwitchParams, i: AttrGroup) {
     let toggle = bind!(value, |_| transaction(|ctx| value.set(!value.get(ctx))));
 
     match params.display_type {
@@ -74,13 +70,14 @@ pub fn Switch(
                 let toggle = bind!(value_clone, |_| transaction(
                     |ctx| value_clone.set(!value_clone.get(ctx))
                 ));
+                let i = i.clone();
                 if value_inner {
                     dom! {
-                        <input type="checkbox" on_click={toggle} checked="checked" />
+                        <input type="checkbox" on_click={toggle} checked="checked" {..i} />
                     }
                 } else {
                     dom! {
-                        <input type="checkbox" on_click={toggle} />
+                        <input type="checkbox" on_click={toggle} {..i} />
                     }
                 }
             })

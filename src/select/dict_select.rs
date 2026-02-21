@@ -1,4 +1,6 @@
-use vertigo::{AttrGroup, Computed, Value, bind, component, computed_tuple, dom};
+use vertigo::{
+    AttrGroup, Computed, Value, bind, component, computed_tuple, dom, render::render_list,
+};
 
 /// Simple Select component based on map of `i64`->`T` values.
 ///
@@ -43,7 +45,8 @@ pub fn DictSelect<T: Clone + From<String> + PartialEq + ToString + 'static>(
 
     let list = bind!(
         options,
-        value.render_value(move |value| options.render_list(
+        value.render_value(move |value| render_list(
+            &options,
             |(key, _)| key.to_string(),
             move |(key, item)| {
                 let text_item = item.to_string();
