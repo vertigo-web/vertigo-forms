@@ -1,4 +1,4 @@
-use vertigo::{Computed, Css, DomNode, Value, bind, bind_rc, css, dom};
+use vertigo::{Computed, Css, DomNode, Value, bind, bind_rc, css, dom, render::render_list};
 
 /// Select component based on vector of `T` values,
 /// which allows to have multiple options selected at once.
@@ -24,7 +24,7 @@ use vertigo::{Computed, Css, DomNode, Value, bind, bind_rc, css, dom};
 ///     />
 /// };
 /// ```
-pub struct MultiSelect<T: Clone> {
+pub struct MultiSelect<T: Clone + PartialEq + 'static> {
     pub value: Value<Vec<T>>,
     pub options: Computed<Vec<T>>,
 }
@@ -55,7 +55,8 @@ where
             value.render_value(move |value| {
                 bind!(
                     toggle,
-                    options.render_list(
+                    render_list(
+                        &options,
                         |item| item.to_string(),
                         bind!(toggle, |item| {
                             let text_item = item.to_string();

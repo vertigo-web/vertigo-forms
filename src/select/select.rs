@@ -1,6 +1,6 @@
 use std::ops::Not;
 
-use vertigo::{Computed, DomNode, Value, bind, computed_tuple, dom};
+use vertigo::{Computed, DomNode, Value, bind, computed_tuple, dom, render::render_list};
 
 /// Simple Select component based on vector of `T` values.
 ///
@@ -25,7 +25,7 @@ use vertigo::{Computed, DomNode, Value, bind, computed_tuple, dom};
 ///     />
 /// };
 /// ```
-pub struct Select<T: Clone> {
+pub struct Select<T: Clone + PartialEq + 'static> {
     pub value: Value<T>,
     pub options: Computed<Vec<T>>,
 }
@@ -53,7 +53,8 @@ where
 
         let list = bind!(
             options,
-            value.render_value(move |value| options.render_list(
+            value.render_value(move |value| render_list(
+                &options,
                 |item| item.to_string(),
                 move |item| {
                     let text_item = item.to_string();
