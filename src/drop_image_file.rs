@@ -1,14 +1,86 @@
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as BASE_64};
 use std::rc::Rc;
 use vertigo::{
-    Computed, Css, DomNode, DropFileEvent, DropFileItem, Value, bind, computed_tuple, css, dom,
+    AttrGroup, Computed, Css, DropFileEvent, DropFileItem, Value, bind, component, computed_tuple,
+    css, dom,
 };
 
 /// Box that allows to accept image files on it, connected to `Value<Option<DropFileItem>>`.
-pub struct DropImageFile {
-    pub original_link: Computed<Option<Rc<String>>>,
-    pub item: Value<Option<DropFileItem>>,
-    pub params: DropImageFileParams,
+#[component]
+pub fn DropImageFile(
+    original_link: Computed<Option<Rc<String>>>,
+    item: Value<Option<DropFileItem>>,
+    params: DropImageFileParams,
+    /// Any additional attributes for the dropzone
+    zone: AttrGroup,
+) {
+    let base64_data = item.to_computed().map(|item| match item {
+        Some(item) => image_as_uri(&item),
+        None => "".to_string(),
+    });
+
+    let view_deps = computed_tuple!(
+        a => original_link,
+        b => item,
+        c => base64_data
+    );
+    let item_clone = item.clone();
+    let params = params.clone();
+    let callback = params.callback.clone();
+    let image_view = view_deps.render_value(move |(original, item, base64_date)| match item {
+        Some(item) => {
+            let message = format_line(&item);
+            let image_css = css! {"
+                display: flex;
+                flex-flow: column;
+            "};
+            let restore = bind!(item_clone, callback, |_| {
+                if let Some(callback) = &callback {
+                    callback(None);
+                } else {
+                    item_clone.set(None);
+                }
+            });
+            let restore_text = if original.is_some() {
+                &params.revert_label
+            } else {
+                &params.cancel_label
+            };
+            dom! {
+                <div css={image_css}>
+                    <button on_click={restore}>{restore_text}</button>
+                    <img css={&params.img_css} src={base64_date} />
+                    { message }
+                </div>
+            }
+        }
+        None => match original {
+            Some(original) => {
+                dom! { <div><img css={&params.img_css} src={original} /></div> }
+            }
+            None => dom! { <div>{&params.no_image_text}</div> },
+        },
+    });
+
+    let item = item.clone();
+    let callback = params.callback.clone();
+    let on_dropfile = move |event: DropFileEvent| {
+        for file in event.items.into_iter() {
+            if let Some(callback) = callback.as_deref() {
+                callback(Some(file));
+            } else {
+                item.set(Some(file));
+            }
+        }
+    };
+
+    let dropzone_css = &params.dropzone_css + &params.dropzone_add_css;
+
+    dom! {
+        <div css={dropzone_css} on_dropfile={on_dropfile} {..zone}>
+            { image_view }
+        </div>
+    }
 }
 
 #[derive(Clone)]
@@ -42,82 +114,6 @@ impl Default for DropImageFileParams {
             "},
             dropzone_add_css: css!(""),
             img_css: css!(""),
-        }
-    }
-}
-
-impl DropImageFile {
-    pub fn into_component(self) -> Self {
-        self
-    }
-
-    pub fn mount(&self) -> DomNode {
-        let base64_data = self.item.to_computed().map(|item| match item {
-            Some(item) => image_as_uri(&item),
-            None => "".to_string(),
-        });
-
-        let view_deps = computed_tuple!(
-            a => self.original_link,
-            b => self.item,
-            c => base64_data
-        );
-        let item_clone = self.item.clone();
-        let params = self.params.clone();
-        let callback = self.params.callback.clone();
-        let image_view = view_deps.render_value(move |(original, item, base64_date)| match item {
-            Some(item) => {
-                let message = format_line(&item);
-                let image_css = css! {"
-                    display: flex;
-                    flex-flow: column;
-                "};
-                let restore = bind!(item_clone, callback, |_| {
-                    if let Some(callback) = &callback {
-                        callback(None);
-                    } else {
-                        item_clone.set(None);
-                    }
-                });
-                let restore_text = if original.is_some() {
-                    &params.revert_label
-                } else {
-                    &params.cancel_label
-                };
-                dom! {
-                    <div css={image_css}>
-                        <button on_click={restore}>{restore_text}</button>
-                        <img css={&params.img_css} src={base64_date} />
-                        { message }
-                    </div>
-                }
-            }
-            None => match original {
-                Some(original) => {
-                    dom! { <div><img css={&params.img_css} src={original} /></div> }
-                }
-                None => dom! { <div>{&params.no_image_text}</div> },
-            },
-        });
-
-        let item = self.item.clone();
-        let callback = self.params.callback.clone();
-        let on_dropfile = move |event: DropFileEvent| {
-            for file in event.items.into_iter() {
-                if let Some(callback) = callback.as_deref() {
-                    callback(Some(file));
-                } else {
-                    item.set(Some(file));
-                }
-            }
-        };
-
-        let dropzone_css = &self.params.dropzone_css + &self.params.dropzone_add_css;
-
-        dom! {
-            <div css={dropzone_css} on_dropfile={on_dropfile}>
-                { image_view }
-            </div>
         }
     }
 }
