@@ -39,10 +39,14 @@ pub fn SearchPanel<T, K>(
     cache: AutoMap<String, K>,
     render_results: Rc<dyn Fn(Rc<T>) -> DomNode>,
     params: SearchPanelParams,
-    /// Add attributes to the container
+    /// Additional attributes for the container
     c: AttrGroup,
-    /// Add attributes to the input
+    /// Additional attributes for the input
     i: AttrGroup,
+    /// Additional attributes for the popup content
+    pc: AttrGroup,
+    /// Additional attributes for the empty item
+    ei: AttrGroup,
 ) where
     T: SearchResult + PartialEq + Clone + 'static,
     K: ToComputed<Resource<Rc<T>>> + Clone + 'static,
@@ -61,17 +65,19 @@ pub fn SearchPanel<T, K>(
             return dom! { <div>{msg}</div> };
         }
         let render_results = render_results.clone();
+        let (pc, ei) = (pc.clone(), ei.clone());
         let content = cache
             .get(&query)
             .to_computed()
-            .render_value(move |books| match books {
+            .render_value(move |items| match items {
                 Resource::Loading => dom! { <div>{loading_text.clone()}</div> },
                 Resource::Ready(dataset) => {
                     if !dataset.is_empty() {
                         render_results(dataset)
                     } else {
+                        let ei = ei.clone();
                         dom! {
-                            <div>{empty_text.clone()}</div>
+                            <div {..ei}>{empty_text.clone()}</div>
                         }
                     }
                 }
@@ -79,7 +85,7 @@ pub fn SearchPanel<T, K>(
                     dom! { <div>{err}</div> }
                 }
             });
-        dom! { <div>{content}</div> }
+        dom! { <div {..pc}>{content}</div> }
     });
 
     let on_input = bind!(query, |new_value: String| {

@@ -1,11 +1,13 @@
 <!-- markdownlint-configure-file { "no-duplicate-heading": { "siblings_only": true } } -->
 
 <!-- markdownlint-disable-next-line first-line-h1 -->
-## 0.1.3 - Unreleased
+## 0.1.3 - 2026-03-05
 
 ### Added
 
 * Added dynamic attributes to various components
+
+  (DropImageFile, Popup, PopupOnHover, SearchPanel, TabsHeader, TabsContent, TabsContentMapped)
 
 ### Changed
 
