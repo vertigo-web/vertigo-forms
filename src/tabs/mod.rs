@@ -43,10 +43,16 @@ impl Default for TabsParams {
 }
 
 /// [TabsHeader] and [TabsContent] rendered next to each other.
-// TODO: Add AttrGroups here for header and container, after https://github.com/vertigo-web/vertigo/issues/505 resolved
 #[component]
-pub fn Tabs<R, K>(current_tab: R, tabs: Vec<Tab<K>>, params: TabsParams)
-where
+pub fn Tabs<R, K>(
+    current_tab: R,
+    tabs: Vec<Tab<K>>,
+    params: TabsParams,
+    /// Any additional attributes for the header container
+    h: AttrGroup,
+    /// Any additional attributes for the content container
+    c: AttrGroup,
+) where
     R: Reactive<K> + ToComputed<K> + Clone + 'static,
     K: Clone + PartialEq + 'static,
 {
@@ -58,11 +64,13 @@ where
                 {&current_tab}
                 tabs={tabs.clone()}
                 params={params.clone()}
+                h={..h}
             />
             <TabsContent
                 current_tab={current_computed}
                 tabs={tabs}
                 {params}
+                c={..c}
             />
         </div>
     }

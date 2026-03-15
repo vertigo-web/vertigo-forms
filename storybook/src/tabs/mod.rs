@@ -4,6 +4,9 @@ use vertigo_forms::{Tab, TabsContentMapped, TabsHeader};
 
 use crate::bordered_tabs;
 
+mod tabs_with_dyn_attrs;
+use tabs_with_dyn_attrs::tabs_with_dyn_attrs;
+
 #[derive(Clone, PartialEq)]
 pub enum MyView {
     View1,
@@ -11,6 +14,7 @@ pub enum MyView {
     View1SubView2,
     View2SubView1,
     View2SubView2,
+    View3,
 }
 
 pub fn tabs() -> DomNode {
@@ -48,6 +52,11 @@ pub fn tabs() -> DomNode {
                 }
             }),
         },
+        Tab {
+            key: MyView::View3,
+            name: "View 3".to_string(),
+            render: Rc::new(move |_| tabs_with_dyn_attrs()),
+        },
     ];
 
     dom! {
@@ -64,6 +73,7 @@ pub fn tabs() -> DomNode {
                     match view {
                         MyView::View1 | MyView::View1SubView1 | MyView::View1SubView2 => MyView::View1,
                         MyView::View2SubView1 | MyView::View2SubView2 => MyView::View2SubView1,
+                        MyView::View3 => MyView::View3,
                     }
                 )}
                 params={bordered_tabs()}
@@ -80,6 +90,7 @@ impl std::fmt::Display for MyView {
             Self::View1SubView2 => f.write_str("View1SubView2"),
             Self::View2SubView1 => f.write_str("View2SubView1"),
             Self::View2SubView2 => f.write_str("View2SubView2"),
+            Self::View3 => f.write_str("View3"),
         }
     }
 }
