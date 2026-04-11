@@ -8,7 +8,7 @@ pub struct PopupParams {
 fn popup_css() -> Css {
     css! {"
         visibility: hidden;
-        position: absolute;
+        position: fixed;
         z-index: 1;
     "}
 }

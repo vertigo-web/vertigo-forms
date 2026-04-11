@@ -68,11 +68,10 @@ pub fn SelectSearch<K, V>(
         let display_value = if visible { "block" } else { "none" };
         css! {"
             display: {display_value};
-            position: absolute;
+            position: fixed;
             background-color: white;
             box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.4);
             border: 1px black solid;
-            z-index: 1;
         "}
     };
 
