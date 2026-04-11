@@ -1,6 +1,12 @@
 <!-- markdownlint-configure-file { "no-duplicate-heading": { "siblings_only": true } } -->
 
 <!-- markdownlint-disable-next-line first-line-h1 -->
+## Unreleased
+
+### Fixed
+
+* Fixed positioning of `SelectSearch`, `Popup` and `MultiDropDown` popups
+
 ## 0.1.3 - 2026-03-05
 
 ### Added

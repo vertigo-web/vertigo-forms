@@ -32,7 +32,7 @@ where
             }
         });
         let content_css = css! {"
-            position: absolute;
+            position: fixed;
             z-index: 1;
         "};
         let drop_down_content_css = content_css + self.params.drop_down_content_css;
