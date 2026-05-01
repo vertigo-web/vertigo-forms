@@ -9,6 +9,7 @@ mod login;
 mod multi_drop_down;
 mod multi_select;
 mod popup;
+mod resource_table;
 mod search_panel;
 mod select;
 mod select_search;
@@ -29,6 +30,7 @@ fn render() -> DomNode {
         SelectSearch,
         SearchPanel,
         Form,
+        ResourceTable,
         Tabs,
         DropFile,
         Login,
@@ -48,6 +50,7 @@ fn render() -> DomNode {
                 "/select_search" => Self::SelectSearch,
                 "/search_panel" => Self::SearchPanel,
                 "/form" => Self::Form,
+                "/resource_table" => Self::ResourceTable,
                 "/tabs" => Self::Tabs,
                 "/drop_file" => Self::DropFile,
                 "/login" => Self::Login,
@@ -70,6 +73,7 @@ fn render() -> DomNode {
                 Self::SelectSearch => write!(f, "/select_search"),
                 Self::SearchPanel => write!(f, "/search_panel"),
                 Self::Form => write!(f, "/form"),
+                Self::ResourceTable => write!(f, "/resource_table"),
                 Self::Tabs => write!(f, "/tabs"),
                 Self::DropFile => write!(f, "/drop_file"),
                 Self::Login => write!(f, "/login"),
@@ -124,6 +128,11 @@ fn render() -> DomNode {
             key: TabRoute::Form,
             name: "Form".to_string(),
             render: Rc::new(|_| form::form()),
+        },
+        Tab {
+            key: TabRoute::ResourceTable,
+            name: "Resource Table".to_string(),
+            render: Rc::new(|_| resource_table::resource_table()),
         },
         Tab {
             key: TabRoute::Tabs,

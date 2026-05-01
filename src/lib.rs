@@ -1,10 +1,12 @@
 use std::{collections::HashMap, fmt::Display, str::FromStr};
 
+pub mod button;
 mod drop_image_file;
 pub mod form;
 mod input;
 pub mod login;
 mod popup;
+pub mod resource_table;
 mod search_panel;
 mod select;
 mod select_search;
@@ -14,6 +16,7 @@ mod tabs;
 mod with_loader;
 
 pub use {
+    button::{Button, ButtonColor, ButtonVariant, TableButton},
     drop_image_file::{DropImageFile, DropImageFileParams, image_as_uri, name_to_mime},
     input::{Input, InputWithButton, InputWithButtonParams, ListInput},
     popup::{Popup, PopupOnHover, PopupParams},
