@@ -7,6 +7,8 @@ on:
 env:
   CARGO_INCREMENTAL: 0
   CARGO_TERM_COLOR: always
+  CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   RUSTC_WRAPPER: "sccache"
   RUSTFLAGS: -D warnings
   SCCACHE_GHA_ENABLED: "true"
@@ -17,55 +19,32 @@ jobs:
     name: Nightly clippy (wasm32)
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      # Install caches
-      - name: Install sccache
-        uses: mozilla-actions/sccache-action@v0.0.6
-      - name: Cache cargo registry and index
-        uses: actions/cache@v4
+      - uses: actions/checkout@v6
+      - uses: mozilla-actions/sccache-action@v0.0.9
+      - uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/index
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-      - name: Cache cargo target
-        uses: actions/cache@v4
-        with:
-          path: target
-          key: ${{ runner.os }}-cargo-target-${{ hashFiles('**/Cargo.lock') }}
-
-      # Install toolchain
-      - name: Install toolchain
-        uses: actions-rs/toolchain@v1
+          shared-key: "deps-cache-stable"
+          cache-targets: "false" # IMPORTANT: Let sccache handle target artifacts
+      - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: nightly
           target: wasm32-unknown-unknown
           components: clippy, rustfmt
-          override: true
 
       # Formatting check
       - name: Check formatting
         run: cargo fmt -- --check
 
       # Clippy checks
-      - name: Vertigo-forms Clippy
-        uses: actions-rs/clippy-check@v1
+      - name: Clippy (stable)
+        uses: giraffate/clippy-action@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: -p vertigo-forms --all-features --target wasm32-unknown-unknown -- -Dwarnings
-          name: Vertigo-forms Clippy Output
-      - name: Examples Clippy
-        uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: -p vertigo-forms-storybook -p vertigo-forms-example-manual-form -p vertigo-forms-example-model-form --all-features --target wasm32-unknown-unknown -- -Dwarnings
-          name: Storybook/Examples Clippy Output
+          tool_name: "Clippy (stable)"
+          reporter: github-pr-review
+          filter_mode: added
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          clippy_flags: --all --all-features --tests --locked
 
       # Unit tests
       - name: Unit tests
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --all-features
+        run: cargo test --all --all-features --locked

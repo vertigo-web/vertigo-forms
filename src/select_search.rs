@@ -50,12 +50,14 @@ pub fn SelectSearch<K, V>(
             let inner_filter = inner_filter.to_lowercase();
             if inner_filter.len() >= params.min_chars {
                 // Filter options
-                inner_options
+                let mut filtered = inner_options
                     .into_iter()
                     .filter(|(_, opt_value)| {
                         opt_value.to_string().to_lowercase().contains(&inner_filter)
                     })
-                    .collect::<Vec<_>>()
+                    .collect::<Vec<_>>();
+                filtered.sort_by_cached_key(|(_, opt_value)| opt_value.to_string());
+                filtered
             } else {
                 vec![]
             }
