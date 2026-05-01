@@ -5,7 +5,8 @@
 
 ### Fixed
 
-* Fixed positioning of `SelectSearch`, `Popup` and `MultiDropDown` popups
+* Positioning of `SelectSearch`, `Popup` and `MultiDropDown` popups
+* `SelectSearch` sorting
 
 ## 0.1.3 - 2026-03-05
 
