@@ -131,6 +131,7 @@ pub enum FieldsetStyle {
 
 /// A section of form with label and a field (or field set).
 #[derive(Default)]
+// #[derive(Clone)]
 pub struct DataSection {
     pub label: String,
     pub fields: Vec<DataField>,
