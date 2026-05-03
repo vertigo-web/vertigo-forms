@@ -79,7 +79,7 @@ pub fn row_form<Model: Clone + PartialEq + 'static, FormModel: Clone + 'static>(
     state.clone().render_value(move |current_state| {
         let error_view = error.clone().render_value(|err| {
             if let Some(err) = err {
-                dom! { <div css={css!("color: #dc3545; font-size: 0.8rem; margin: 8px 20px; font-weight: 600;")}>{err}</div> }
+                dom! { <div css={css! {"color: #dc3545; font-size: 0.8rem; margin: 8px 20px; font-weight: 600;"}}>{err}</div> }
             } else {
                 dom! { <div /> }
             }
@@ -136,10 +136,7 @@ pub fn row_form<Model: Clone + PartialEq + 'static, FormModel: Clone + 'static>(
                     };
 
                     dom! {
-                        <div data-testid="row-buttons" css={css!("
-                            display: flex;
-                            gap: 12px;
-                        ")}>
+                        <div data-testid="row-buttons" css={css! {"display: flex; gap: 12px;"}}>
                             <Button
                                 label={edit_label.clone()}
                                 on_click={bind_rc!(state_for_buttons, || state_for_buttons.set(RowState::Edit))}
@@ -163,11 +160,7 @@ pub fn row_form<Model: Clone + PartialEq + 'static, FormModel: Clone + 'static>(
             }
             RowState::Edit => {
                 let buttons = dom! {
-                    <div css={css!("
-                        display: flex;
-                        gap: 8px;
-                        justify-content: flex-end;
-                    ")}>
+                    <div css={css! {"display: flex; gap: 8px; justify-content: flex-end;"}}>
                         <Button
                             label={process_label.clone()}
                             on_click={bind_rc!(state, error, item, process, form_model, optimistic_item, || {
@@ -232,8 +225,18 @@ pub fn row_form<Model: Clone + PartialEq + 'static, FormModel: Clone + 'static>(
                     } else {
                         let label = processing_label.clone();
                         dom! {
-                            <div css={css!("padding: 24px 20px; text-align: center; color: #888; background: #f9f9f9; border-bottom: 1px solid #eee;")}>
-                                <span css={css!("display: inline-block; animation: spin 1s linear infinite; margin-right: 8px;")}>"↻"</span>
+                            <div css={css! {"
+                                padding: 24px 20px;
+                                text-align: center;
+                                color: #888;
+                                background: #f9f9f9;
+                                border-bottom: 1px solid #eee;
+                            "}}>
+                                <span css={css! {"
+                                    display: inline-block;
+                                    animation: spin 1s linear infinite;
+                                    margin-right: 8px;
+                                "}}>"↻"</span>
                                 {label}
                             </div>
                         }
@@ -254,7 +257,7 @@ fn confirm_delete_view(
     let cancel_label = labels.cancel.clone();
 
     dom! {
-        <div css={css!("
+        <div css={css! {"
             background: #fff0f0;
             padding: 16px 20px;
             border-bottom: 1px solid #ffcccc;
@@ -262,22 +265,22 @@ fn confirm_delete_view(
             display: flex;
             flex-direction: row;
             justify-content: space-between;
-        ")}>
-            <div css={css!("
+        "}}>
+            <div css={css! {"
                 font-weight: 600;
                 color: #b02a37;
 
                 display: flex;
                 align-items: center;
-            ")}>
+            "}}>
                 {confirm_question}
             </div>
 
-            <div css={css!("
+            <div css={css! {"
                 display: flex;
                 gap: 12px;
                 justify-content: flex-end;
-            ")}>
+            "}}>
                 <Button
                     label={confirm_delete_label}
                     on_click={on_confirm}

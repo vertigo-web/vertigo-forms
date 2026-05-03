@@ -40,10 +40,10 @@ pub fn resource_table_text_field() -> DomNode {
         list,
         title: "My Resources".to_string(),
         add_label: "Add Item".to_string(),
-        table_css: css!(""),
+        table_css: css! {""},
         render_header: || {
             dom! {
-                <div css={base_header_css() + css!("grid-template-columns: 50px 1fr 150px;")}>
+                <div css={base_header_css() + css! {"grid-template-columns: 50px 1fr 150px;"}}>
                     <div>"ID"</div>
                     <div>"Name"</div>
                     <div>"Actions"</div>
@@ -69,7 +69,7 @@ pub fn resource_table_text_field() -> DomNode {
         },
         render_row_view: |model, create_buttons, _alert| {
             dom! {
-                <div css={base_row_css() + css!("grid-template-columns: 50px 1fr 150px;")}>
+                <div css={base_row_css() + css! {"grid-template-columns: 50px 1fr 150px;"}}>
                     <div css={normal_col_css()}>{model.id}</div>
                     <div css={main_col_css()}>{model.name.clone()}</div>
                     <div>{create_buttons()}</div>
@@ -78,7 +78,7 @@ pub fn resource_table_text_field() -> DomNode {
         },
         render_row_form: |form, buttons| {
             dom! {
-                <div css={base_row_css() + css!("grid-template-columns: 50px 1fr 150px;")}>
+                <div css={base_row_css() + css! {"grid-template-columns: 50px 1fr 150px;"}}>
                     <div>"-"</div>
                     <div>
                         <Input value={form.name.clone()} />

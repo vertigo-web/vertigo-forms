@@ -26,7 +26,7 @@ use vertigo::{AttrGroup, Value, bind, component, computed_tuple, dom, transactio
 ///                 button_label: "Load".to_string(),
 ///                 ..Default::default()
 ///         }}
-///         input:css={css!("width: 300px;")}
+///         input:css={css! {"width: 300px;"}}
 ///     />
 /// };
 /// ```

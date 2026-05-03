@@ -95,7 +95,7 @@ pub fn TabsHeader<R, K>(
                 } else {
                     header_item_css.clone()
                 };
-                let item_css = css!("display: block;");
+                let item_css = css! {"display: block;"};
                 header.add_child(dom! {
                     <li css={item_css}>
                         <a  css={header_item_css} on_click={on_click}>{&tab.name}</a>

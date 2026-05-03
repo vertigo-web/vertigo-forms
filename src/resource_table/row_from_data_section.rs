@@ -38,11 +38,11 @@ pub fn row_from_data_section(
         .collect();
 
     let error_node = section.error.as_ref().map(|err| {
-        dom! { <span css={css!{"color: red; font-size: 0.8rem;"}}>{err}</span> }
+        dom! { <span css={css! {"color: red; font-size: 0.8rem;"}}>{err}</span> }
     });
 
     dom! {
-        <div css={base_row_css() + css!("grid-template-columns: {grid_template_columns};")}>
+        <div css={base_row_css() + css! {"grid-template-columns: {grid_template_columns};"}}>
             <div css={normal_col_css()}>{section.label.clone()}</div>
             {..fields}
             {..error_node}

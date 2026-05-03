@@ -166,7 +166,7 @@ pub fn Form<T>(
         if controls.is_empty() {
             None
         } else {
-            let mut css_controls = css!("grid-column: span 2;");
+            let mut css_controls = css! {"grid-column: span 2;"};
             if let Some(custom_css) = &c_config.css {
                 css_controls += custom_css;
             }

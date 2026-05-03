@@ -125,12 +125,12 @@ impl<Model: Clone + PartialEq + Default + 'static, ModelForm: Clone + 'static>
         "} + &props.table_css;
 
         dom! {
-            <div css={css!{"
+            <div css={css! {"
                     padding: 10px;
                     width: 100%;
                 "}}>
                 <div css={table_css}>
-                    <div css={css!{"
+                    <div css={css! {"
                             display: flex;
                             justify-content: space-between;
                             align-items: center;
@@ -138,7 +138,7 @@ impl<Model: Clone + PartialEq + Default + 'static, ModelForm: Clone + 'static>
                             border-bottom: 1px solid #eee;
                             gap: 10px;
                         "}}>
-                        <h2 css={css!{"margin: 0; font-size: 1.2rem; color: #333;"}}>{props.title.clone()}</h2>
+                        <h2 css={css! {"margin: 0; font-size: 1.2rem; color: #333;"}}>{props.title.clone()}</h2>
 
                         {..props.render_filters.map(|render_filters| render_filters())}
 
