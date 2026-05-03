@@ -41,10 +41,10 @@ pub fn resource_table_data_section() -> DomNode {
         list,
         title: "My Resources (DataSection)".to_string(),
         add_label: "Add Item".to_string(),
-        table_css: css!("margin-top: 40px;"),
+        table_css: css! {"margin-top: 40px;"},
         render_header: || {
             dom! {
-                <div css={base_header_css() + css!("grid-template-columns: 50px 1fr 100px 150px 150px;")}>
+                <div css={base_header_css() + css! {"grid-template-columns: 50px 1fr 100px 150px 150px;"}}>
                     <div>"ID"</div>
                     <div>"Name"</div>
                     <div>"Active"</div>
@@ -116,7 +116,7 @@ pub fn resource_table_data_section() -> DomNode {
             };
             let active_str = if model.is_active { "Yes" } else { "No" };
             dom! {
-                <div css={base_row_css() + css!("grid-template-columns: 50px 1fr 100px 150px 150px;")}>
+                <div css={base_row_css() + css! {"grid-template-columns: 50px 1fr 100px 150px 150px;"}}>
                     <div css={normal_col_css()}>{model.id}</div>
                     <div css={main_col_css()}>{model.name.clone()}</div>
                     <div css={normal_col_css()}>{active_str}</div>

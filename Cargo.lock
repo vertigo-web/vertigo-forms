@@ -519,8 +519,7 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 [[package]]
 name = "vertigo"
 version = "0.11.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7ad8484c79e7f9b7a44b5f3738aa7e7dabdf707a5b8ea944b1f667f786a5ab49"
+source = "git+https://github.com/vertigo-web/vertigo?branch=master#a16511b7f57738c6593bf23d321f8f8bbc98bc9b"
 dependencies = [
  "base64",
  "log",
@@ -563,8 +562,7 @@ dependencies = [
 [[package]]
 name = "vertigo-macro"
 version = "0.11.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b05ec1f45b26c2d5e8cbae596b6971b3992d878a13f73aedc7c5798fd1f869d"
+source = "git+https://github.com/vertigo-web/vertigo?branch=master#a16511b7f57738c6593bf23d321f8f8bbc98bc9b"
 dependencies = [
  "base64",
  "crc",

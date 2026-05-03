@@ -19,3 +19,6 @@ edition = "2024"
 base64 = "0.22"
 either = "1.15"
 vertigo = "0.11"
+
+[patch.crates-io]
+vertigo = { git = "https://github.com/vertigo-web/vertigo", branch = "master" }

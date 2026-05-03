@@ -6,6 +6,7 @@
 ### Added
 
 * `ResourceTable`
+* "Select file" button to `DropImageFile` component
 
 ### Fixed
 

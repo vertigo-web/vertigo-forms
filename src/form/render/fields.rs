@@ -49,7 +49,7 @@ pub(in super::super) fn fields<'a>(
 
         if section.new_group {
             vec![
-                dom! { <hr css={css!{"width: 100%; grid-column: 1 / 3;"}}/> },
+                dom! { <hr css={css! {"width: 100%; grid-column: 1 / 3;"}}/> },
                 section_rendered,
             ]
         } else {
@@ -66,9 +66,9 @@ fn render_field(field: &DataField, validation_errors: &Value<ValidationErrors>) 
         })
     };
     dom! {
-        <div css={css!{"display: flex; flex-flow: column nowrap;"}}>
+        <div css={css! {"display: flex; flex-flow: column nowrap;"}}>
             <Field {field} />
-            <span css={css!{"color: red;"}}>{val_error}</span>
+            <span css={css! {"color: red;"}}>{val_error}</span>
         </div>
     }
 }

@@ -27,39 +27,123 @@ pub fn DropImageFile(
     let item_clone = item.clone();
     let params = params.clone();
     let callback = params.callback.clone();
-    let image_view = view_deps.render_value(move |(original, item, base64_date)| match item {
-        Some(item) => {
-            let message = format_line(&item);
-            let image_css = css! {"
-                display: flex;
-                flex-flow: column;
-            "};
-            let restore = bind!(item_clone, callback, |_| {
-                if let Some(callback) = &callback {
-                    callback(None);
+
+    // Shared handler factory for the file-input-select path (cloned per render branch)
+    let item_for_select = item.clone();
+    let callback_for_select = params.callback.clone();
+    let make_on_change_file = Rc::new(move || {
+        let item = item_for_select.clone();
+        let callback = callback_for_select.clone();
+        move |event: DropFileEvent| {
+            for file in event.items {
+                if let Some(cb) = callback.as_deref() {
+                    cb(Some(file));
                 } else {
-                    item_clone.set(None);
+                    item.set(Some(file));
                 }
-            });
-            let restore_text = if original.is_some() {
-                &params.revert_label
-            } else {
-                &params.cancel_label
-            };
-            dom! {
-                <div css={image_css}>
-                    <button on_click={restore}>{restore_text}</button>
-                    <img css={&params.img_css} src={base64_date} />
-                    { message }
-                </div>
             }
         }
-        None => match original {
-            Some(original) => {
-                dom! { <div><img css={&params.img_css} src={original} /></div> }
+    });
+
+    let image_view = view_deps.render_value(move |(original, item, base64_date)| {
+        let hidden_input_css = css! {"display: none;"};
+        let btn_css = css! {"
+            text-align: center;
+            display: inline-block;
+            cursor: pointer;
+            padding: 4px 12px;
+            border: 1px solid currentColor;
+            border-radius: 4px;
+            font-size: 0.85em;
+            margin-top: 6px;
+            margin-bottom: 6px;
+        "};
+        let select_label = params.select_label.clone();
+        let accept = params.accept.clone();
+        let flex_column = css! {"display: flex; flex-direction: column; align-items: center;"};
+
+        match item {
+            Some(item) => {
+                let message = format_line(&item);
+                let restore = bind!(item_clone, callback, |_| {
+                    if let Some(callback) = &callback {
+                        callback(None);
+                    } else {
+                        item_clone.set(None);
+                    }
+                });
+                let restore_text = if original.is_some() {
+                    &params.revert_label
+                } else {
+                    &params.cancel_label
+                };
+                let select_button = if select_label.is_empty() {
+                    None
+                } else {
+                    Some(dom! {
+                        <label css={&btn_css}>
+                            <input
+                                css={hidden_input_css}
+                                type="file"
+                                accept={accept}
+                                on_change_file={make_on_change_file()}
+                            />
+                            {select_label}
+                        </label>
+                    })
+                };
+                dom! {
+                    <div css={flex_column}>
+                        <button css={btn_css}on_click={restore}>{restore_text}</button>
+                        {..select_button}
+                        <img css={&params.img_css} src={base64_date} />
+                        { message }
+                    </div>
+                }
             }
-            None => dom! { <div>{&params.no_image_text}</div> },
-        },
+            None => match original {
+                Some(original) => {
+                    if select_label.is_empty() {
+                        dom! { <div><img css={&params.img_css} src={original} /></div> }
+                    } else {
+                        dom! {
+                            <div css={flex_column}>
+                                <img css={&params.img_css} src={original} />
+                                <label css={btn_css}>
+                                    <input
+                                        css={hidden_input_css}
+                                        type="file"
+                                        accept={accept}
+                                        on_change_file={make_on_change_file()}
+                                    />
+                                    {select_label}
+                                </label>
+                            </div>
+                        }
+                    }
+                }
+                None => {
+                    if select_label.is_empty() {
+                        dom! { <div>{&params.no_image_text}</div> }
+                    } else {
+                        dom! {
+                            <div css={flex_column}>
+                                {&params.no_image_text}
+                                <label css={btn_css}>
+                                    <input
+                                        css={hidden_input_css}
+                                        type="file"
+                                        accept={accept}
+                                        on_change_file={make_on_change_file()}
+                                    />
+                                    {select_label}
+                                </label>
+                            </div>
+                        }
+                    }
+                }
+            },
+        }
     });
 
     let item = item.clone();
@@ -93,6 +177,10 @@ pub struct DropImageFileParams {
     pub dropzone_css: Css,
     pub dropzone_add_css: Css,
     pub img_css: Css,
+    /// Label for the "select file" button. Set to empty string to hide the button.
+    pub select_label: String,
+    /// Value for the `accept` attribute on the hidden file input (e.g. `"image/*"`).
+    pub accept: String,
 }
 
 impl Default for DropImageFileParams {
@@ -112,8 +200,14 @@ impl Default for DropImageFileParams {
 
                 padding: 10px;
             "},
-            dropzone_add_css: css!(""),
-            img_css: css!(""),
+            dropzone_add_css: css! {""},
+            img_css: css! {"
+                max-width: 100%;
+                max-height: 320px;
+                object-fit: contain;
+            "},
+            select_label: "Select file...".to_string(),
+            accept: "image/*".to_string(),
         }
     }
 }
