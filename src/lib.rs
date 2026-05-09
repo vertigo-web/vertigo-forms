@@ -3,6 +3,7 @@ use std::{collections::HashMap, fmt::Display, str::FromStr};
 pub mod button;
 mod drop_image_file;
 pub mod form;
+mod image_upload;
 mod input;
 pub mod login;
 mod popup;
@@ -18,6 +19,7 @@ mod with_loader;
 pub use {
     button::{Button, ButtonColor, ButtonVariant, TableButton},
     drop_image_file::{DropImageFile, DropImageFileParams, image_as_uri, name_to_mime},
+    image_upload::ImageUpload,
     input::{Input, InputWithButton, InputWithButtonParams, ListInput},
     popup::{Popup, PopupOnHover, PopupParams},
     search_panel::{SearchPanel, SearchPanelParams, SearchResult},
