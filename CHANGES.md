@@ -6,7 +6,8 @@
 ### Added
 
 * `ResourceTable`
-* "Select file" button to `DropImageFile` component
+* `ImageUpload` helper struct to `DropImageFile`
+* "Select file" button to `DropImageFile`
 
 ### Fixed
 
