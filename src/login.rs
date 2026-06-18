@@ -6,6 +6,13 @@ use vertigo::{
 
 pub type OnSubmit = Rc<dyn Fn(&str, &str)>;
 
+/// Custom renderer for a login input. Receives the value bound to the form so
+/// submit/Enter handling keeps working.
+pub type RenderInput = Rc<dyn Fn(Value<String>) -> DomNode>;
+
+/// Custom renderer for the submit control. Receives the submit callback to wire up.
+pub type RenderSubmit = Rc<dyn Fn(Rc<dyn Fn()>) -> DomNode>;
+
 #[component]
 pub fn Login<T: Clone + PartialEq + 'static>(
     on_submit: OnSubmit,
@@ -32,6 +39,19 @@ pub struct LoginParams {
     pub password_label: String,
     pub button_label: String,
     pub waiting_label: String,
+    /// Optional content rendered at the top of the form, before the message line.
+    pub header: Option<DomNode>,
+    /// Optional content rendered at the bottom of the form, after the submit button.
+    pub footer: Option<DomNode>,
+    /// Optional custom renderer for the username input. Receives the bound value
+    /// so submit/Enter handling keeps working. When `None`, a plain `<input>` is used.
+    pub render_username: Option<RenderInput>,
+    /// Optional custom renderer for the password input. Receives the bound value.
+    /// When `None`, a plain `<input type="password">` is used.
+    pub render_password: Option<RenderInput>,
+    /// Optional custom renderer for the submit control. Receives the submit callback
+    /// to wire up (e.g. `on_click`). When `None`, a plain `<input type="submit">` is used.
+    pub render_submit: Option<RenderSubmit>,
 }
 
 impl Default for LoginParams {
@@ -59,6 +79,11 @@ impl Default for LoginParams {
             password_label: "Password:".to_string(),
             button_label: "Login".to_string(),
             waiting_label: "Logging in...".to_string(),
+            header: None,
+            footer: None,
+            render_username: None,
+            render_password: None,
+            render_submit: None,
         }
     }
 }
@@ -110,40 +135,46 @@ pub fn mount_login<T: Clone + PartialEq + 'static>(
         })
     );
 
-    let on_username_change = bind!(username, |new_value: String| username.set(new_value));
-
-    let username_div = dom! {
-        <div css={line_css.clone()}>
-            <div>{&params.username_label}</div>
-            <input
-                css={&params.input_css}
-                value={username.to_computed()}
-                on_input={on_username_change}
-                {..input_attrs.clone()}
-            />
-        </div>
+    let username_div = match &params.render_username {
+        Some(render) => render(username.clone()),
+        None => {
+            let on_username_change = bind!(username, |new_value: String| username.set(new_value));
+            dom! {
+                <div css={line_css.clone()}>
+                    <div>{&params.username_label}</div>
+                    <input
+                        css={&params.input_css}
+                        value={username.to_computed()}
+                        on_input={on_username_change}
+                        {..input_attrs.clone()}
+                    />
+                </div>
+            }
+        }
     };
 
-    let on_password_change = bind!(password, |new_value| password.set(new_value));
-
-    let password_div = dom! {
-        <div css={line_css}>
-            <div>{&params.password_label}</div>
-            <input
-                css={&params.input_css}
-                value={password.to_computed()}
-                on_input={on_password_change}
-                type="password"
-                {..input_attrs}
-            />
-        </div>
+    let password_div = match &params.render_password {
+        Some(render) => render(password.clone()),
+        None => {
+            let on_password_change = bind!(password, |new_value| password.set(new_value));
+            dom! {
+                <div css={line_css}>
+                    <div>{&params.password_label}</div>
+                    <input
+                        css={&params.input_css}
+                        value={password.to_computed()}
+                        on_input={on_password_change}
+                        type="password"
+                        {..input_attrs}
+                    />
+                </div>
+            }
+        }
     };
 
-    dom! {
-        <div css={css} {on_key_down}>
-            { message_div }
-            { username_div }
-            { password_div }
+    let submit_div = match &params.render_submit {
+        Some(render) => render(submit.clone()),
+        None => dom! {
             <div css={submit_css}>
                 <input
                     type="submit"
@@ -152,6 +183,20 @@ pub fn mount_login<T: Clone + PartialEq + 'static>(
                     {..submit_attrs}
                 />
             </div>
+        },
+    };
+
+    let header = params.header;
+    let footer = params.footer;
+
+    dom! {
+        <div css={css} {on_key_down}>
+            { ..header }
+            { message_div }
+            { username_div }
+            { password_div }
+            { submit_div }
+            { ..footer }
         </div>
     }
 }

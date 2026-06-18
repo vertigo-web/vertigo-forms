@@ -8,6 +8,7 @@
 * `ResourceTable`
 * `ImageUpload` helper struct to `DropImageFile`
 * "Select file" button to `DropImageFile`
+* Optional render customization slots to `LoginParams` (`header`, `footer`, `render_username`, `render_password`, `render_submit`)
 
 ### Fixed
 
