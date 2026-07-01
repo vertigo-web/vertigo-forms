@@ -20,5 +20,5 @@ base64 = "0.22"
 either = "1.15"
 vertigo = "0.12"
 
-[patch.crates-io]
-vertigo = { git = "https://github.com/vertigo-web/vertigo", branch = "master" }
+# [patch.crates-io]
+# vertigo = { git = "https://github.com/vertigo-web/vertigo", branch = "master" }
