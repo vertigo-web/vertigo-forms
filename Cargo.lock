@@ -518,8 +518,9 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
 name = "vertigo"
-version = "0.11.4"
-source = "git+https://github.com/vertigo-web/vertigo?branch=master#a16511b7f57738c6593bf23d321f8f8bbc98bc9b"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3033a63e59421406b7887e8a3f40f835148b3817053d282752398d9780c74edb"
 dependencies = [
  "base64",
  "log",
@@ -561,8 +562,9 @@ dependencies = [
 
 [[package]]
 name = "vertigo-macro"
-version = "0.11.4"
-source = "git+https://github.com/vertigo-web/vertigo?branch=master#a16511b7f57738c6593bf23d321f8f8bbc98bc9b"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6d4f8a05a0aae8f252020526e0c910696393090ce6a0eb9359e0bb58ff04236d"
 dependencies = [
  "base64",
  "crc",
@@ -670,3 +672,8 @@ name = "yansi"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cfe53a6657fd280eaa890a3bc59152892ffa3e30101319d168b781ed6529b049"
+
+[[patch.unused]]
+name = "vertigo"
+version = "0.11.4"
+source = "git+https://github.com/vertigo-web/vertigo?branch=master#a16511b7f57738c6593bf23d321f8f8bbc98bc9b"

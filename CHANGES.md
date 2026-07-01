@@ -15,6 +15,10 @@
 * Positioning of `SelectSearch`, `Popup` and `MultiDropDown` popups
 * `SelectSearch` sorting
 
+### Changed
+
+* Updated to vertigo 0.12
+
 ## 0.1.3 - 2026-03-05
 
 ### Added
