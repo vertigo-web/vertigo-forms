@@ -51,21 +51,16 @@ where
                 .then(|| dom! { <option value="" selected="selected" /> })
         });
 
-        let list = bind!(
-            options,
-            value.render_value(move |value| render_list(
-                &options,
-                |item| item.to_string(),
-                move |item| {
-                    let text_item = item.to_string();
-                    if item == &value {
-                        dom! { <option value={&text_item} selected="selected">{text_item}</option> }
-                    } else {
-                        dom! { <option value={&text_item}>{text_item}</option> }
-                    }
-                }
-            ))
-        );
+        let list = render_list(options, |item| item.to_string(), {
+            let value = value.clone();
+            move |item: &Computed<T>| {
+                let item = item.clone();
+                let text_item = item.map(|item| item.to_string());
+                let selected = computed_tuple!(item, value)
+                    .map(|(item, value)| (item == value).then(|| "selected".to_string()));
+                dom! { <option value={&text_item} {selected}>{text_item}</option> }
+            }
+        });
 
         dom! {
             <select {on_change}>
