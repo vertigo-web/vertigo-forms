@@ -43,21 +43,16 @@ pub fn DictSelect<T: Clone + From<String> + PartialEq + ToString + 'static>(
             .then(|| dom! { <option value="" selected="selected" /> })
     });
 
-    let list = bind!(
-        options,
-        value.render_value(move |value| render_list(
-            &options,
-            |(key, _)| key.to_string(),
-            move |(key, item)| {
-                let text_item = item.to_string();
-                if key == &value {
-                    dom! { <option value={&key} selected="selected">{text_item}</option> }
-                } else {
-                    dom! { <option value={&key}>{text_item}</option> }
-                }
-            }
-        ))
-    );
+    let list = render_list(&options, |(key, _)| key.to_string(), {
+        let value = value.clone();
+        move |item: &Computed<(i64, T)>| {
+            let key = item.map(|(key, _)| key);
+            let text_item = item.map(|(_, item)| item.to_string());
+            let selected = computed_tuple!(key, value)
+                .map(|(key, value)| (key == value).then(|| "selected".to_string()));
+            dom! { <option value={&key} {selected}>{text_item}</option> }
+        }
+    });
 
     dom! {
         <select {on_change} {..select}>

@@ -3,7 +3,7 @@ members = ["storybook", "examples/manual_form", "examples/model_form"]
 
 [package]
 name = "vertigo-forms"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Michał Pokrywka <wolfmoon@o2.pl>"]
 description = "Building block for forms in vertigo"
 readme = "README.md"
@@ -15,10 +15,13 @@ categories = ["asynchronous", "gui", "wasm", "web-programming"]
 license = "MIT OR Apache-2.0"
 edition = "2024"
 
+[workspace.dependencies]
+vertigo = "0.13"
+
 [dependencies]
 base64 = "0.22"
 either = "1.15"
-vertigo = "0.12"
+vertigo = { workspace = true }
 
 # [patch.crates-io]
 # vertigo = { git = "https://github.com/vertigo-web/vertigo", branch = "master" }

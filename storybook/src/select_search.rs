@@ -30,13 +30,22 @@ pub fn select_search() -> DomNode {
     let selected_value = computed_tuple!(value, options)
         .map(|(value, options)| options.get(&value).cloned().unwrap_or_default());
 
+    // `render_list` takes a `Vec`, so flatten the map into one with a stable order
+    let sorted_options = options.map(|options| {
+        let mut options = options.into_iter().collect::<Vec<_>>();
+        options.sort_by_key(|(key, _)| *key);
+        options
+    });
+
     let hints = render_list(
-        &options,
+        sorted_options,
         |(key, _)| key.to_string(),
-        |(_key, value)| {
-            dom! {
-                <li>{value.split(' ').next().unwrap_or_default()}</li>
-            }
+        |item| {
+            item.render_value(|(_key, value)| {
+                dom! {
+                    <li>{value.split(' ').next().unwrap_or_default()}</li>
+                }
+            })
         },
     );
 

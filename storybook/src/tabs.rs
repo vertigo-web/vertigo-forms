@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use vertigo::{DomNode, Value, bind_rc, dom};
+use vertigo::{DomDisplay, DomNode, Value, bind_rc, dom};
 use vertigo_forms::{Tab, TabsContentMapped, TabsHeader};
 
 use crate::bordered_tabs;
@@ -71,6 +71,8 @@ pub fn tabs() -> DomNode {
         </p>
     }
 }
+
+impl DomDisplay for MyView {}
 
 impl std::fmt::Display for MyView {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

@@ -1,4 +1,7 @@
-use vertigo::{Computed, Css, DomNode, Value, bind, bind_rc, css, dom, render::render_list};
+use vertigo::{
+    Computed, Css, DomNode, Value, bind, bind_rc, computed_tuple, css, dom, render::render_list,
+    transaction,
+};
 
 /// Select component based on vector of `T` values,
 /// which allows to have multiple options selected at once.
@@ -49,35 +52,32 @@ where
             });
         });
 
-        let list = bind!(
-            options,
-            toggle,
-            value.render_value(move |value| {
-                bind!(
-                    toggle,
-                    render_list(
-                        &options,
-                        |item| item.to_string(),
-                        bind!(toggle, |item| {
-                            let text_item = item.to_string();
-                            let on_click = bind!(toggle, item, |_| toggle(&item));
-                            let css = if value.contains(item) {
-                                css! {"
+        let list = render_list(options, |item| item.to_string(), {
+            let toggle = toggle.clone();
+            let value = value.clone();
+            move |item: &Computed<T>| {
+                let item = item.clone();
+                let text_item = item.map(|item| item.to_string());
+
+                let on_click = bind!(toggle, item, |_| transaction(|ctx| toggle(&item.get(ctx))));
+
+                let css = computed_tuple!(item, value).map(|(item, value)| {
+                    if value.contains(&item) {
+                        css! {"
                             border-style: inset;
                             font-weight: bold;
                             color: green;
                         "}
-                            } else {
-                                Css::default()
-                            };
-                            dom! {
-                                <button {css} {on_click}>{text_item}</button>
-                            }
-                        })
-                    )
-                )
-            })
-        );
+                    } else {
+                        Css::default()
+                    }
+                });
+
+                dom! {
+                    <button {css} {on_click}>{text_item}</button>
+                }
+            }
+        });
 
         let list_css = css! {"
             display: flex;
