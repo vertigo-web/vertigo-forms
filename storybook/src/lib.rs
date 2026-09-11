@@ -16,6 +16,7 @@ mod select_search;
 mod switch;
 mod tabs;
 mod with_loader;
+mod with_stable_loader;
 
 #[main]
 fn render() -> DomNode {
@@ -36,6 +37,7 @@ fn render() -> DomNode {
         Login,
         Spinner,
         WithLoader,
+        WithStableLoader,
     }
 
     impl From<String> for TabRoute {
@@ -56,6 +58,7 @@ fn render() -> DomNode {
                 "/login" => Self::Login,
                 "/spinner" => Self::Spinner,
                 "/with_loader" => Self::WithLoader,
+                "/with_stable_loader" => Self::WithStableLoader,
                 _ => Self::Input,
             }
         }
@@ -79,6 +82,7 @@ fn render() -> DomNode {
                 Self::Login => write!(f, "/login"),
                 Self::Spinner => write!(f, "/spinner"),
                 Self::WithLoader => write!(f, "/with_loader"),
+                Self::WithStableLoader => write!(f, "/with_stable_loader"),
             }
         }
     }
@@ -158,6 +162,11 @@ fn render() -> DomNode {
             key: TabRoute::WithLoader,
             name: "With Loader".to_string(),
             render: Rc::new(|_| with_loader::with_loader()),
+        },
+        Tab {
+            key: TabRoute::WithStableLoader,
+            name: "With Stable Loader".to_string(),
+            render: Rc::new(|_| with_stable_loader::with_stable_loader()),
         },
     ];
 

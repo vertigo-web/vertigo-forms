@@ -9,6 +9,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
+name = "base64"
+version = "0.23.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ac07cdecf99051d9a5238b80f35af32cdeba5b336e55d957b318b50137e18da5"
+
+[[package]]
 name = "cc"
 version = "1.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -467,7 +473,7 @@ version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d973870822864b0a6ae9bc191172ed162ae2ed492aafe52850bfd1c67ddf3001"
 dependencies = [
- "base64",
+ "base64 0.22.1",
  "log",
  "vertigo-macro",
 ]
@@ -476,7 +482,7 @@ dependencies = [
 name = "vertigo-forms"
 version = "0.2.1"
 dependencies = [
- "base64",
+ "base64 0.23.1",
  "either",
  "vertigo",
 ]
@@ -511,7 +517,7 @@ version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "61132b314900597417642d2aeaf495fd4cbcb32acb6c2e17ca14853a8ffaca8c"
 dependencies = [
- "base64",
+ "base64 0.22.1",
  "crc",
  "darling",
  "heck",

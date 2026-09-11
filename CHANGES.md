@@ -1,6 +1,12 @@
 <!-- markdownlint-configure-file { "no-duplicate-heading": { "siblings_only": true } } -->
 
 <!-- markdownlint-disable-next-line first-line-h1 -->
+## Unreleased
+
+### Added
+
+* `with_stable_loader` and `WithStableLoader` - a loader that renders once, when the resource first becomes ready, and keeps the rendered content on later `Loading`/`Error`, so edit forms survive background re-fetches
+
 ## 0.2.1 - 2026-09-07
 
 ### Changed

@@ -28,7 +28,7 @@ pub use {
     spinner::Spinner,
     switch::{Switch, SwitchParams},
     tabs::{Tab, Tabs, TabsContent, TabsContentMapped, TabsHeader, TabsParams},
-    with_loader::{WithLoader, with_loader},
+    with_loader::{WithLoader, WithStableLoader, with_loader, with_stable_loader},
 };
 
 pub type ValidationErrors = HashMap<String, String>;
