@@ -61,7 +61,7 @@ pub fn Switch(value: Value<bool>, params: SwitchParams, i: AttrGroup) {
             });
 
             dom! {
-                <button on_click={toggle} {..i}>{symbol}</button>
+                <button type="button" on_click={toggle} {..i}>{symbol}</button>
             }
         }
         DisplayType::CheckBox => {

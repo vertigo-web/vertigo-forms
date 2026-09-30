@@ -94,7 +94,7 @@ pub fn DropImageFile(
                 };
                 dom! {
                     <div css={flex_column}>
-                        <button css={btn_css}on_click={restore}>{restore_text}</button>
+                        <button type="button" css={btn_css} on_click={restore}>{restore_text}</button>
                         {..select_button}
                         <img css={&params.img_css} src={base64_date} />
                         { message }

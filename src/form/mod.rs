@@ -136,7 +136,7 @@ pub fn Form<T>(
             && let Some(on_click) = params.on_delete.clone()
         {
             controls.push(dom! {
-                <input css={&ctrl_item_css} type="submit" value={&params.delete_label} on_click={move |_| on_click()} />
+                <input css={&ctrl_item_css} type="button" value={&params.delete_label} on_click={move |_| on_click()} />
             });
         }
 

@@ -7,6 +7,10 @@
 
 * `with_stable_loader` and `WithStableLoader` - a loader that renders once, when the resource first becomes ready, and keeps the rendered content on later `Loading`/`Error`, so edit forms survive background re-fetches
 
+### Fixed
+
+* Set `type="button"` for buttons inside forms which are not submits
+
 ## 0.2.1 - 2026-09-07
 
 ### Changed
