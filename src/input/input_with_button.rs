@@ -57,7 +57,7 @@ pub fn InputWithButton(
 
     dom! {
         <input value={display_value} {on_input} {..input}/>
-        <button {on_click} {..button}>{params.button_label}</button>
+        <button type="button" {on_click} {..button}>{params.button_label}</button>
     }
 }
 

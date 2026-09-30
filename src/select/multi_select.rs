@@ -74,7 +74,7 @@ where
                 });
 
                 dom! {
-                    <button {css} {on_click}>{text_item}</button>
+                    <button type="button" {css} {on_click}>{text_item}</button>
                 }
             }
         });

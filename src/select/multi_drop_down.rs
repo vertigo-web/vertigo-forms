@@ -61,7 +61,7 @@ where
 
         dom! {
             <div>
-                <button {on_click}>{button_label}</button>
+                <button type="button" {on_click}>{button_label}</button>
                 <div css={base_css}>{content}</div>
             </div>
         }

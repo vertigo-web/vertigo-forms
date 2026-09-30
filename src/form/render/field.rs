@@ -50,7 +50,7 @@ pub fn Field<'a>(field: &'a DataField) {
                         selects.add_child(dom! {
                         <div css={&row_css}>
                             <SelectSearch value={tag_id.clone()} options={options.clone()} params={} />
-                            <button {on_click}>"x"</button>
+                            <button type="button" {on_click}>"x"</button>
                         </div>
                     });
                     }
@@ -59,7 +59,7 @@ pub fn Field<'a>(field: &'a DataField) {
                         let on_click = bind!(value, |_| value
                             .change(|list| list.push(Value::new(0))));
                         dom! {
-                            <button {on_click}>{&*add_label}</button>
+                            <button type="button" {on_click}>{&*add_label}</button>
                         }
                     });
 
