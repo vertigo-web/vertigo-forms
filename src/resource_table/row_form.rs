@@ -1,4 +1,4 @@
-use std::{future::Future, pin::Pin, rc::Rc};
+use std::{cell::RefCell, future::Future, pin::Pin, rc::Rc};
 use vertigo::{Computed, DomComment, DomNode, Value, bind_rc, bind_spawn, css, dom, transaction};
 
 use crate::button::{Button, ButtonColor, ButtonVariant};
@@ -60,10 +60,78 @@ pub fn row_form<Model: Clone + PartialEq + 'static, FormModel: Clone + 'static>(
 
     labels: ResourceTableLabels,
 ) -> DomNode {
-    let state = Value::new(initial_state);
-    let error = Value::new(None::<String>);
-    let form_model = create_form_model(item);
-    let optimistic_item: Value<Option<Model>> = Value::new(None);
+    row_form_with_store(
+        RowStore::new(initial_state),
+        item,
+        create_form_model,
+        update_model,
+        render_view,
+        render_form,
+        process_label,
+        process,
+        cancel_label,
+        cancel,
+        delete,
+        labels,
+    )
+}
+
+/// State of a row kept outside of its rendering.
+///
+/// A row is rendered anew whenever its item changes or comes back: an optimistic update or
+/// removal, its rollback after a failure, a background refresh. [`ResourceTable`](super::ResourceTable)
+/// keeps one store per list position, so the row stays in the edit form with what was typed
+/// in, and the message about a failed save or delete is shown in the row that comes back.
+#[derive(Clone)]
+pub(crate) struct RowStore<Model: Clone + PartialEq + 'static, FormModel: Clone + 'static> {
+    state: Value<RowState>,
+    error: Value<Option<String>>,
+    /// Created from the item when editing starts, so that the next edit doesn't start from
+    /// changes dropped with "Cancel". A failed save returns to the same form.
+    form_model: Rc<RefCell<Option<FormModel>>>,
+    optimistic_item: Value<Option<Model>>,
+}
+
+impl<Model: Clone + PartialEq + 'static, FormModel: Clone + 'static> RowStore<Model, FormModel> {
+    pub(crate) fn new(initial_state: RowState) -> Self {
+        Self {
+            state: Value::new(initial_state),
+            error: Value::new(None),
+            form_model: Rc::new(RefCell::new(None)),
+            optimistic_item: Value::new(None),
+        }
+    }
+}
+
+/// [`row_form`] with its state in `store`, owned by the caller.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn row_form_with_store<
+    Model: Clone + PartialEq + 'static,
+    FormModel: Clone + 'static,
+>(
+    store: RowStore<Model, FormModel>,
+    item: &Model,
+    create_form_model: fn(&Model) -> FormModel,
+    update_model: fn(&Model, &FormModel, &vertigo::Context) -> RowResult<Model>,
+    render_view: fn(&Model, create_buttons: CreateFn, alert: Computed<bool>) -> DomNode,
+    render_form: fn(&FormModel, buttons: DomNode) -> DomNode,
+
+    process_label: String,
+    process: ProcessCallback<Model>,
+
+    cancel_label: String,
+    cancel: CancelCallback,
+
+    delete: Option<ProcessCallback<Model>>,
+
+    labels: ResourceTableLabels,
+) -> DomNode {
+    let RowStore {
+        state,
+        error,
+        form_model,
+        optimistic_item,
+    } = store;
 
     let alert_view = state.map(|value| {
         if let RowState::View { confirm_delete } = value
@@ -113,13 +181,17 @@ pub fn row_form<Model: Clone + PartialEq + 'static, FormModel: Clone + 'static>(
                 };
 
                 let state_for_buttons = state.clone();
+                let error_for_buttons = error.clone();
+                let form_model_for_buttons = form_model.clone();
+                let item_for_buttons = item.clone();
                 let delete_for_buttons = delete.clone();
                 let edit_label = labels.edit.clone();
                 let delete_label = labels.delete.clone();
 
                 let create_buttons = move || {
                     let delete_view_inner = if delete_for_buttons.is_some() {
-                        let delete_click = bind_rc!(state_for_buttons, || {
+                        let delete_click = bind_rc!(state_for_buttons, error_for_buttons, || {
+                            error_for_buttons.set(None);
                             state_for_buttons.set(RowState::View { confirm_delete: true });
                         });
 
@@ -135,11 +207,24 @@ pub fn row_form<Model: Clone + PartialEq + 'static, FormModel: Clone + 'static>(
                         dom! { <div /> }
                     };
 
+                    let edit_click = bind_rc!(
+                        state_for_buttons,
+                        error_for_buttons,
+                        form_model_for_buttons,
+                        item_for_buttons,
+                        || {
+                            *form_model_for_buttons.borrow_mut() =
+                                Some(create_form_model(&item_for_buttons));
+                            error_for_buttons.set(None);
+                            state_for_buttons.set(RowState::Edit);
+                        }
+                    );
+
                     dom! {
                         <div data-testid="row-buttons" css={css! {"display: flex; gap: 12px;"}}>
                             <Button
                                 label={edit_label.clone()}
-                                on_click={bind_rc!(state_for_buttons, || state_for_buttons.set(RowState::Edit))}
+                                on_click={edit_click}
                                 color={ButtonColor::Primary}
                                 variant={ButtonVariant::Outline}
                             />
@@ -153,19 +238,25 @@ pub fn row_form<Model: Clone + PartialEq + 'static, FormModel: Clone + 'static>(
                     dom! {
                         <div>
                             { confirm_view }
+                            { error_view }
                         </div>
                     },
                 ])
                 .into()
             }
             RowState::Edit => {
+                let form = form_model
+                    .borrow_mut()
+                    .get_or_insert_with(|| create_form_model(&item))
+                    .clone();
+
                 let buttons = dom! {
                     <div css={css! {"display: flex; gap: 8px; justify-content: flex-end;"}}>
                         <Button
                             label={process_label.clone()}
-                            on_click={bind_rc!(state, error, item, process, form_model, optimistic_item, || {
+                            on_click={bind_rc!(state, error, item, process, form, optimistic_item, || {
                                 let result = transaction(|ctx| {
-                                    update_model(&item, &form_model, ctx)
+                                    update_model(&item, &form, ctx)
                                 });
 
                                 match result {
@@ -195,10 +286,12 @@ pub fn row_form<Model: Clone + PartialEq + 'static, FormModel: Clone + 'static>(
                         />
                         <Button
                             label={cancel_label.clone()}
-                            on_click={bind_rc!(state, cancel, || {
+                            on_click={bind_rc!(state, error, cancel, || {
                                 bind_spawn!(cancel, async move {
                                     cancel().await;
                                 })();
+                                // The error was about the edit being dropped
+                                error.set(None);
                                 state.set(RowState::View { confirm_delete: false });
                             })}
                             color={ButtonColor::Danger}
@@ -207,7 +300,7 @@ pub fn row_form<Model: Clone + PartialEq + 'static, FormModel: Clone + 'static>(
                     </div>
                 };
 
-                let rendered_form = render_form(&form_model, buttons);
+                let rendered_form = render_form(&form, buttons);
 
                 dom! {
                     <div>
