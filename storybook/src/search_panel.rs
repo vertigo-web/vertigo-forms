@@ -21,7 +21,7 @@ pub fn search_panel() -> DomNode {
     });
 
     dom! {
-        <p>
+        <div>
             <SearchPanel
                 query={query}
                 cache={cache}
@@ -32,6 +32,6 @@ pub fn search_panel() -> DomNode {
                     ..Default::default()
                 }}
             />
-        </p>
+        </div>
     }
 }

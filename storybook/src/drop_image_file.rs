@@ -13,7 +13,7 @@ pub fn drop_file() -> DomNode {
         });
 
     dom! {
-        <p>
+        <div>
             <DropImageFile
                 original_link={value.clone()}
                 item={image}
@@ -25,7 +25,7 @@ pub fn drop_file() -> DomNode {
                     ..Default::default()
                 }}
             />
-        </p>
+        </div>
         <p>"Dropped image: "</p>
         <p>{image_element}</p>
     }
