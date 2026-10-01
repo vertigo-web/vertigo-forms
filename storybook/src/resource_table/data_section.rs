@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use vertigo::{DomNode, Resource, Value, css, dom};
+use vertigo::{DomNode, Value, css, dom};
 use vertigo_forms::{
     form::{DataFieldValue, DataSection},
     resource_table::{
@@ -7,6 +7,8 @@ use vertigo_forms::{
         normal_col_css, row_from_data_section,
     },
 };
+
+use super::fake_server::{FakeServer, Item};
 
 #[derive(Clone, PartialEq, Default)]
 struct ComplexModel {
@@ -16,29 +18,37 @@ struct ComplexModel {
     role: Option<i64>,
 }
 
-pub fn resource_table_data_section() -> DomNode {
-    let list_state = Value::new(vec![
-        Value::new(Some(ComplexModel {
-            id: 1,
-            name: "Item 1".to_string(),
-            is_active: true,
-            role: Some(1),
-        })),
-        Value::new(Some(ComplexModel {
-            id: 2,
-            name: "Item 2".to_string(),
-            is_active: false,
-            role: Some(2),
-        })),
-    ]);
+impl Item for ComplexModel {
+    fn id(&self) -> u32 {
+        self.id
+    }
 
-    let list = list_state.to_computed().map(|list| {
-        let computed_list = list.iter().map(|v| v.to_computed()).collect::<Vec<_>>();
-        Resource::Ready(Rc::new(computed_list))
-    });
+    fn set_id(&mut self, id: u32) {
+        self.id = id;
+    }
+}
+
+pub fn resource_table_data_section(server_rejecting: &Value<bool>) -> DomNode {
+    let server = FakeServer::new(
+        vec![
+            ComplexModel {
+                id: 1,
+                name: "Item 1".to_string(),
+                is_active: true,
+                role: Some(1),
+            },
+            ComplexModel {
+                id: 2,
+                name: "Item 2".to_string(),
+                is_active: false,
+                role: Some(2),
+            },
+        ],
+        server_rejecting,
+    );
 
     let table = ResourceTable {
-        list,
+        list: server.list(),
         title: "My Resources (DataSection)".to_string(),
         add_label: "Add Item".to_string(),
         table_css: css! {"margin-top: 40px;"},
@@ -128,62 +138,9 @@ pub fn resource_table_data_section() -> DomNode {
         render_row_form: |form: &Rc<DataSection>, buttons| {
             row_from_data_section(form, buttons, "50px 1fr 100px 150px 150px")
         },
-        on_create: Rc::new({
-            let list_state = list_state.clone();
-            move |new_model| {
-                let list_state = list_state.clone();
-                Box::pin(async move {
-                    vertigo::transaction(|ctx| {
-                        let mut m = new_model.clone();
-                        let mut current = list_state.get(ctx);
-                        m.id = current.len() as u32 + 10;
-                        current.push(Value::new(Some(m)));
-                        list_state.set(current);
-                    });
-                    None
-                })
-            }
-        }),
-        on_update: Rc::new({
-            let list_state = list_state.clone();
-            move |updated_model| {
-                let list_state = list_state.clone();
-                Box::pin(async move {
-                    vertigo::transaction(|ctx| {
-                        let current = list_state.get(ctx);
-                        for item_val in current.iter() {
-                            if let Some(ref m) = item_val.get(ctx)
-                                && m.id == updated_model.id
-                            {
-                                item_val.set(Some(updated_model.clone()));
-                                break;
-                            }
-                        }
-                    });
-                    None
-                })
-            }
-        }),
-        on_delete: Some(Rc::new({
-            let list_state = list_state.clone();
-            move |deleted_model| {
-                let list_state = list_state.clone();
-                Box::pin(async move {
-                    vertigo::transaction(|ctx| {
-                        let current = list_state.get(ctx);
-                        for item_val in current.iter() {
-                            if let Some(ref m) = item_val.get(ctx)
-                                && m.id == deleted_model.id
-                            {
-                                item_val.set(None);
-                                break;
-                            }
-                        }
-                    });
-                    None
-                })
-            }
-        })),
+        on_create: server.on_create(),
+        on_update: server.on_update(),
+        on_delete: Some(server.on_delete()),
         labels: ResourceTableLabels {
             save: "Save".to_string(),
             cancel: "Cancel".to_string(),

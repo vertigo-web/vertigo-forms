@@ -1,5 +1,5 @@
 [workspace]
-members = ["storybook", "examples/manual_form", "examples/model_form"]
+members = ["storybook", "examples/manual_form", "examples/model_form", "e2e"]
 
 [package]
 name = "vertigo-forms"
@@ -17,11 +17,9 @@ edition = "2024"
 
 [workspace.dependencies]
 vertigo = "0.13"
+vertigo-testing = "0.13"
 
 [dependencies]
 base64 = "0.23"
 either = "1.15"
 vertigo = { workspace = true }
-
-# [patch.crates-io]
-# vertigo = { git = "https://github.com/vertigo-web/vertigo", branch = "master" }
