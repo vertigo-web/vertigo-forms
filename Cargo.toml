@@ -1,5 +1,5 @@
 [workspace]
-members = ["storybook", "examples/manual_form", "examples/model_form"]
+members = ["storybook", "examples/manual_form", "examples/model_form", "e2e"]
 
 [package]
 name = "vertigo-forms"
@@ -23,5 +23,9 @@ base64 = "0.23"
 either = "1.15"
 vertigo = { workspace = true }
 
-# [patch.crates-io]
+[patch.crates-io]
 # vertigo = { git = "https://github.com/vertigo-web/vertigo", branch = "master" }
+vertigo = { git = "https://github.com/vertigo-web/vertigo", branch = "e2e-harness" }
+vertigo-cli = { git = "https://github.com/vertigo-web/vertigo", branch = "e2e-harness" }
+# vertigo = { path = "../vertigo/crates/vertigo" }
+# vertigo-cli = { path = "../vertigo/crates/vertigo-cli" }
