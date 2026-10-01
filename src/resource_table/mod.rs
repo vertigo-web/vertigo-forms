@@ -11,6 +11,7 @@ pub use row_form::{
     AsyncResult, CancelCallback, CreateFn, ProcessCallback, ResourceTableLabels, RowResult,
     RowState, row_form,
 };
+use row_form::{RowStore, row_form_with_store};
 
 type ComputedListItem<T> = Computed<Option<T>>;
 type ComputedList<T> = Computed<Resource<Rc<Vec<ComputedListItem<T>>>>>;
@@ -36,6 +37,11 @@ type ComputedList<T> = Computed<Resource<Rc<Vec<ComputedListItem<T>>>>>;
 ///     // ...
 /// }
 /// ```
+///
+/// ## Row state
+///
+/// The state of a row (view or edit form, what was typed in, error message) is kept per
+/// position in `list`.
 #[derive(Clone)]
 pub struct ResourceTable<Model: Clone + PartialEq + Default + 'static, ModelForm: Clone + 'static> {
     pub list: ComputedList<Model>,
@@ -72,12 +78,15 @@ impl<Model: Clone + PartialEq + Default + 'static, ModelForm: Clone + 'static>
                 Resource::Ready(list) => {
                     for item in &*list {
                         let props = props.clone();
+                        // Outlives the row, which is rendered anew whenever its item changes
+                        // or comes back (f. ex. an optimistic update rolled back after a failure)
+                        let store = RowStore::new(RowState::View {
+                            confirm_delete: false,
+                        });
                         let row = item.render_value_option(move |item| {
                             item.map(|item| {
-                                row_form(
-                                    RowState::View {
-                                        confirm_delete: false,
-                                    },
+                                row_form_with_store(
+                                    store.clone(),
                                     &item,
                                     props.create_form_model,
                                     props.update_model,

@@ -5,11 +5,16 @@
 
 ### Added
 
-* `with_stable_loader` and `WithStableLoader` - a loader that renders once, when the resource first becomes ready, and keeps the rendered content on later `Loading`/`Error`, so edit forms survive background re-fetches
+* `with_stable_loader` and `WithStableLoader` - a loader that renders once, when the resource first becomes ready,
+  and keeps the rendered content on later `Loading`/`Error`, so edit forms survive background re-fetches
 
 ### Fixed
 
 * Set `type="button"` for buttons inside forms which are not submits
+* `ResourceTable`: the error of a failed delete is shown below the row
+* `ResourceTable`: a row keeps its state (edit form with what was typed in, error message) when it is rendered anew
+  because its item changed or came back, f. ex. after an optimistic update or removal is rolled back
+* `ResourceTable`: "Cancel" drops the changes made in the form, the next edit starts from the item
 
 ## 0.2.1 - 2026-09-07
 
