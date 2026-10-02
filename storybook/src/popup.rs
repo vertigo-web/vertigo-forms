@@ -19,20 +19,20 @@ pub fn popup() -> DomNode {
     };
 
     dom! {
-        <p>
+        <div>
             "Popup with trigger: "
             <Switch
                 value={&visible}
                 params={}
             />
             <Popup {visible} {content} params={params.clone()} />
-        </p>
-        <p>
+        </div>
+        <div>
             <PopupOnHover
                 element={dom! { <p>"Popup on hover"</p> }}
                 content={dom! { <p>"Hover popup content"</p> }}
                 {params}
             />
-        </p>
+        </div>
     }
 }

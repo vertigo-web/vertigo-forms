@@ -157,6 +157,13 @@ Eventually terminal will let you know that app is available under `http://localh
 
 If you want to play around with the code, the browser will automatically refresh after the project has been recompiled.
 
+### Tests
+
+Run them with [just](https://github.com/casey/just) (`just` lists all recipes):
+
+* `just check` - what CI checks: formatting, clippy and unit tests
+* `just e2e` - every story tested in Chrome, see [e2e/README.md](e2e/README.md)
+
 ### Run example
 
 To run the example in watch mode (it will run also on localhost:4444):

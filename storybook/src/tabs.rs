@@ -51,7 +51,7 @@ pub fn tabs() -> DomNode {
     ];
 
     dom! {
-        <p>
+        <div>
             <TabsHeader
                 current_tab={&current_tab}
                 tabs={tabs.clone()}
@@ -68,7 +68,7 @@ pub fn tabs() -> DomNode {
                 )}
                 params={bordered_tabs()}
             />
-        </p>
+        </div>
     }
 }
 
