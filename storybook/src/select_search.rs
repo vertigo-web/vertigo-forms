@@ -50,14 +50,14 @@ pub fn select_search() -> DomNode {
     );
 
     dom! {
-        <p>
+        <div>
             "Select value: "
             <SelectSearch
                 value={value.clone()}
                 options={options}
                 params={}
             />
-        </p>
+        </div>
         <p>"Selected key: " {value}</p>
         <p>"Selected value: " {selected_value}</p>
         <h4>"Hints:"</h4>

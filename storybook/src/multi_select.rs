@@ -10,13 +10,13 @@ pub fn multi_select() -> DomNode {
     ]);
 
     dom! {
-        <p>
+        <div>
             "Select value: "
             <MultiSelect
                 value={value.clone()}
                 options={options}
             />
-        </p>
+        </div>
         <p>
             "Selected values: " {value.map(|v| v.join(","))}
         </p>

@@ -1,0 +1,24 @@
+[package]
+name = "vertigo-forms-e2e"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+# The library only serves the suites in tests/
+[lib]
+test = false
+doctest = false
+
+[dependencies]
+anyhow = "1.0"
+serde_json = "1.0"
+thirtyfour = "0.37"
+# The harness. From the branch the workspace patches `vertigo` and `vertigo-cli` to, so the
+# build has one vertigo-cli: switch them together.
+vertigo-testing = { git = "https://github.com/vertigo-web/vertigo", branch = "e2e-harness" }
+# vertigo-testing = { path = "../../vertigo/crates/vertigo-testing" }
+
+[[test]]
+name = "storybook"
+path = "tests/storybook/main.rs"
+harness = false

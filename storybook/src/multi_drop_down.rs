@@ -10,14 +10,14 @@ pub fn multi_drop_down() -> DomNode {
     ]);
 
     dom! {
-        <p>
+        <div>
             "Select value: "
             <MultiDropDown
                 value={value.clone()}
                 options={options}
                 params={}
             />
-        </p>
+        </div>
         <p>
             "Selected values: " {value.map(|v| v.join(","))}
         </p>

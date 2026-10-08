@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use vertigo::{DomNode, Resource, Value, css, dom};
+use vertigo::{DomNode, Value, css, dom};
 use vertigo_forms::{
     Input,
     resource_table::{
@@ -8,10 +8,22 @@ use vertigo_forms::{
     },
 };
 
+use super::fake_server::{FakeServer, Item};
+
 #[derive(Clone, PartialEq, Default)]
 struct MyModel {
     id: u32,
     name: String,
+}
+
+impl Item for MyModel {
+    fn id(&self) -> u32 {
+        self.id
+    }
+
+    fn set_id(&mut self, id: u32) {
+        self.id = id;
+    }
 }
 
 #[derive(Clone)]
@@ -19,25 +31,23 @@ struct MyModelForm {
     name: Value<String>,
 }
 
-pub fn resource_table_text_field() -> DomNode {
-    let list_state = Value::new(vec![
-        Value::new(Some(MyModel {
-            id: 1,
-            name: "Item 1".to_string(),
-        })),
-        Value::new(Some(MyModel {
-            id: 2,
-            name: "Item 2".to_string(),
-        })),
-    ]);
-
-    let list = list_state.to_computed().map(|list| {
-        let computed_list = list.iter().map(|v| v.to_computed()).collect::<Vec<_>>();
-        Resource::Ready(Rc::new(computed_list))
-    });
+pub fn resource_table_text_field(server_rejecting: &Value<bool>) -> DomNode {
+    let server = FakeServer::new(
+        vec![
+            MyModel {
+                id: 1,
+                name: "Item 1".to_string(),
+            },
+            MyModel {
+                id: 2,
+                name: "Item 2".to_string(),
+            },
+        ],
+        server_rejecting,
+    );
 
     let table = ResourceTable {
-        list,
+        list: server.list(),
         title: "My Resources".to_string(),
         add_label: "Add Item".to_string(),
         table_css: css! {""},
@@ -87,62 +97,9 @@ pub fn resource_table_text_field() -> DomNode {
                 </div>
             }
         },
-        on_create: Rc::new({
-            let list_state = list_state.clone();
-            move |new_model| {
-                let list_state = list_state.clone();
-                Box::pin(async move {
-                    vertigo::transaction(|ctx| {
-                        let mut m = new_model.clone();
-                        let mut current = list_state.get(ctx);
-                        m.id = current.len() as u32 + 10;
-                        current.push(Value::new(Some(m)));
-                        list_state.set(current);
-                    });
-                    None
-                })
-            }
-        }),
-        on_update: Rc::new({
-            let list_state = list_state.clone();
-            move |updated_model| {
-                let list_state = list_state.clone();
-                Box::pin(async move {
-                    vertigo::transaction(|ctx| {
-                        let current = list_state.get(ctx);
-                        for item_val in current.iter() {
-                            if let Some(ref m) = item_val.get(ctx)
-                                && m.id == updated_model.id
-                            {
-                                item_val.set(Some(updated_model.clone()));
-                                break;
-                            }
-                        }
-                    });
-                    None
-                })
-            }
-        }),
-        on_delete: Some(Rc::new({
-            let list_state = list_state.clone();
-            move |deleted_model| {
-                let list_state = list_state.clone();
-                Box::pin(async move {
-                    vertigo::transaction(|ctx| {
-                        let current = list_state.get(ctx);
-                        for item_val in current.iter() {
-                            if let Some(ref m) = item_val.get(ctx)
-                                && m.id == deleted_model.id
-                            {
-                                item_val.set(None);
-                                break;
-                            }
-                        }
-                    });
-                    None
-                })
-            }
-        })),
+        on_create: server.on_create(),
+        on_update: server.on_update(),
+        on_delete: Some(server.on_delete()),
         labels: ResourceTableLabels {
             save: "Save".to_string(),
             cancel: "Cancel".to_string(),
