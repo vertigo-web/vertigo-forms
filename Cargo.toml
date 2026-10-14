@@ -3,7 +3,7 @@ members = ["storybook", "examples/manual_form", "examples/model_form", "e2e"]
 
 [package]
 name = "vertigo-forms"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["Michał Pokrywka <wolfmoon@o2.pl>"]
 description = "Building block for forms in vertigo"
 readme = { workspace = true }
