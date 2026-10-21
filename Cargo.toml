@@ -16,8 +16,8 @@ license = "MIT OR Apache-2.0"
 edition = "2024"
 
 [workspace.dependencies]
-vertigo = "0.13"
-vertigo-testing = "0.13"
+vertigo = "0.14"
+vertigo-testing = "0.14"
 
 [dependencies]
 base64 = "0.23"

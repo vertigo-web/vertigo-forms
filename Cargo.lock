@@ -2301,6 +2301,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "743fb55ba31b18fb1ecef6bdc9aa2743314978ac084044301a7eee33fb99a20d"
 
 [[package]]
+name = "nix"
+version = "0.31.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cf20d2fde8ff38632c426f1165ed7436270b44f199fc55284c38276f9db47c3d"
+dependencies = [
+ "bitflags 2.13.2",
+ "cfg-if",
+ "cfg_aliases",
+ "libc",
+]
+
+[[package]]
 name = "notify"
 version = "8.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3445,13 +3457,13 @@ dependencies = [
 
 [[package]]
 name = "thirtyfour"
-version = "0.37.8"
+version = "0.38.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a9c6d349d6b4a7243df43b9852fd0f93ef113c23ada67201374c1af904b1263"
+checksum = "4ee66d96cfd32e01668efd6ec62caf5f7000438d771a9d673bf0c727bc05fbb6"
 dependencies = [
  "arc-swap",
  "async-trait",
- "base64 0.22.1",
+ "base64 0.23.1",
  "bytes",
  "cfg-if",
  "const_format",
@@ -3899,9 +3911,9 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
 name = "vertigo"
-version = "0.13.4"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b53295cef5db6d94c8f9c068dbd81b8a69df14948dae6253375171e71a28e3f"
+checksum = "87586caeb933546dc19bfde5bb88e639044a36faea9083128e1c65a614a29fac"
 dependencies = [
  "base64 0.23.1",
  "log",
@@ -3910,12 +3922,13 @@ dependencies = [
 
 [[package]]
 name = "vertigo-cli"
-version = "0.13.4"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "819132eb3aa3783647c01f4ffbda46ea3525847e2a15e6886d93b4de0e88d819"
+checksum = "828405c860a2be5c93e4e08fdb98ce00340790dd1f760eb0b3118294c7b7e018"
 dependencies = [
  "actix-cors",
  "actix-files",
+ "actix-http",
  "actix-proxy",
  "actix-web",
  "awc",
@@ -3990,9 +4003,9 @@ dependencies = [
 
 [[package]]
 name = "vertigo-macro"
-version = "0.13.4"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c565bb2de793965e592cb5e9b15591dc6ce1b72f61442af9d9ef6624e1a4725f"
+checksum = "7dd14f22039bebec91f02c38ab2fd06295435d22b9708637b0ecc05b7b043e5e"
 dependencies = [
  "base64 0.23.1",
  "crc",
@@ -4012,9 +4025,9 @@ dependencies = [
 
 [[package]]
 name = "vertigo-testing"
-version = "0.13.4"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1ccbd460177a7414a4def531fef5d1303496c20fc1e54c9ad89baa51f9fec5ef"
+checksum = "f779e44492284a9e53c440d1911be7cafa45f5c614ee5e08125ba1a1e4ab9f18"
 dependencies = [
  "actix-web",
  "anyhow",
@@ -4935,14 +4948,15 @@ dependencies = [
 
 [[package]]
 name = "zip"
-version = "8.6.0"
+version = "9.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d04a6b5381502aa6087c94c669499eb1602eb9c5e8198e534de571f7154809b"
+checksum = "6e04976da629d3b04204ba8105b396a193af8ad2583b2c79bfb3ab8af580a11e"
 dependencies = [
  "crc32fast",
  "flate2",
  "indexmap",
  "memchr",
+ "nix",
  "typed-path",
  "zopfli",
 ]
