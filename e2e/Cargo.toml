@@ -12,7 +12,7 @@ doctest = false
 [dependencies]
 anyhow = "1.0"
 serde_json = "1.0"
-thirtyfour = "0.37"
+thirtyfour = "0.38"
 vertigo-testing = { workspace = true }
 
 [[test]]
