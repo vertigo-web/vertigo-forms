@@ -1,9 +1,12 @@
 [workspace]
 members = ["storybook", "examples/manual_form", "examples/model_form", "e2e"]
 
+[workspace.package]
+version = "0.2.3"
+
 [package]
 name = "vertigo-forms"
-version = "0.2.2"
+version.workspace = true
 authors = ["Michał Pokrywka <wolfmoon@o2.pl>"]
 description = "Building block for forms in vertigo"
 readme = { workspace = true }

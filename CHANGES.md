@@ -1,6 +1,12 @@
 <!-- markdownlint-configure-file { "no-duplicate-heading": { "siblings_only": true } } -->
 
 <!-- markdownlint-disable-next-line first-line-h1 -->
+## 0.2.3 - 2026-10-21
+
+### Changed
+
+* Updated to vertigo 0.14
+
 ## 0.2.2 - 2026-10-14
 
 ### Added
