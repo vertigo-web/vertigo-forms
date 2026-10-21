@@ -24,7 +24,7 @@ cargo test -p vertigo-forms-e2e -- --include-ignored  # with the tests of known 
 ```
 
 The `Justfile` in the workspace root has it shorter: `just e2e`, which takes the same arguments
-(`just e2e resource_table`), and `just e2e-headed`, which shows the browser.
+(`just e2e resource_table`), and `just e2e --headed`, which shows the browser.
 
 Plain `cargo test` in the workspace root runs only the library's tests, and CI excludes this
 crate from its test run. Use `cargo test`, not nextest: nextest runs each test in a separate

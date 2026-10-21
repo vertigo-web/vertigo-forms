@@ -1,6 +1,6 @@
 [package]
 name = "vertigo-forms-example-model-form"
-version = "0.2.0"
+version.workspace = true
 authors = ["Michał Pokrywka <wolfmoon@o2.pl>"]
 edition = "2024"
 

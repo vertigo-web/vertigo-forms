@@ -3960,7 +3960,7 @@ dependencies = [
 
 [[package]]
 name = "vertigo-forms"
-version = "0.2.2"
+version = "0.2.3"
 dependencies = [
  "base64 0.23.1",
  "either",
@@ -3969,7 +3969,7 @@ dependencies = [
 
 [[package]]
 name = "vertigo-forms-e2e"
-version = "0.1.0"
+version = "0.2.3"
 dependencies = [
  "anyhow",
  "serde_json",
@@ -3979,7 +3979,7 @@ dependencies = [
 
 [[package]]
 name = "vertigo-forms-example-manual-form"
-version = "0.2.0"
+version = "0.2.3"
 dependencies = [
  "vertigo",
  "vertigo-forms",
@@ -3987,7 +3987,7 @@ dependencies = [
 
 [[package]]
 name = "vertigo-forms-example-model-form"
-version = "0.2.0"
+version = "0.2.3"
 dependencies = [
  "vertigo",
  "vertigo-forms",
@@ -3995,7 +3995,7 @@ dependencies = [
 
 [[package]]
 name = "vertigo-forms-storybook"
-version = "0.2.0"
+version = "0.2.3"
 dependencies = [
  "vertigo",
  "vertigo-forms",
