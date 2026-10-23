@@ -37,6 +37,7 @@ fn main() {
         switch::switches_share_the_value,
         select::choosing_option_sets_value,
         multi_select::buttons_toggle_values,
+        multi_select::filter_click_selects_one_ctrl_click_adds,
         multi_drop_down::drop_down_toggles_values,
         select_search::typing_filters_and_click_selects,
         select_search::arrows_and_enter_select,
