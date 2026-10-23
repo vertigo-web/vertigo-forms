@@ -23,7 +23,10 @@ pub use {
     input::{Input, InputWithButton, InputWithButtonParams, ListInput},
     popup::{Popup, PopupOnHover, PopupParams},
     search_panel::{SearchPanel, SearchPanelParams, SearchResult},
-    select::{DictSelect, MultiDropDown, MultiDropDownParams, MultiSelect, Select},
+    select::{
+        DictSelect, MultiDropDown, MultiDropDownParams, MultiSelect, MultiSelectMode,
+        MultiSelectParams, Select,
+    },
     select_search::{SelectSearch, SelectSearchParams},
     spinner::Spinner,
     switch::{Switch, SwitchParams},

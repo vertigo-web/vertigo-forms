@@ -44,6 +44,7 @@ where
                         <MultiSelect
                             value={&self.value}
                             options={&self.options}
+                            params={}
                         />
                     </div>
                 }

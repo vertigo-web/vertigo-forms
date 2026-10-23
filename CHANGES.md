@@ -1,6 +1,21 @@
 <!-- markdownlint-configure-file { "no-duplicate-heading": { "siblings_only": true } } -->
 
 <!-- markdownlint-disable-next-line first-line-h1 -->
+## Unreleased
+
+### Added
+
+* `MultiSelect` takes `params` (`MultiSelectParams`): `MultiSelectMode::Exclusive`, where a click
+  selects only the clicked option and Ctrl/⌘+click adds it or takes it away, as in
+  a `<select multiple>`; `none_label` for a button which clears the selection, f. ex. "All"
+  of a filter; and the CSS of the container and of the buttons, selected or not
+* `MultiSelect`: every button tells whether it is selected in `aria-pressed`
+
+### Changed
+
+* `MultiSelect` needs `params` - `params={}` keeps how it worked and looked
+* Needs vertigo with the modifier keys in `ClickEvent`
+
 ## 0.2.3 - 2026-10-21
 
 ### Changed

@@ -68,7 +68,7 @@ dependencies = [
  "actix-utils",
  "base64 0.22.1",
  "bitflags 2.13.2",
- "brotli",
+ "brotli 8.0.4",
  "bytes",
  "bytestring",
  "derive_more",
@@ -289,12 +289,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cc7bb162ec39d46ab1ca8c77bf72e890535becd1751bb45f64c597edb4c8c6b3"
 
 [[package]]
+name = "alloc-no-stdlib"
+version = "3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c2fb6cfd47bf496ff64095c20eaba0c201404ee38714d4142fcfa1dc334fcc7a"
+
+[[package]]
 name = "alloc-stdlib"
 version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0e76a019e91224d279006ff972f1e984179a6e9feb050adba6ce8274aef23195"
 dependencies = [
- "alloc-no-stdlib",
+ "alloc-no-stdlib 2.0.4",
+]
+
+[[package]]
+name = "alloc-stdlib"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0b5c1865780388bfa186411ab5f247819487fc4864c6e9c3106611fa347586e1"
+dependencies = [
+ "alloc-no-stdlib 3.0.0",
 ]
 
 [[package]]
@@ -512,9 +527,20 @@ version = "8.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5cc91aac060a7a1e25823bdccbfb6af1875b88f17c6daac97894eed8207166b3"
 dependencies = [
- "alloc-no-stdlib",
- "alloc-stdlib",
- "brotli-decompressor",
+ "alloc-no-stdlib 2.0.4",
+ "alloc-stdlib 0.2.4",
+ "brotli-decompressor 5.0.3",
+]
+
+[[package]]
+name = "brotli"
+version = "9.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f8b851b75c23ca7873623d612fe49bd1989aeb03d08fb9432187eb253d3d4c6b"
+dependencies = [
+ "alloc-no-stdlib 3.0.0",
+ "alloc-stdlib 0.3.0",
+ "brotli-decompressor 6.0.1",
 ]
 
 [[package]]
@@ -523,8 +549,18 @@ version = "5.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3a32acac15fe1967bc3986b2a6347dffc965602354ea6f450ad07e8bfd253583"
 dependencies = [
- "alloc-no-stdlib",
- "alloc-stdlib",
+ "alloc-no-stdlib 2.0.4",
+ "alloc-stdlib 0.2.4",
+]
+
+[[package]]
+name = "brotli-decompressor"
+version = "6.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "941cd9bd4ddab83cb46fa5a2d428f1c857b24ac78cb876cf7beb710840934bd7"
+dependencies = [
+ "alloc-no-stdlib 3.0.0",
+ "alloc-stdlib 0.3.0",
 ]
 
 [[package]]
@@ -3911,9 +3947,9 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
 name = "vertigo"
-version = "0.14.0"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87586caeb933546dc19bfde5bb88e639044a36faea9083128e1c65a614a29fac"
+checksum = "a169a3f8f2745fd777c57b8f3f198924b1e0682942bc753598b2001726860dc3"
 dependencies = [
  "base64 0.23.1",
  "log",
@@ -3922,9 +3958,9 @@ dependencies = [
 
 [[package]]
 name = "vertigo-cli"
-version = "0.14.0"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "828405c860a2be5c93e4e08fdb98ce00340790dd1f760eb0b3118294c7b7e018"
+checksum = "46299e6ecf658b75df1ccd8a796ae7e485be0c0b086c936a7f614bb3e2c7f3dd"
 dependencies = [
  "actix-cors",
  "actix-files",
@@ -3933,6 +3969,7 @@ dependencies = [
  "actix-web",
  "awc",
  "base64 0.23.1",
+ "brotli 9.0.0",
  "chrono",
  "clap",
  "crc",
@@ -4003,9 +4040,9 @@ dependencies = [
 
 [[package]]
 name = "vertigo-macro"
-version = "0.14.0"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7dd14f22039bebec91f02c38ab2fd06295435d22b9708637b0ecc05b7b043e5e"
+checksum = "818cea96df241efc2de3a222bfdb1067550abd24f04beed83ad1c0bcb5391054"
 dependencies = [
  "base64 0.23.1",
  "crc",
@@ -4025,9 +4062,9 @@ dependencies = [
 
 [[package]]
 name = "vertigo-testing"
-version = "0.14.0"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f779e44492284a9e53c440d1911be7cafa45f5c614ee5e08125ba1a1e4ab9f18"
+checksum = "60de6f19603467e7768b08373894f34ddbdac453baeca7ce94d1578fd9cab765"
 dependencies = [
  "actix-web",
  "anyhow",
