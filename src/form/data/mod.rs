@@ -4,7 +4,10 @@ use vertigo::Value;
 use crate::ValidationErrors;
 
 mod data_field;
-pub use data_field::{CustomValue, DataFieldValue, ImageValue, TextAreaValue};
+pub use data_field::{
+    BoolValue, CustomValue, DataFieldValue, DictValue, ImageValue, ListValue, MultiValue,
+    StringValue, TextAreaValue,
+};
 
 mod form_export;
 pub use form_export::{FieldExport, FormExport};
