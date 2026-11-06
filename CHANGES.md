@@ -10,6 +10,10 @@
   a `<select multiple>`; `none_label` for a button which clears the selection, f. ex. "All"
   of a filter; and the CSS of the container and of the buttons, selected or not
 * `MultiSelect`: every button tells whether it is selected in `aria-pressed`
+* `StringValue`, `ListValue`, `DictValue`, `MultiValue` and `BoolValue` exported from `form`, so
+  a field can be built on a `Value` shared with something else, f. ex. a preview that follows
+  what is typed. They were public but out of reach, so only `TextAreaValue`, `ImageValue` and
+  `CustomValue` could be built by hand
 
 ### Changed
 

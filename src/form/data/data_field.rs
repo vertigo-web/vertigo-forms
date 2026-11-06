@@ -46,12 +46,38 @@ impl DataFieldValue {
     }
 }
 
+/// Value of a [DataFieldValue::String] field.
+///
+/// Built by hand, a field can share its `Value` with something else, f. ex. a preview that
+/// follows what is typed. [DataSection::with_string_field](super::DataSection::with_string_field)
+/// creates a `Value` of its own instead.
+///
+/// ```rust
+/// use std::rc::Rc;
+/// use vertigo::{Value, transaction};
+/// use vertigo_forms::form::{DataFieldValue, DataSection, StringValue};
+///
+/// let title = Value::new("Draft".to_string());
+/// let section = DataSection::new("Title").add_field(
+///     "title",
+///     DataFieldValue::String(StringValue {
+///         value: title.clone(),
+///         original_value: Rc::new("Draft".to_string()),
+///     }),
+/// );
+///
+/// // Typing into the field changes `title` as well
+/// let DataFieldValue::String(field) = &section.fields[0].value else { unreachable!() };
+/// field.value.set("Final".to_string());
+/// assert_eq!(transaction(|ctx| title.get(ctx)), "Final");
+/// ```
 #[derive(Clone)]
 pub struct StringValue {
     pub value: Value<String>,
     pub original_value: Rc<String>,
 }
 
+/// Value of a [DataFieldValue::TextArea] field.
 #[derive(Clone)]
 pub struct TextAreaValue {
     pub value: Value<String>,
@@ -60,6 +86,7 @@ pub struct TextAreaValue {
     pub cols: Option<i32>,
 }
 
+/// Value of a [DataFieldValue::List] field.
 #[derive(Clone)]
 pub struct ListValue {
     pub value: Value<String>,
@@ -67,6 +94,7 @@ pub struct ListValue {
     pub options: Computed<Vec<String>>,
 }
 
+/// Value of a [DataFieldValue::Dict] field.
 #[derive(Clone)]
 pub struct DictValue {
     pub value: Value<i64>,
@@ -74,6 +102,7 @@ pub struct DictValue {
     pub options: Computed<Vec<(i64, String)>>,
 }
 
+/// Value of a [DataFieldValue::Multi] field.
 #[derive(Clone)]
 pub struct MultiValue {
     pub value: Value<Vec<Value<i64>>>,
@@ -82,6 +111,7 @@ pub struct MultiValue {
     pub add_label: Rc<String>,
 }
 
+/// Value of a [DataFieldValue::Bool] field.
 #[derive(Clone)]
 pub struct BoolValue {
     pub value: Value<bool>,
