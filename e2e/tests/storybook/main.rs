@@ -7,6 +7,7 @@ mod input;
 mod login;
 mod multi_drop_down;
 mod multi_select;
+mod photo_popup;
 mod popup;
 mod resource_table;
 mod search_panel;
@@ -34,6 +35,12 @@ fn main() {
         input::list_input_splits_on_commas,
         popup::switch_shows_and_hides_popup,
         popup::hover_shows_popup,
+        photo_popup::thumbnail_opens_its_photo,
+        photo_popup::buttons_and_arrow_keys_go_around,
+        photo_popup::click_beside_photo_closes,
+        photo_popup::swipe_goes_through_photos,
+        photo_popup::single_photo_has_no_browsing,
+        photo_popup::thumbnails_link_to_photos,
         switch::switches_share_the_value,
         select::choosing_option_sets_value,
         multi_select::buttons_toggle_values,

@@ -21,6 +21,11 @@ pub const STORIES: &[Story] = &[
         marker: "//p[normalize-space(.)='Popup on hover']",
     },
     Story {
+        tab: "Photo Popup",
+        path: "/photo_popup",
+        marker: "//p[normalize-space(.)='One photo, custom labels:']",
+    },
+    Story {
         tab: "Switch",
         path: "/switch",
         marker: "//p[starts-with(normalize-space(.), 'Toggle 2:')]",
