@@ -6,6 +6,7 @@ pub mod form;
 mod image_upload;
 mod input;
 pub mod login;
+mod photo_popup;
 mod popup;
 pub mod resource_table;
 mod search_panel;
@@ -21,6 +22,7 @@ pub use {
     drop_image_file::{DropImageFile, DropImageFileParams, image_as_uri, name_to_mime},
     image_upload::ImageUpload,
     input::{Input, InputWithButton, InputWithButtonParams, ListInput},
+    photo_popup::{Photo, PhotoGallery, PhotoGalleryParams, PhotoPopup, PhotoPopupParams},
     popup::{Popup, PopupOnHover, PopupParams},
     search_panel::{SearchPanel, SearchPanelParams, SearchResult},
     select::{

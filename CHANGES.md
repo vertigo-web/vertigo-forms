@@ -5,6 +5,12 @@
 
 ### Added
 
+* `PhotoGallery` - thumbnails, each opening its photo over the whole page in a `PhotoPopup`,
+  with buttons, arrow keys and a swipe of a finger going through the photos, from the last back
+  to the first. A thumbnail is a link to its photo, opened in a new tab, so it works before the
+  app starts, for search engines and with a modifier key
+* `PhotoPopup` - the popup alone, showing the photo at the index in a `Value<Option<usize>>`.
+  Escape, the close button or a click beside the photo close it
 * `MultiSelect` takes `params` (`MultiSelectParams`): `MultiSelectMode::Exclusive`, where a click
   selects only the clicked option and Ctrl/⌘+click adds it or takes it away, as in
   a `<select multiple>`; `none_label` for a button which clears the selection, f. ex. "All"

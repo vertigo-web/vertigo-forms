@@ -8,6 +8,7 @@ mod input;
 mod login;
 mod multi_drop_down;
 mod multi_select;
+mod photo_popup;
 mod popup;
 mod resource_table;
 mod search_panel;
@@ -24,6 +25,7 @@ fn render() -> DomNode {
     enum TabRoute {
         Input,
         Popup,
+        PhotoPopup,
         MultiSelect,
         MultiDropDown,
         Switch,
@@ -45,6 +47,7 @@ fn render() -> DomNode {
             match path.as_str() {
                 "/input" => Self::Input,
                 "/popup" => Self::Popup,
+                "/photo_popup" => Self::PhotoPopup,
                 "/multi_select" => Self::MultiSelect,
                 "/multi_drop_down" => Self::MultiDropDown,
                 "/switch" => Self::Switch,
@@ -69,6 +72,7 @@ fn render() -> DomNode {
             match self {
                 Self::Input => write!(f, "/input"),
                 Self::Popup => write!(f, "/popup"),
+                Self::PhotoPopup => write!(f, "/photo_popup"),
                 Self::MultiSelect => write!(f, "/multi_select"),
                 Self::MultiDropDown => write!(f, "/multi_drop_down"),
                 Self::Switch => write!(f, "/switch"),
@@ -97,6 +101,11 @@ fn render() -> DomNode {
             key: TabRoute::Popup,
             name: "Popup".to_string(),
             render: Rc::new(|_| popup::popup()),
+        },
+        Tab {
+            key: TabRoute::PhotoPopup,
+            name: "Photo Popup".to_string(),
+            render: Rc::new(|_| photo_popup::photo_popup()),
         },
         Tab {
             key: TabRoute::Switch,
