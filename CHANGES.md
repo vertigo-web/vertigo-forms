@@ -5,6 +5,11 @@
 
 ### Added
 
+* `DragGroups` - items in groups, each in one of them, put into another group by dragging it there
+  with a mouse, a pen or a finger, or picked with a tap, a click, Enter or Space and put with
+  another on "Here", in each group it may go to. A second press or Escape puts the item down. The
+  component only calls `on_move`, and the item moves when the groups say so - at once, or when
+  a server agrees. With `DragGroup`, `DragMove`, `DragGroupsParams` and the types of its callbacks
 * `PhotoGallery` - thumbnails, each opening its photo over the whole page in a `PhotoPopup`,
   with buttons, arrow keys and a swipe of a finger going through the photos, from the last back
   to the first. A thumbnail is a link to its photo, opened in a new tab, so it works before the
@@ -24,7 +29,7 @@
 ### Changed
 
 * `MultiSelect` needs `params` - `params={}` keeps how it worked and looked
-* Needs vertigo with the modifier keys in `ClickEvent`
+* Needs vertigo with the modifier keys in `ClickEvent`, and with `PointerEvent::release_pointer`
 
 ## 0.2.3 - 2026-10-21
 

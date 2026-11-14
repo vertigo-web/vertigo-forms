@@ -1,6 +1,7 @@
 //! The vertigo-forms storybook, story by story. Every test gets a fresh page, and the stories
 //! keep their state in the page only, so the tests can run in parallel.
 
+mod drag_groups;
 mod drop_image_file;
 mod form;
 mod input;
@@ -46,6 +47,11 @@ fn main() {
         multi_select::buttons_toggle_values,
         multi_select::filter_click_selects_one_ctrl_click_adds,
         multi_drop_down::drop_down_toggles_values,
+        drag_groups::mouse_drags_item_to_another_group,
+        drag_groups::finger_drags_item_to_another_group,
+        drag_groups::click_picks_and_here_puts,
+        drag_groups::second_click_or_escape_puts_down,
+        drag_groups::keyboard_picks_and_puts,
         select_search::typing_filters_and_click_selects,
         select_search::arrows_and_enter_select,
         select_search::leaving_field_closes_options,

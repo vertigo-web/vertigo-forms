@@ -26,3 +26,11 @@ vertigo-testing = "0.14"
 base64 = "0.23"
 either = "1.15"
 vertigo = { workspace = true }
+
+# `PointerEvent::release_pointer` (branch `release-pointer`), which `DragGroups` needs to be
+# dragged with a finger. The CLI and the test harness come from the same branch, so the storybook
+# is built with the driver which knows it.
+[patch.crates-io]
+vertigo = { git = "https://github.com/vertigo-web/vertigo.git", branch = "release-pointer" }
+vertigo-cli = { git = "https://github.com/vertigo-web/vertigo.git", branch = "release-pointer" }
+vertigo-testing = { git = "https://github.com/vertigo-web/vertigo.git", branch = "release-pointer" }

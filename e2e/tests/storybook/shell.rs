@@ -46,6 +46,11 @@ pub const STORIES: &[Story] = &[
         marker: "//button[normalize-space(.)='V']",
     },
     Story {
+        tab: "Drag Groups",
+        path: "/drag_groups",
+        marker: "//p[starts-with(normalize-space(.), 'Groups:')]",
+    },
+    Story {
         tab: "Select/Search",
         path: "/select_search",
         marker: "//input[@title='Enter phrase']",

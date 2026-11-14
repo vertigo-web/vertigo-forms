@@ -2,6 +2,7 @@ use std::{fmt, rc::Rc};
 use vertigo::{DomNode, css, dom, main, router::Router};
 use vertigo_forms::{Tab, Tabs, TabsParams};
 
+mod drag_groups;
 mod drop_image_file;
 mod form;
 mod input;
@@ -28,6 +29,7 @@ fn render() -> DomNode {
         PhotoPopup,
         MultiSelect,
         MultiDropDown,
+        DragGroups,
         Switch,
         Select,
         SelectSearch,
@@ -50,6 +52,7 @@ fn render() -> DomNode {
                 "/photo_popup" => Self::PhotoPopup,
                 "/multi_select" => Self::MultiSelect,
                 "/multi_drop_down" => Self::MultiDropDown,
+                "/drag_groups" => Self::DragGroups,
                 "/switch" => Self::Switch,
                 "/select" => Self::Select,
                 "/select_search" => Self::SelectSearch,
@@ -75,6 +78,7 @@ fn render() -> DomNode {
                 Self::PhotoPopup => write!(f, "/photo_popup"),
                 Self::MultiSelect => write!(f, "/multi_select"),
                 Self::MultiDropDown => write!(f, "/multi_drop_down"),
+                Self::DragGroups => write!(f, "/drag_groups"),
                 Self::Switch => write!(f, "/switch"),
                 Self::Select => write!(f, "/select"),
                 Self::SelectSearch => write!(f, "/select_search"),
@@ -126,6 +130,11 @@ fn render() -> DomNode {
             key: TabRoute::MultiDropDown,
             name: "MultiDropDown".to_string(),
             render: Rc::new(|_| multi_drop_down::multi_drop_down()),
+        },
+        Tab {
+            key: TabRoute::DragGroups,
+            name: "Drag Groups".to_string(),
+            render: Rc::new(|_| drag_groups::drag_groups()),
         },
         Tab {
             key: TabRoute::SelectSearch,
