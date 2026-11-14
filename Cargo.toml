@@ -26,3 +26,8 @@ vertigo-testing = "0.14"
 base64 = "0.23"
 either = "1.15"
 vertigo = { workspace = true }
+
+[patch.crates-io]
+vertigo = { git = "https://github.com/vertigo-web/vertigo.git", branch = "master" }
+vertigo-cli = { git = "https://github.com/vertigo-web/vertigo.git", branch = "master" }
+vertigo-testing = { git = "https://github.com/vertigo-web/vertigo.git", branch = "master" }

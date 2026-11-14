@@ -1,6 +1,7 @@
 use std::{collections::HashMap, fmt::Display, str::FromStr};
 
 pub mod button;
+mod drag_groups;
 mod drop_image_file;
 pub mod form;
 mod image_upload;
@@ -19,6 +20,10 @@ mod with_loader;
 
 pub use {
     button::{Button, ButtonColor, ButtonVariant, TableButton},
+    drag_groups::{
+        DragGroup, DragGroupAttrs, DragGroups, DragGroupsParams, DragMove, OnDragMove,
+        RenderDragItem, RenderGroupFooter, RenderGroupHeader,
+    },
     drop_image_file::{DropImageFile, DropImageFileParams, image_as_uri, name_to_mime},
     image_upload::ImageUpload,
     input::{Input, InputWithButton, InputWithButtonParams, ListInput},
