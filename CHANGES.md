@@ -29,7 +29,8 @@
 ### Changed
 
 * `MultiSelect` needs `params` - `params={}` keeps how it worked and looked
-* Needs vertigo with the modifier keys in `ClickEvent`, and with `PointerEvent::release_pointer`
+* Needs vertigo with the modifier keys in `ClickEvent`, with `PointerEvent::release_pointer` and
+  with `AttrGroup` event handlers binding themselves
 
 ## 0.2.3 - 2026-10-21
 
