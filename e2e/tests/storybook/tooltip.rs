@@ -101,21 +101,25 @@ pub async fn tap_shows_hint_and_tap_elsewhere_hides_it(ctx: Ctx) -> Result<()> {
     wait_in_sight(&ctx, SIGN_HINT, false).await
 }
 
-/// Reached with the keyboard, Enter shows the hint and Escape hides it.
-pub async fn enter_shows_hint_and_escape_hides_it(ctx: Ctx) -> Result<()> {
+/// Tab brings the focus to the word and shows its hint; Escape hides it, Enter shows it again,
+/// and Tab to the next element hides it and shows the next hint.
+pub async fn tab_shows_hint_and_escape_hides_it(ctx: Ctx) -> Result<()> {
     ctx.open("/tooltip").await?;
     ctx.find(element(WORD)).await?.focus().await?;
-    ctx.action_chain().send_keys(Key::Enter).perform().await?;
     wait_in_sight(&ctx, WORD_HINT, true).await?;
     ctx.action_chain().send_keys(Key::Escape).perform().await?;
-    wait_in_sight(&ctx, WORD_HINT, false).await
+    wait_in_sight(&ctx, WORD_HINT, false).await?;
+    ctx.action_chain().send_keys(Key::Enter).perform().await?;
+    wait_in_sight(&ctx, WORD_HINT, true).await?;
+    ctx.action_chain().send_keys(Key::Tab).perform().await?;
+    wait_in_sight(&ctx, WORD_HINT, false).await?;
+    wait_in_sight(&ctx, SIGN_HINT, true).await
 }
 
 /// The hint of the sign at the right edge stays within the window, 8 pixels from its edge.
 pub async fn hint_keeps_within_the_window(ctx: Ctx) -> Result<()> {
     ctx.open("/tooltip").await?;
     ctx.find(element(SIGN)).await?.focus().await?;
-    ctx.action_chain().send_keys(Key::Enter).perform().await?;
     wait_in_sight(&ctx, SIGN_HINT, true).await?;
     let width = ctx
         .js("return document.documentElement.clientWidth")
