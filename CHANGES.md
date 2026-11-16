@@ -1,40 +1,29 @@
 <!-- markdownlint-configure-file { "no-duplicate-heading": { "siblings_only": true } } -->
 
 <!-- markdownlint-disable-next-line first-line-h1 -->
-## Unreleased
+## 0.2.4 - 2026-11-16
+
+### Breaking
+
+* `MultiSelect` needs `params` - `params={}` keeps how it worked and looked
 
 ### Added
 
-* `Tooltip` - a short text about an element, shown next to it when a mouse or a pen is over it,
-  when a finger taps it, or when the keyboard brings the focus to it, as it is a tab stop, and
-  with Enter or Space. Leaving it, a tap elsewhere, Escape or the focus going away hides it. The bubble stands under
-  the element, or over it without room under it, and keeps within the window. Hidden, it stays in
-  the page out of sight, so a screen reader reads it with the element. With `TooltipParams`
-* `DragGroups` - items in groups, each in one of them, put into another group by dragging it there
-  with a mouse, a pen or a finger, or picked with a tap, a click, Enter or Space and put with
-  another on "Here", in each group it may go to. A second tap, click, Enter or Space, or Escape
-  puts the item down, but a picked item can still be dragged. While it's dragged, a copy of the
-  item follows the pointer, within the component. The component only calls `on_move`, and the
-  item moves when the groups say so - at once, or when a server agrees. With `DragGroup`, `DragMove`, `DragGroupsParams` and the types of its callbacks
-* `PhotoGallery` - thumbnails, each opening its photo over the whole page in a `PhotoPopup`,
-  with buttons, arrow keys and a swipe of a finger going through the photos, from the last back
-  to the first. A thumbnail is a link to its photo, opened in a new tab, so it works before the
-  app starts, for search engines and with a modifier key
-* `PhotoPopup` - the popup alone, showing the photo at the index in a `Value<Option<usize>>`.
-  Escape, the close button or a click beside the photo close it
-* `MultiSelect` takes `params` (`MultiSelectParams`): `MultiSelectMode::Exclusive`, where a click
-  selects only the clicked option and Ctrl/⌘+click adds it or takes it away, as in
-  a `<select multiple>`; `none_label` for a button which clears the selection, f. ex. "All"
-  of a filter; and the CSS of the container and of the buttons, selected or not
-* `MultiSelect`: every button tells whether it is selected in `aria-pressed`
-* `StringValue`, `ListValue`, `DictValue`, `MultiValue` and `BoolValue` exported from `form`, so
-  a field can be built on a `Value` shared with something else, f. ex. a preview that follows
-  what is typed. They were public but out of reach, so only `TextAreaValue`, `ImageValue` and
-  `CustomValue` could be built by hand
+* `Tooltip` - text next to an element, shown on hover, tap or focus, with `TooltipParams`
+* `DragGroups` - items moved between groups by dragging, or picked and put with a tap, click or
+  keyboard, with `DragGroup`, `DragMove` and `DragGroupsParams`
+* `PhotoPopup` - a photo over the whole page, with buttons, arrow keys and swipe going through
+  the photos, with `Photo` and `PhotoPopupParams`
+* `PhotoGallery` - thumbnails, each a link to its photo, opening it in a `PhotoPopup`
+* `MultiSelectParams`: `MultiSelectMode::Exclusive` (a click selects only the clicked option, as in
+  `<select multiple>`), a `none_label` button clearing the selection, and CSS of the buttons
+* `MultiSelect`: buttons tell whether they are selected in `aria-pressed`
+* `StringValue`, `ListValue`, `DictValue`, `MultiValue` and `BoolValue` exported from `form`,
+  so a field can be built on a shared `Value`
 
 ### Changed
 
-* `MultiSelect` needs `params` - `params={}` keeps how it worked and looked
+* Updated to vertigo 0.14.4
 
 ## 0.2.3 - 2026-10-21
 
