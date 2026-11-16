@@ -2,7 +2,7 @@
 members = ["storybook", "examples/manual_form", "examples/model_form", "e2e"]
 
 [workspace.package]
-version = "0.2.3"
+version = "0.2.4"
 
 [package]
 name = "vertigo-forms"
@@ -19,15 +19,10 @@ license = "MIT OR Apache-2.0"
 edition = "2024"
 
 [workspace.dependencies]
-vertigo = "0.14"
-vertigo-testing = "0.14"
+vertigo = "0.14.4"
+vertigo-testing = "0.14.4"
 
 [dependencies]
 base64 = "0.23"
 either = "1.15"
 vertigo = { workspace = true }
-
-[patch.crates-io]
-vertigo = { git = "https://github.com/vertigo-web/vertigo.git", branch = "master" }
-vertigo-cli = { git = "https://github.com/vertigo-web/vertigo.git", branch = "master" }
-vertigo-testing = { git = "https://github.com/vertigo-web/vertigo.git", branch = "master" }
