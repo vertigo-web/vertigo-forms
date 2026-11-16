@@ -45,9 +45,9 @@ const MARGIN: f64 = 8.0;
 const GAP: f64 = 6.0;
 
 /// A short text about an element, shown next to it: when a mouse or a pen is over the element,
-/// when a finger taps it, or with Enter or Space while the element has the focus of the keyboard,
-/// as it is a tab stop. Leaving the element with the pointer, a tap anywhere else, Escape or
-/// moving the focus away hides it, and so does a second tap or Enter.
+/// when a finger taps it, or when the keyboard brings the focus to it, as it is a tab stop.
+/// Leaving the element with the pointer, a tap anywhere else, Escape or moving the focus away
+/// hides it, and so does a second tap. Enter or Space shows or hides it again.
 ///
 /// The bubble stands under the element, centered on it, or over it when there is no room under
 /// it, and keeps within the window, 8 pixels from its edges. It stays in the page while
@@ -168,6 +168,15 @@ pub fn Tooltip(
             _ => false,
         }
     };
+    // The keyboard, or `focus()`; a press of a pointer focuses it too, and has its own way
+    let on_focus = {
+        let (state, anchor) = (state.clone(), anchor.clone());
+        move || {
+            if !state.pressed.get() && state.opener().is_none() {
+                state.open(&anchor, Opener::Key);
+            }
+        }
+    };
     let on_blur = {
         let state = state.clone();
         move || {
@@ -184,6 +193,7 @@ pub fn Tooltip(
         .hook_pointer_up(on_up)
         .hook_pointer_cancel(on_cancel)
         .on_key_down(on_key_down)
+        .on_focus(on_focus)
         .on_blur(on_blur);
     DomNode::from(container)
 }
@@ -282,7 +292,8 @@ enum Opener {
     Hover,
     /// A finger: a second tap, or a tap elsewhere.
     Tap,
-    /// Enter or Space: again, Escape, or the focus going away.
+    /// The focus from the keyboard, Enter or Space: Escape, Enter or Space again, or the focus
+    /// going away.
     Key,
 }
 
