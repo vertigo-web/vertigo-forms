@@ -18,6 +18,7 @@ mod shell;
 mod spinner;
 mod switch;
 mod tabs;
+mod tooltip;
 mod with_loader;
 mod with_stable_loader;
 
@@ -36,6 +37,10 @@ fn main() {
         input::list_input_splits_on_commas,
         popup::switch_shows_and_hides_popup,
         popup::hover_shows_popup,
+        tooltip::hover_shows_hint_and_leaving_hides_it,
+        tooltip::tap_shows_hint_and_tap_elsewhere_hides_it,
+        tooltip::enter_shows_hint_and_escape_hides_it,
+        tooltip::hint_keeps_within_the_window,
         photo_popup::thumbnail_opens_its_photo,
         photo_popup::buttons_and_arrow_keys_go_around,
         photo_popup::click_beside_photo_closes,

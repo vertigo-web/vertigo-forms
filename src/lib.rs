@@ -16,6 +16,7 @@ mod select_search;
 mod spinner;
 mod switch;
 mod tabs;
+mod tooltip;
 mod with_loader;
 
 pub use {
@@ -38,6 +39,7 @@ pub use {
     spinner::Spinner,
     switch::{Switch, SwitchParams},
     tabs::{Tab, Tabs, TabsContent, TabsContentMapped, TabsHeader, TabsParams},
+    tooltip::{Tooltip, TooltipParams},
     with_loader::{WithLoader, WithStableLoader, with_loader, with_stable_loader},
 };
 

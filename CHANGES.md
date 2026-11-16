@@ -5,6 +5,11 @@
 
 ### Added
 
+* `Tooltip` - a short text about an element, shown next to it when a mouse or a pen is over it,
+  when a finger taps it, or with Enter or Space while it has the focus, as it is a tab stop.
+  Leaving it, a tap elsewhere, Escape or the focus going away hides it. The bubble stands under
+  the element, or over it without room under it, and keeps within the window. Hidden, it stays in
+  the page out of sight, so a screen reader reads it with the element. With `TooltipParams`
 * `DragGroups` - items in groups, each in one of them, put into another group by dragging it there
   with a mouse, a pen or a finger, or picked with a tap, a click, Enter or Space and put with
   another on "Here", in each group it may go to. A second tap, click, Enter or Space, or Escape

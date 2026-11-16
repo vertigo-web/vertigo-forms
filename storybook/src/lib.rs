@@ -17,6 +17,7 @@ mod select;
 mod select_search;
 mod switch;
 mod tabs;
+mod tooltip;
 mod with_loader;
 mod with_stable_loader;
 
@@ -26,6 +27,7 @@ fn render() -> DomNode {
     enum TabRoute {
         Input,
         Popup,
+        Tooltip,
         PhotoPopup,
         MultiSelect,
         MultiDropDown,
@@ -49,6 +51,7 @@ fn render() -> DomNode {
             match path.as_str() {
                 "/input" => Self::Input,
                 "/popup" => Self::Popup,
+                "/tooltip" => Self::Tooltip,
                 "/photo_popup" => Self::PhotoPopup,
                 "/multi_select" => Self::MultiSelect,
                 "/multi_drop_down" => Self::MultiDropDown,
@@ -75,6 +78,7 @@ fn render() -> DomNode {
             match self {
                 Self::Input => write!(f, "/input"),
                 Self::Popup => write!(f, "/popup"),
+                Self::Tooltip => write!(f, "/tooltip"),
                 Self::PhotoPopup => write!(f, "/photo_popup"),
                 Self::MultiSelect => write!(f, "/multi_select"),
                 Self::MultiDropDown => write!(f, "/multi_drop_down"),
@@ -105,6 +109,11 @@ fn render() -> DomNode {
             key: TabRoute::Popup,
             name: "Popup".to_string(),
             render: Rc::new(|_| popup::popup()),
+        },
+        Tab {
+            key: TabRoute::Tooltip,
+            name: "Tooltip".to_string(),
+            render: Rc::new(|_| tooltip::tooltip()),
         },
         Tab {
             key: TabRoute::PhotoPopup,
