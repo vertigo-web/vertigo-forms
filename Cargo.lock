@@ -109,17 +109,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "actix-proxy"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3eb1ba1258bd79835d602dffb79f62aae42da7569036c67929e21961e2b3693c"
-dependencies = [
- "actix-web",
- "awc",
- "openssl",
-]
-
-[[package]]
 name = "actix-router"
 version = "0.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -183,11 +172,9 @@ dependencies = [
  "http 0.2.12",
  "http 1.5.0",
  "impl-more",
- "openssl",
  "pin-project-lite",
  "rustls-pki-types",
  "tokio",
- "tokio-openssl",
  "tokio-rustls",
  "tokio-util",
  "tracing",
@@ -441,7 +428,6 @@ dependencies = [
  "itoa",
  "log",
  "mime",
- "openssl",
  "percent-encoding",
  "pin-project-lite",
  "rand",
@@ -1298,21 +1284,6 @@ name = "foldhash"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77ce24cb58228fbb8aa041425bb1050850ac19177686ea6e0f41a70416f56fdb"
-
-[[package]]
-name = "foreign-types"
-version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6f339eb8adc052cd2ca78910fda869aefa38d22d5cb648e6485e4d3fc06f3b1"
-dependencies = [
- "foreign-types-shared",
-]
-
-[[package]]
-name = "foreign-types-shared"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "00b0228411908ca8685dba7fc2cdd70ec9990a6e753e89b6ac91a84c40fbaf4b"
 
 [[package]]
 name = "form_urlencoded"
@@ -2378,47 +2349,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
 
 [[package]]
-name = "openssl"
-version = "0.10.82"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4de8111e94a56adca7ebfe6c365b6d42f99deb69b74b6becacd4204e2f193aa2"
-dependencies = [
- "bitflags",
- "cfg-if",
- "foreign-types",
- "libc",
- "openssl-macros",
- "openssl-sys",
-]
-
-[[package]]
-name = "openssl-macros"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a948666b637a0f465e8564c73e89d4dde00d72d4d473cc972f390fc3dcee7d9c"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.119",
-]
-
-[[package]]
 name = "openssl-probe"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7e036b411754132fd6b74e94b74e9a13c5cf606fa93d1885c35860d3060820b1"
-
-[[package]]
-name = "openssl-sys"
-version = "0.9.118"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "19c413d6ec9ebaf5e1c829d355cb3e9f783778d700f135be0921d52fce3c60ae"
-dependencies = [
- "cc",
- "libc",
- "pkg-config",
- "vcpkg",
-]
 
 [[package]]
 name = "option-ext"
@@ -3577,17 +3511,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tokio-openssl"
-version = "0.6.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "59df6849caa43bb7567f9a36f863c447d95a11d5903c9cc334ba32576a27eadd"
-dependencies = [
- "openssl",
- "openssl-sys",
- "tokio",
-]
-
-[[package]]
 name = "tokio-retry"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3869,12 +3792,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "vcpkg"
-version = "0.2.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
-
-[[package]]
 name = "version_check"
 version = "0.9.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3882,9 +3799,8 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
 name = "vertigo"
-version = "0.14.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e1bc1cb9414bc2774f06cffc940642047f83615435221c74cf22dfaa1732d1c"
+version = "0.14.5"
+source = "git+https://github.com/vertigo-web/vertigo.git?branch=master#e6ff736302ee844346d9311a8aebc205787f19af"
 dependencies = [
  "base64 0.23.1",
  "log",
@@ -3893,14 +3809,12 @@ dependencies = [
 
 [[package]]
 name = "vertigo-cli"
-version = "0.14.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8b2622730fae18dc43184eb682f33a68e321d13bb6ea8fe70aac0a3dee2033f3"
+version = "0.14.5"
+source = "git+https://github.com/vertigo-web/vertigo.git?branch=master#e6ff736302ee844346d9311a8aebc205787f19af"
 dependencies = [
  "actix-cors",
  "actix-files",
  "actix-http",
- "actix-proxy",
  "actix-web",
  "awc",
  "base64 0.23.1",
@@ -3975,9 +3889,8 @@ dependencies = [
 
 [[package]]
 name = "vertigo-macro"
-version = "0.14.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0fa22d85ffc23dd796e1f41cac2d8c4149a12430b5c6ad7fd684c13c04995a4f"
+version = "0.14.5"
+source = "git+https://github.com/vertigo-web/vertigo.git?branch=master#e6ff736302ee844346d9311a8aebc205787f19af"
 dependencies = [
  "base64 0.23.1",
  "crc",
@@ -3996,9 +3909,8 @@ dependencies = [
 
 [[package]]
 name = "vertigo-testing"
-version = "0.14.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9351023fc0e19d9a7b972e692085e74a480152853bc391b8d5b25156181c1efa"
+version = "0.14.5"
+source = "git+https://github.com/vertigo-web/vertigo.git?branch=master#e6ff736302ee844346d9311a8aebc205787f19af"
 dependencies = [
  "actix-web",
  "anyhow",

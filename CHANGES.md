@@ -1,6 +1,21 @@
 <!-- markdownlint-configure-file { "no-duplicate-heading": { "siblings_only": true } } -->
 
 <!-- markdownlint-disable-next-line first-line-h1 -->
+## Unreleased
+
+### Added
+
+* `Modal` - a window over the whole page with a title and content rendered anew each time it opens,
+  closed by Escape, its close button or a click beside it; the keyboard stays in it, the page under
+  it doesn't scroll, and a screen reader reads it as a dialog named by its title. Closed, it gives
+  the focus back to the button that opened it. A `Modal` opened from another closes on its own
+  Escape. With `ModalParams` and `RenderModalContent`
+
+### Fixed
+
+* `PhotoPopup` left the focus nowhere once closed, so the keyboard started again from the top of
+  the page - it gives it back to the thumbnail or button that opened it
+
 ## 0.2.4 - 2026-11-16
 
 ### Breaking

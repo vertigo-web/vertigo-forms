@@ -7,6 +7,7 @@ pub mod form;
 mod image_upload;
 mod input;
 pub mod login;
+mod modal;
 mod photo_popup;
 mod popup;
 pub mod resource_table;
@@ -28,6 +29,7 @@ pub use {
     drop_image_file::{DropImageFile, DropImageFileParams, image_as_uri, name_to_mime},
     image_upload::ImageUpload,
     input::{Input, InputWithButton, InputWithButtonParams, ListInput},
+    modal::{Modal, ModalParams, RenderModalContent},
     photo_popup::{Photo, PhotoGallery, PhotoGalleryParams, PhotoPopup, PhotoPopupParams},
     popup::{Popup, PopupOnHover, PopupParams},
     search_panel::{SearchPanel, SearchPanelParams, SearchResult},
