@@ -1,6 +1,15 @@
 <!-- markdownlint-configure-file { "no-duplicate-heading": { "siblings_only": true } } -->
 
 <!-- markdownlint-disable-next-line first-line-h1 -->
+## 0.2.5 - Unreleased
+
+### Added
+
+* `Modal` - a window over the whole page with a title and content rendered anew each time it opens,
+  closed by Escape, its close button or a click beside it; the keyboard stays in it, the page under
+  it doesn't scroll, and a screen reader reads it as a dialog named by its title. With `ModalParams`
+  and `RenderModalContent`
+
 ## 0.2.4 - 2026-11-16
 
 ### Breaking

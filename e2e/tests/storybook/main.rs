@@ -6,6 +6,7 @@ mod drop_image_file;
 mod form;
 mod input;
 mod login;
+mod modal;
 mod multi_drop_down;
 mod multi_select;
 mod photo_popup;
@@ -41,6 +42,11 @@ fn main() {
         tooltip::tap_shows_hint_and_tap_elsewhere_hides_it,
         tooltip::tab_shows_hint_and_escape_hides_it,
         tooltip::hint_keeps_within_the_window,
+        modal::button_opens_window_named_by_its_title,
+        modal::click_beside_or_close_button_closes,
+        modal::tab_stays_in_the_window,
+        modal::content_is_new_each_time,
+        modal::long_content_scrolls_in_the_window,
         photo_popup::thumbnail_opens_its_photo,
         photo_popup::buttons_and_arrow_keys_go_around,
         photo_popup::click_beside_photo_closes,
