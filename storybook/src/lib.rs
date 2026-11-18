@@ -7,6 +7,7 @@ mod drop_image_file;
 mod form;
 mod input;
 mod login;
+mod modal;
 mod multi_drop_down;
 mod multi_select;
 mod photo_popup;
@@ -29,6 +30,7 @@ fn render() -> DomNode {
         Popup,
         Tooltip,
         PhotoPopup,
+        Modal,
         MultiSelect,
         MultiDropDown,
         DragGroups,
@@ -53,6 +55,7 @@ fn render() -> DomNode {
                 "/popup" => Self::Popup,
                 "/tooltip" => Self::Tooltip,
                 "/photo_popup" => Self::PhotoPopup,
+                "/modal" => Self::Modal,
                 "/multi_select" => Self::MultiSelect,
                 "/multi_drop_down" => Self::MultiDropDown,
                 "/drag_groups" => Self::DragGroups,
@@ -80,6 +83,7 @@ fn render() -> DomNode {
                 Self::Popup => write!(f, "/popup"),
                 Self::Tooltip => write!(f, "/tooltip"),
                 Self::PhotoPopup => write!(f, "/photo_popup"),
+                Self::Modal => write!(f, "/modal"),
                 Self::MultiSelect => write!(f, "/multi_select"),
                 Self::MultiDropDown => write!(f, "/multi_drop_down"),
                 Self::DragGroups => write!(f, "/drag_groups"),
@@ -119,6 +123,11 @@ fn render() -> DomNode {
             key: TabRoute::PhotoPopup,
             name: "Photo Popup".to_string(),
             render: Rc::new(|_| photo_popup::photo_popup()),
+        },
+        Tab {
+            key: TabRoute::Modal,
+            name: "Modal".to_string(),
+            render: Rc::new(|_| modal::modal()),
         },
         Tab {
             key: TabRoute::Switch,

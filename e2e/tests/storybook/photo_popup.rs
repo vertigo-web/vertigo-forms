@@ -37,6 +37,19 @@ async fn click_thumbnail(ctx: &Ctx, number: u32) -> Result<()> {
     Ok(())
 }
 
+/// Waits until the focus is back on the link of thumbnail `number`, which opened the popup.
+async fn wait_for_focus_on_thumbnail(ctx: &Ctx, number: u32) -> Result<()> {
+    let alt = format!("Photo {number}");
+    ctx.wait_for(&format!("the focus on the thumbnail {alt:?}"), async || {
+        let focused = ctx
+            .js("const e = document.activeElement; \
+                 return e.tagName === 'A' ? e.querySelector('img')?.alt : null")
+            .await?;
+        Ok((focused.as_str() == Some(alt.as_str())).then_some(()))
+    })
+    .await
+}
+
 /// Waits until the popup shows photo `number`, the same picture as its thumbnail.
 async fn wait_for_photo(ctx: &Ctx, number: u32) -> Result<()> {
     let alt = format!("Photo {number}");
@@ -128,8 +141,10 @@ pub async fn thumbnail_opens_its_photo(ctx: Ctx) -> Result<()> {
         .await?;
     ensure!(focused == json!("dialog"), "focus on {focused}");
 
+    // Closed, it gives the focus back to the thumbnail
     ctx.find(dialog_button("Close")).await?.click().await?;
-    ctx.wait_for_none(dialog()).await
+    ctx.wait_for_none(dialog()).await?;
+    wait_for_focus_on_thumbnail(&ctx, 2).await
 }
 
 pub async fn buttons_and_arrow_keys_go_around(ctx: Ctx) -> Result<()> {
@@ -149,7 +164,8 @@ pub async fn buttons_and_arrow_keys_go_around(ctx: Ctx) -> Result<()> {
     press(&ctx, Key::Right).await?;
     wait_for_photo(&ctx, 3).await?;
     press(&ctx, Key::Escape).await?;
-    ctx.wait_for_none(dialog()).await
+    ctx.wait_for_none(dialog()).await?;
+    wait_for_focus_on_thumbnail(&ctx, 3).await
 }
 
 pub async fn click_beside_photo_closes(ctx: Ctx) -> Result<()> {
@@ -169,7 +185,8 @@ pub async fn click_beside_photo_closes(ctx: Ctx) -> Result<()> {
         .click()
         .perform()
         .await?;
-    ctx.wait_for_none(dialog()).await
+    ctx.wait_for_none(dialog()).await?;
+    wait_for_focus_on_thumbnail(&ctx, 1).await
 }
 
 pub async fn swipe_goes_through_photos(ctx: Ctx) -> Result<()> {

@@ -2,7 +2,7 @@ use std::{cell::Cell, rc::Rc};
 
 use vertigo::{
     AttrGroup, ClickEvent, Computed, Css, DomNode, KeyDownEvent, PointerEvent, PointerType, Value,
-    WheelEvent, bind, component, css, dom,
+    WheelEvent, bind, component, css, dom, get_driver,
 };
 
 /// A photo of [`PhotoGallery`] and [`PhotoPopup`].
@@ -78,7 +78,8 @@ impl Default for PhotoPopupParams {
 ///
 /// Escape, the close button or a click beside the photo set `shown` back to `None`. With more
 /// photos than one, the arrow keys, buttons and a swipe of a finger go through them, from the
-/// last back to the first. Two fingers still zoom the page.
+/// last back to the first. Two fingers still zoom the page. Closed, the popup gives the focus back
+/// to the element that had it when the popup opened, f. ex. the thumbnail of [`PhotoGallery`].
 ///
 /// The layer has `position: fixed`, so no ancestor of the component may have a `transform` or
 /// a `filter`, which would make it fixed to that ancestor instead of the window.
@@ -115,6 +116,8 @@ fn render_overlay(
     current: &Computed<Option<usize>>,
     params: &PhotoPopupParams,
 ) -> DomNode {
+    // Before the popup takes the focus, which it does once it's on the page
+    let focus_back = get_driver().remember_focus();
     let count = photos.len();
     let photo = {
         let photos = photos.clone();
@@ -231,7 +234,7 @@ fn render_overlay(
     let on_photo_click = |event: ClickEvent| event.stop_propagation();
 
     // The layer takes the focus, so Tab goes through the buttons of the popup
-    dom! {
+    let overlay = dom! {
         <div
             css={overlay_css}
             role="dialog"
@@ -259,7 +262,10 @@ fn render_overlay(
             {..next_button}
             {..counter}
         </div>
-    }
+    };
+    // The focus, gone with the popup, goes back, f. ex. to the thumbnail that opened it
+    overlay.append_drop_resource(focus_back);
+    overlay
 }
 
 /// Moves the shown photo `by` forward, around to the first after the last.
