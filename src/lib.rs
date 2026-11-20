@@ -24,7 +24,7 @@ pub use {
     button::{Button, ButtonColor, ButtonVariant, TableButton},
     drag_groups::{
         DragGroup, DragGroupAttrs, DragGroups, DragGroupsParams, DragMove, OnDragMove,
-        RenderDragItem, RenderGroupFooter, RenderGroupHeader,
+        RenderDragItem, RenderGroupFooter, RenderGroupHeader, RenderItemAside,
     },
     drop_image_file::{DropImageFile, DropImageFileParams, image_as_uri, name_to_mime},
     image_upload::ImageUpload,

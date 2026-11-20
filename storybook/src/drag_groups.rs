@@ -1,10 +1,21 @@
 use std::rc::Rc;
 
-use vertigo::{AttrGroup, DomNode, Value, dom};
+use vertigo::{AttrGroup, Computed, DomNode, Value, css, dom, transaction};
 use vertigo_forms::{
     DragGroup, DragGroups, DragGroupsParams, DragMove, OnDragMove, RenderDragItem,
-    RenderGroupHeader,
+    RenderGroupHeader, RenderItemAside,
 };
+
+/// How wide the pin over the end of a chore is, and the room the chore keeps for it.
+const PIN_WIDTH: &str = "22px";
+const PIN_ROOM: &str = "26px";
+
+/// Pinned chores stand first in their group, in the order they had.
+fn pinned_first(groups: &mut [DragGroup<&'static str, String>], pinned: &[String]) {
+    for group in groups {
+        group.items.sort_by_key(|item| !pinned.contains(item));
+    }
+}
 
 pub fn drag_groups() -> DomNode {
     let groups = Value::new(vec![
@@ -22,10 +33,13 @@ pub fn drag_groups() -> DomNode {
         },
     ]);
 
+    let pinned = Value::new(Vec::<String>::new());
+
     // Moved at once; an app may wait for a server instead
     let on_move: OnDragMove<&'static str, String> = Rc::new({
-        let groups = groups.clone();
+        let (groups, pinned) = (groups.clone(), pinned.clone());
         move |moved: DragMove<&'static str, String>| {
+            let pinned = transaction(|ctx| pinned.get(ctx));
             groups.change(|groups| {
                 for group in groups.iter_mut() {
                     group.items.retain(|item| *item != moved.item);
@@ -33,6 +47,7 @@ pub fn drag_groups() -> DomNode {
                 if let Some(group) = groups.iter_mut().find(|group| group.key == moved.to) {
                     group.items.push(moved.item);
                 }
+                pinned_first(groups, &pinned);
             });
         }
     });
@@ -48,7 +63,79 @@ pub fn drag_groups() -> DomNode {
             .join("; ")
     });
 
+    // A pin over the end of a chore, which puts it first in its group: shown with the pointer over
+    // the chore, the keyboard on it or the chore picked, and always on a pinned one - which a tap
+    // reaches too
+    let render_item_aside: RenderItemAside<String> = Rc::new({
+        let (groups, pinned) = (groups.clone(), pinned.clone());
+        move |item: &String, shown: Computed<bool>| {
+            let is_pinned = pinned.map({
+                let item = item.clone();
+                move |pinned| pinned.contains(&item)
+            });
+            // Shown, it takes the pointer when the component lets it; pinned, always
+            let pin_css = Computed::from({
+                let is_pinned = is_pinned.clone();
+                move |ctx| (shown.get(ctx), is_pinned.get(ctx))
+            })
+            .map(|(shown, is_pinned)| {
+                let opacity = if shown || is_pinned { "1" } else { "0" };
+                let pointer_events = if is_pinned { "auto" } else { "inherit" };
+                // In the room the chore keeps for it at its end
+                css! {"
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    width: {PIN_WIDTH};
+                    padding: 0;
+                    border: none;
+                    background: none;
+                    opacity: {opacity};
+                    pointer-events: {pointer_events};
+
+                    :focus-visible {
+                        opacity: 1;
+                    };
+                "}
+            });
+            let toggle = {
+                let (groups, pinned, item) = (groups.clone(), pinned.clone(), item.clone());
+                move |_| {
+                    let mut now = transaction(|ctx| pinned.get(ctx));
+                    match now.iter().position(|it| *it == item) {
+                        Some(index) => {
+                            now.remove(index);
+                        }
+                        None => now.push(item.clone()),
+                    }
+                    groups.change(|groups| pinned_first(groups, &now));
+                    pinned.set(now);
+                }
+            };
+            Some(dom! {
+                <button
+                    type="button"
+                    css={pin_css}
+                    aria-label={format!("Pin {item}")}
+                    aria-pressed={is_pinned.map(|pinned| pinned.to_string())}
+                    on_click={toggle}
+                >
+                    "📌"
+                </button>
+            })
+        }
+    });
+    let pinned_list = pinned.map(|pinned| match pinned.is_empty() {
+        true => "Pinned: nothing".to_string(),
+        false => format!("Pinned: {}", pinned.join(", ")),
+    });
+
+    let defaults = DragGroupsParams::default();
     let params = DragGroupsParams {
+        render_item_aside,
+        // Room for the pin at the end of a chore, which doesn't cover its name then
+        item_css: defaults.item_css.clone() + css! {"padding-right: {PIN_ROOM};"},
         empty_label: Some("Nothing".to_string()),
         group_attrs: Rc::new(|key: &&'static str| {
             AttrGroup::from([
@@ -59,7 +146,7 @@ pub fn drag_groups() -> DomNode {
         render_footer: Rc::new(|key: &&'static str| {
             (*key == "Done").then(|| dom! { <small>"Well done!"</small> })
         }),
-        ..Default::default()
+        ..defaults
     };
 
     let render_header: RenderGroupHeader<&'static str> =
@@ -67,7 +154,7 @@ pub fn drag_groups() -> DomNode {
     let render_item: RenderDragItem<String> = Rc::new(|item| dom! { <span>{item}</span> });
 
     dom! {
-        <p>"Drag a chore to another group, or pick it and press Here."</p>
+        <p>"Drag a chore to another group, or pick it and press Here. The pin at its end puts it first."</p>
         <DragGroups
             groups={groups}
             {render_header}
@@ -76,5 +163,6 @@ pub fn drag_groups() -> DomNode {
             {params}
         />
         <p>"Groups: " {summary}</p>
+        <p>{pinned_list}</p>
     }
 }
