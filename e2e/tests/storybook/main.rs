@@ -65,6 +65,8 @@ fn main() {
         drag_groups::picked_item_can_still_be_dragged,
         drag_groups::second_click_or_escape_puts_down,
         drag_groups::keyboard_picks_and_puts,
+        drag_groups::aside_shows_over_the_item_and_does_not_pick_it,
+        drag_groups::aside_shows_with_the_keyboard_on_the_item,
         select_search::typing_filters_and_click_selects,
         select_search::arrows_and_enter_select,
         select_search::leaving_field_closes_options,

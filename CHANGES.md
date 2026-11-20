@@ -9,6 +9,15 @@
   closed by Escape, its close button or a click beside it; the keyboard stays in it, the page under
   it doesn't scroll, and a screen reader reads it as a dialog named by its title. With `ModalParams`
   and `RenderModalContent`
+* `DragGroupsParams::render_item_aside` - what stands at the end of an item, beside its button,
+  f. ex. a button of its own, which the button of an item can't hold; it's told whether the
+  pointer is over the item or the keyboard on its button. With `RenderItemAside` and
+  `DragGroupsParams::item_box_css`
+
+### Changed
+
+* `DragGroupsParams` takes the type of the items too, `DragGroupsParams<G, I>` - inferred where
+  it's built
 
 ## 0.2.4 - 2026-11-16
 

@@ -11,6 +11,10 @@ pub type RenderGroupHeader<G> = Rc<dyn Fn(&G) -> DomNode>;
 pub type RenderGroupFooter<G> = Rc<dyn Fn(&G) -> Option<DomNode>>;
 /// Renders what an item of [`DragGroups`] shows.
 pub type RenderDragItem<I> = Rc<dyn Fn(&I) -> DomNode>;
+/// Renders what stands at the end of an item of [`DragGroups`], beside its button and over its
+/// end, if anything: f. ex. a button of its own, which a button of an item can't hold. `shown`
+/// tells whether the pointer is over the item or the keyboard on its button.
+pub type RenderItemAside<I> = Rc<dyn Fn(&I, Computed<bool>) -> Option<DomNode>>;
 /// Attributes of a group of [`DragGroups`] from its key.
 pub type DragGroupAttrs<G> = Rc<dyn Fn(&G) -> AttrGroup>;
 /// What [`DragGroups`] does with an item put into another group.
@@ -34,9 +38,15 @@ pub struct DragMove<G, I> {
 }
 
 #[derive(Clone)]
-pub struct DragGroupsParams<G> {
+pub struct DragGroupsParams<G, I> {
     /// What stands below the items of a group, f. ex. a hint. Nothing by default.
     pub render_footer: RenderGroupFooter<G>,
+    /// What stands at the end of an item, beside its button. Nothing by default. Hidden till
+    /// `shown`, it had better stay in the order of the Tab key - f. ex. with `opacity: 0` rather
+    /// than `display: none` - and show itself on `:focus-visible`, so the keyboard reaches it.
+    pub render_item_aside: RenderItemAside<I>,
+    /// The box of an item with something at its end: the button and, over its end, the aside.
+    pub item_box_css: Css,
     /// Attributes of the container of a group, f. ex. its `aria-label` or `data-testid`. None by
     /// default.
     pub group_attrs: DragGroupAttrs<G>,
@@ -65,10 +75,16 @@ pub struct DragGroupsParams<G> {
     pub empty_css: Css,
 }
 
-impl<G> Default for DragGroupsParams<G> {
+impl<G, I> Default for DragGroupsParams<G, I> {
     fn default() -> Self {
         Self {
             render_footer: Rc::new(|_| None),
+            render_item_aside: Rc::new(|_, _| None),
+            item_box_css: css! {"
+                position: relative;
+                display: inline-flex;
+                align-items: center;
+            "},
             group_attrs: Rc::new(|_| AttrGroup::new()),
             empty_label: None,
             here_label: "Here".to_string(),
@@ -185,7 +201,7 @@ pub fn DragGroups<G, I>(
     render_header: RenderGroupHeader<G>,
     render_item: RenderDragItem<I>,
     on_move: OnDragMove<G, I>,
-    params: DragGroupsParams<G>,
+    params: DragGroupsParams<G, I>,
     /// Additional attributes for the button of each item, f. ex. `i:disabled`
     i: AttrGroup,
     /// Additional attributes for each "here" button
@@ -372,7 +388,7 @@ struct Parts<G: Clone + PartialEq + 'static, I: Clone + PartialEq + 'static> {
     render_header: RenderGroupHeader<G>,
     render_item: RenderDragItem<I>,
     on_move: OnDragMove<G, I>,
-    params: DragGroupsParams<G>,
+    params: DragGroupsParams<G, I>,
     item_attrs: AttrGroup,
     here_attrs: AttrGroup,
 }
@@ -495,17 +511,39 @@ where
             pressed
         });
 
-        dom! {
+        // Over the item, or the keyboard on its button: what stands at its end may show
+        let (hovered, focused) = (Value::new(false), Value::new(false));
+        let shown = Computed::from({
+            let (hovered, focused) = (hovered.clone(), focused.clone());
+            move |ctx| hovered.get(ctx) || focused.get(ctx)
+        });
+        let aside = (self.params.render_item_aside)(item, shown);
+        let button = dom! {
             <button
                 type="button"
                 css={item_css}
                 aria-pressed={picked.map(|picked| picked.to_string())}
                 on_pointer_down={on_pointer_down}
                 on_key_down={on_key_down}
+                on_focus={bind!(focused, || focused.set(true))}
+                on_blur={bind!(focused, || focused.set(false))}
                 {..self.item_attrs.clone()}
             >
                 {(self.render_item)(item)}
             </button>
+        };
+        let Some(aside) = aside else {
+            return button;
+        };
+        dom! {
+            <span
+                css={&self.params.item_box_css}
+                on_mouse_enter={bind!(hovered, || hovered.set(true))}
+                on_mouse_leave={bind!(hovered, || hovered.set(false))}
+            >
+                {button}
+                {aside}
+            </span>
         }
     }
 

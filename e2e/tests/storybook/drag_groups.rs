@@ -226,3 +226,74 @@ pub async fn keyboard_picks_and_puts(ctx: Ctx) -> Result<()> {
     ctx.action_chain().send_keys(Key::Enter).perform().await?;
     wait_for_groups(&ctx, "To do: Cook, Sweep; Doing: Shop, Wash; Done: nothing").await
 }
+
+/// The pin of a chore, at its end beside its button.
+fn pin(label: &str) -> By {
+    By::XPath(format!(
+        "//button[@aria-label={}]",
+        xpath_literal(&format!("Pin {label}"))
+    ))
+}
+
+async fn opacity(element: &WebElement) -> Result<String> {
+    Ok(element.css_value("opacity").await?)
+}
+
+/// What stands at the end of an item shows with the pointer over the item, and a click on it
+/// does what it does without picking the item.
+pub async fn aside_shows_over_the_item_and_does_not_pick_it(ctx: Ctx) -> Result<()> {
+    open_story(&ctx).await?;
+    let wash = ctx.find(item("To do", "Wash")).await?;
+    let wash_pin = ctx.find(pin("Wash")).await?;
+    ensure!(opacity(&wash_pin).await? == "0", "the pin hides at first");
+    ctx.action_chain()
+        .move_to_element_center(&wash)
+        .perform()
+        .await?;
+    ctx.wait_for("the pin to show", async || {
+        Ok((opacity(&wash_pin).await? == "1").then_some(()))
+    })
+    .await?;
+    wash_pin.click().await?;
+    ctx.wait_for_text_of(
+        By::XPath("//p[starts-with(., 'Pinned:')]".to_string()),
+        "Pinned: Wash",
+    )
+    .await?;
+    wait_for_picked(&ctx, "To do", "Wash", false).await?;
+    // Away from the item a pinned chore keeps its pin in sight
+    ctx.action_chain()
+        .move_to_element_center(&ctx.find(By::XPath(SUMMARY.to_string())).await?)
+        .perform()
+        .await?;
+    ensure!(
+        opacity(&wash_pin).await? == "1",
+        "the pinned chore shows its pin"
+    );
+    let cook_pin = ctx.find(pin("Cook")).await?;
+    ensure!(opacity(&cook_pin).await? == "0", "the others hide theirs");
+    Ok(())
+}
+
+/// The keyboard on the button of an item shows what stands at its end, and Tab goes on to it.
+pub async fn aside_shows_with_the_keyboard_on_the_item(ctx: Ctx) -> Result<()> {
+    open_story(&ctx).await?;
+    let cook = ctx.find(item("To do", "Cook")).await?;
+    let cook_pin = ctx.find(pin("Cook")).await?;
+    cook.focus().await?;
+    ctx.wait_for("the pin to show", async || {
+        Ok((opacity(&cook_pin).await? == "1").then_some(()))
+    })
+    .await?;
+    ctx.action_chain().send_keys(Key::Tab).perform().await?;
+    let focused = ctx.active_element().await?;
+    ensure!(
+        focused.attr("aria-label").await?.as_deref() == Some("Pin Cook"),
+        "Tab goes on to the pin"
+    );
+    ensure!(
+        opacity(&cook_pin).await? == "1",
+        "the pin in focus stays in sight"
+    );
+    Ok(())
+}
