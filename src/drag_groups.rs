@@ -1,8 +1,11 @@
-use std::{cell::Cell, rc::Rc};
+use std::{
+    cell::{Cell, OnceCell, RefCell},
+    rc::Rc,
+};
 
 use vertigo::{
-    AttrGroup, ClickEvent, Computed, Css, DomComment, DomNode, KeyDownEvent, PointerEvent, Value,
-    bind, component, css, dom,
+    AttrGroup, ClickEvent, Computed, Css, DomComment, DomElementRef, DomNode, JsJson, KeyDownEvent,
+    PointerEvent, PointerType, Value, bind, component, css, dom, dom_element, js, transaction,
 };
 
 /// Renders what stands above the items of a group of [`DragGroups`], from its key.
@@ -11,6 +14,11 @@ pub type RenderGroupHeader<G> = Rc<dyn Fn(&G) -> DomNode>;
 pub type RenderGroupFooter<G> = Rc<dyn Fn(&G) -> Option<DomNode>>;
 /// Renders what an item of [`DragGroups`] shows.
 pub type RenderDragItem<I> = Rc<dyn Fn(&I) -> DomNode>;
+/// Renders what stands at the end of an item of [`DragGroups`], beside its button, if anything:
+/// f. ex. a button of its own, which a button of an item can't hold. `shown` tells whether the
+/// item is picked, a mouse or a pen is over it, or the keyboard on its button - a finger, without
+/// a hover, picks the item to get to it. See [`DragGroupsParams::render_item_aside`].
+pub type RenderItemAside<I> = Rc<dyn Fn(&I, Computed<bool>) -> Option<DomNode>>;
 /// Attributes of a group of [`DragGroups`] from its key.
 pub type DragGroupAttrs<G> = Rc<dyn Fn(&G) -> AttrGroup>;
 /// What [`DragGroups`] does with an item put into another group.
@@ -34,9 +42,25 @@ pub struct DragMove<G, I> {
 }
 
 #[derive(Clone)]
-pub struct DragGroupsParams<G> {
+pub struct DragGroupsParams<G, I> {
     /// What stands below the items of a group, f. ex. a hint. Nothing by default.
     pub render_footer: RenderGroupFooter<G>,
+    /// What stands at the end of an item, beside its button - or over the end of the button, with
+    /// `position: absolute`, as their box has `position: relative`. Nothing by default.
+    ///
+    /// Hidden till `shown`, it had better stay in the order of the Tab key - f. ex. with
+    /// `opacity: 0` rather than `display: none` - and show itself while the keyboard is in it, so
+    /// that the keyboard reaches it: with `:focus-visible` on a button, `:has(:focus-visible)` on
+    /// a box of a few. Till then the component lets the pointer through it to the item
+    /// (`pointer-events: none`), so that a hidden aside doesn't catch a tap - nor the click of the
+    /// tap which picks the item and shows it. One in sight for a reason of its own, f. ex. pinned,
+    /// sets `pointer-events: auto` itself.
+    pub render_item_aside: RenderItemAside<I>,
+    /// The box of an item with something at its end, which stands in the group in place of its
+    /// button: the button, and the aside beside it. The component puts `position: relative`
+    /// before it, for an aside over the end of the button to stand in it. What sizes or places an
+    /// item in its group, f. ex. `flex: 1`, goes here then rather than in `item_css`.
+    pub item_box_css: Css,
     /// Attributes of the container of a group, f. ex. its `aria-label` or `data-testid`. None by
     /// default.
     pub group_attrs: DragGroupAttrs<G>,
@@ -65,10 +89,19 @@ pub struct DragGroupsParams<G> {
     pub empty_css: Css,
 }
 
-impl<G> Default for DragGroupsParams<G> {
+impl<G, I> Default for DragGroupsParams<G, I> {
     fn default() -> Self {
         Self {
             render_footer: Rc::new(|_| None),
+            render_item_aside: Rc::new(|_, _| None),
+            // The button takes the room the box gets, f. ex. stretched by its group, and what stands
+            // beside it, in the flow, a column of its own each
+            item_box_css: css! {"
+                display: inline-grid;
+                grid-template-columns: 1fr;
+                grid-auto-flow: column;
+                align-items: center;
+            "},
             group_attrs: Rc::new(|_| AttrGroup::new()),
             empty_label: None,
             here_label: "Here".to_string(),
@@ -130,7 +163,14 @@ impl<G> Default for DragGroupsParams<G> {
 /// Items of `groups`, each in one of them, put into another group by dragging it there with
 /// a mouse, a pen or a finger. Or picked with a tap, a click, Enter or Space, and put with
 /// another on "here", in each group it may go to. A second tap, click, Enter or Space on the picked
-/// item, or Escape, puts it down - but the picked item can still be dragged.
+/// item, or Escape on an item or on "here", puts it down - but the picked item can still be
+/// dragged. Escape elsewhere in the component, f. ex. in a `Modal` opened from what stands at the
+/// end of an item, is left to what it's pressed in.
+///
+/// When the groups change, the focus on an item - on its button or on what stands at its end -
+/// goes to the button of the item, wherever it stands then, or, the item gone, to the one which
+/// took its place in its group. Enter or Space on "here" takes the focus along with the item it
+/// puts there, and Escape on "here" gives it back to the item.
 ///
 /// The component doesn't move anything itself: `on_move` gets the item, where it was and where
 /// it goes, and the item moves when `groups` says so - f. ex. at once, changing the `Value` the
@@ -185,7 +225,7 @@ pub fn DragGroups<G, I>(
     render_header: RenderGroupHeader<G>,
     render_item: RenderDragItem<I>,
     on_move: OnDragMove<G, I>,
-    params: DragGroupsParams<G>,
+    params: DragGroupsParams<G, I>,
     /// Additional attributes for the button of each item, f. ex. `i:disabled`
     i: AttrGroup,
     /// Additional attributes for each "here" button
@@ -194,11 +234,14 @@ pub fn DragGroups<G, I>(
     G: Clone + PartialEq + 'static,
     I: Clone + PartialEq + 'static,
 {
-    let held = Value::<Option<Picked<G, I>>>::default();
     let parts = Rc::new(Parts {
-        held: held.clone(),
+        held: Value::default(),
         drag: Value::default(),
         pressed: Cell::new(None),
+        aside_pressed: Cell::new(false),
+        root: OnceCell::new(),
+        on_page: RefCell::default(),
+        refocus: Cell::new(None),
         render_header,
         render_item,
         on_move,
@@ -207,26 +250,34 @@ pub fn DragGroups<G, I>(
         here_attrs: h,
     });
 
-    let on_key_down = bind!(held, |event: KeyDownEvent| {
-        event.key == "Escape" && put_down(&held)
-    });
     let on_pointer_down = bind!(parts, |event: PointerEvent| parts.press(&event));
     let css = css! {"position: relative;"} + parts.params.css.clone();
     let drag_layer = parts.render_drag_layer();
-    let groups = groups.render_value(move |groups| {
-        let groups = groups
-            .iter()
-            .map(|group| parts.render_group(group))
-            .collect();
-        DomComment::dom_fragment(groups).into()
+    let groups = groups.render_value({
+        let parts = parts.clone();
+        move |groups| {
+            let focus = parts.where_focus_goes(&groups);
+            let groups = groups
+                .iter()
+                .enumerate()
+                .map(|(place, group)| {
+                    let focus = focus.and_then(|(at, item)| (at == place).then_some(item));
+                    parts.render_group(group, focus)
+                })
+                .collect();
+            DomComment::dom_fragment(groups).into()
+        }
     });
 
-    dom! {
-        <div css={css} on_key_down={on_key_down} on_pointer_down={on_pointer_down}>
+    let root = dom_element! {
+        <div css={css} on_pointer_down={on_pointer_down}>
             {groups}
             {drag_layer}
         </div>
-    }
+    };
+    // Set once, here: the first render of the groups, just above, has no focus to look for
+    let _ = parts.root.set(root.get_ref());
+    DomNode::from(root)
 }
 
 /// How far, in CSS pixels, the pointer goes from where it pressed the picked item before the item
@@ -254,6 +305,15 @@ impl Point {
             y: event.element_height,
         }
     }
+}
+
+/// What a pointer pressed in the component, which tells the component in the same event.
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum Pressed {
+    /// An item, which the pointer drags.
+    Item(Press),
+    /// What stands at the end of an item: let go over a group, it puts nothing there.
+    Aside,
 }
 
 /// Where the picked item was pressed, which the item tells the component in the same event.
@@ -350,6 +410,48 @@ fn put_down<G: Clone + PartialEq + 'static, I: Clone + PartialEq + 'static>(
     was
 }
 
+/// The element has the focus from the keyboard, or from a script after it - not from a click or
+/// a tap, as the browser tells with `:focus-visible`.
+fn focus_visible(element: &DomElementRef) -> bool {
+    let visible = js! { #element.matches(":focus-visible") };
+    visible == JsJson::True
+}
+
+/// The element, or one in it, has the focus.
+fn focus_within(element: &DomElementRef) -> bool {
+    let within = js! { #element.matches(":focus-within") };
+    within == JsJson::True
+}
+
+/// An item on the page, as the groups were rendered last.
+struct OnPage<G, I> {
+    item: Picked<G, I>,
+    /// Its place in its group.
+    at: usize,
+    button: DomElementRef,
+    /// What the focus on the item is in: its box with what stands at its end, or its button.
+    area: DomElementRef,
+}
+
+/// Where the focus goes once the groups changed, from the item which had it, `at` its place in
+/// its group: to that item, wherever it stands now, or to the one which took its place - the last
+/// one of its group, if it was further. As the place of a group and of an item in it.
+fn refocus<G: PartialEq, I: PartialEq>(
+    had: &Picked<G, I>,
+    at: usize,
+    groups: &[DragGroup<G, I>],
+) -> Option<(usize, usize)> {
+    let found = groups.iter().enumerate().find_map(|(place, group)| {
+        let item = group.items.iter().position(|item| *item == had.item)?;
+        Some((place, item))
+    });
+    found.or_else(|| {
+        let place = groups.iter().position(|group| group.key == had.from)?;
+        let last = groups[place].items.len().checked_sub(1)?;
+        Some((place, at.min(last)))
+    })
+}
+
 /// The pointer of the drag is lifted, or the browser took it over: the drag ends. What it was, if
 /// it's of that pointer.
 fn end_drag(drag: &Value<Option<Drag>>, event: &PointerEvent) -> Option<Drag> {
@@ -366,13 +468,22 @@ fn end_drag(drag: &Value<Option<Drag>>, event: &PointerEvent) -> Option<Drag> {
 struct Parts<G: Clone + PartialEq + 'static, I: Clone + PartialEq + 'static> {
     held: Value<Option<Picked<G, I>>>,
     drag: Value<Option<Drag>>,
-    /// Where the picked item was pressed, from the item to the component, which starts the drag in
-    /// the same event.
-    pressed: Cell<Option<Press>>,
+    /// What a pointer pressed, from it to the component, which starts the drag of an item in the
+    /// same event.
+    pressed: Cell<Option<Pressed>>,
+    /// The last press in the component was on what stands at the end of an item, and the group
+    /// it's let go over didn't hear it yet.
+    aside_pressed: Cell<bool>,
+    /// The component, which tells whether the focus is in it.
+    root: OnceCell<DomElementRef>,
+    /// The items on the page, which tell which of them has the focus when the groups change.
+    on_page: RefCell<Vec<OnPage<G, I>>>,
+    /// The item "here" puts into its group, which takes the focus from "here", gone then.
+    refocus: Cell<Option<Picked<G, I>>>,
     render_header: RenderGroupHeader<G>,
     render_item: RenderDragItem<I>,
     on_move: OnDragMove<G, I>,
-    params: DragGroupsParams<G>,
+    params: DragGroupsParams<G, I>,
     item_attrs: AttrGroup,
     here_attrs: AttrGroup,
 }
@@ -382,7 +493,8 @@ where
     G: Clone + PartialEq + 'static,
     I: Clone + PartialEq + 'static,
 {
-    fn render_group(self: &Rc<Self>, group: &DragGroup<G, I>) -> DomNode {
+    /// `focus` - the place of the item which takes the focus, if in this group.
+    fn render_group(self: &Rc<Self>, group: &DragGroup<G, I>, focus: Option<usize>) -> DomNode {
         let key = group.key.clone();
         let params = &self.params;
 
@@ -401,10 +513,14 @@ where
             })
         };
 
-        // A mouse, a pen or a finger let go over the group, or a tap on "here"
+        // A mouse, a pen or a finger let go over the group, or a tap on "here" - but not one on
+        // what stands at the end of an item, which does what it does
         let parts = self.clone();
-        let on_pointer_up = bind!(parts, key, |event: PointerEvent| if event.button == 0 {
-            parts.put(&key)
+        let on_pointer_up = bind!(parts, key, |event: PointerEvent| {
+            let on_aside = parts.aside_pressed.replace(false);
+            if event.button == 0 && !on_aside {
+                parts.put(&key)
+            }
         });
         let here = target.render_value_option({
             let parts = self.clone();
@@ -412,12 +528,16 @@ where
             // Enter or Space on "here" - a tap or a click put the item already
             move |target| {
                 target.then(|| {
-                    let on_click = bind!(parts, key, |_: ClickEvent| parts.put(&key));
+                    let on_click = bind!(parts, key, |_: ClickEvent| parts.put_from_here(&key));
+                    let on_key_down = bind!(parts, |event: KeyDownEvent| {
+                        event.key == "Escape" && parts.put_down_from_here()
+                    });
                     dom! {
                         <button
                             type="button"
                             css={&parts.params.here_css}
                             on_click={on_click}
+                            on_key_down={on_key_down}
                             {..parts.here_attrs.clone()}
                         >
                             {&parts.params.here_label}
@@ -430,7 +550,8 @@ where
         let items = group
             .items
             .iter()
-            .map(|item| self.render_item(item, &key))
+            .enumerate()
+            .map(|(at, item)| self.render_item(item, &key, at, focus == Some(at)))
             .collect::<Vec<_>>();
         let empty = match (&params.empty_label, items.is_empty()) {
             (Some(label), true) => Some(dom! { <span css={&params.empty_css}>{label}</span> }),
@@ -448,7 +569,8 @@ where
         }
     }
 
-    fn render_item(self: &Rc<Self>, item: &I, from: &G) -> DomNode {
+    /// `at` - its place in its group; `focus` - it takes the focus once on the page.
+    fn render_item(self: &Rc<Self>, item: &I, from: &G, at: usize, focus: bool) -> DomNode {
         let held = &self.held;
         let this = Picked {
             item: item.clone(),
@@ -469,8 +591,22 @@ where
             })
         };
 
+        // A mouse or a pen over the item, the keyboard on its button, or the item picked - which
+        // is how a finger, without a hover, gets to it: what stands at its end may show
+        let (hovered, focused) = (Value::new(false), Value::new(false));
+        let shown = Computed::from({
+            let (hovered, focused, picked) = (hovered.clone(), focused.clone(), picked.clone());
+            move |ctx| hovered.get(ctx) || focused.get(ctx) || picked.get(ctx)
+        });
+        // Shown, the aside takes the pointer - but not the click of the press which showed it,
+        // which a finger, picking the item, lets go over the aside
+        let armed = Value::new(false);
+
         let parts = self.clone();
-        let on_pointer_down = bind!(parts, this, |event: PointerEvent| {
+        let on_pointer_down = bind!(parts, this, shown, armed, |event: PointerEvent| {
+            if !transaction(|ctx| shown.get(ctx)) {
+                armed.set(false);
+            }
             if event.button == 0 {
                 // The browser captured a finger or a pen for the item: it goes on to the group
                 // it's lifted over
@@ -480,22 +616,26 @@ where
                     .held
                     .change(|held| was_picked = press_on(held, this.clone()));
                 // The component, which the event reaches next, starts dragging it
-                parts.pressed.set(Some(Press {
+                parts.pressed.set(Some(Pressed::Item(Press {
                     grab: Point::of_pointer(&event),
                     size: Point::of_element(&event),
                     was_picked,
-                }));
+                })));
             }
         });
-        let on_key_down = bind!(held, this, |event: KeyDownEvent| {
-            let pressed = matches!(event.key.as_str(), "Enter" | " ");
-            if pressed {
+        let on_key_down = bind!(held, this, |event: KeyDownEvent| match event.key.as_str() {
+            "Enter" | " " => {
                 held.change(|held| pick(held, this.clone()));
+                true
             }
-            pressed
+            // On an item or on "here" only: what stands at the end of an item, f. ex. a `Modal`
+            // opened from it, may have a use for it, also listening on the whole page
+            "Escape" => put_down(&held),
+            _ => false,
         });
 
-        dom! {
+        let aside = (self.params.render_item_aside)(item, shown.clone());
+        let button = dom_element! {
             <button
                 type="button"
                 css={item_css}
@@ -506,17 +646,146 @@ where
             >
                 {(self.render_item)(item)}
             </button>
+        };
+        if focus {
+            // Which the driver gives the focus to, once the button is on the page
+            button.add_attr_static("autofocus", "autofocus");
         }
+        let Some(aside) = aside else {
+            self.on_page.borrow_mut().push(OnPage {
+                item: this,
+                at,
+                button: button.get_ref(),
+                area: button.get_ref(),
+            });
+            return button.into();
+        };
+
+        // The focus from the keyboard, as the browser tells it apart: a click or a tap focuses
+        // the button too, and leaving the item with the pointer has to hide the aside
+        let anchor = button.get_ref();
+        let button_ref = anchor.clone();
+        let button = button
+            .on_focus(bind!(focused, anchor, || focused.set(focus_visible(&anchor))))
+            .on_blur(bind!(focused, || focused.set(false)));
+        // Also a pointer which stood over the item before the page woke up. A finger moving over
+        // it scrolls the page or drags an item, and a tap sends a mouse over it, which stays there
+        let on_pointer_move = bind!(hovered, armed, |event: PointerEvent| {
+            if event.pointer_type != PointerType::Touch {
+                hovered.set(true);
+                // Not while pressing: a pen which can't hover touches the item to pick it
+                if event.buttons == 0 {
+                    armed.set(true);
+                }
+            }
+        });
+        // The click of the press, which went to the item: the next press may take the aside
+        let on_click = bind!(armed, |_: ClickEvent| armed.set(true));
+        let parts = self.clone();
+        let on_aside_down = bind!(parts, |_: PointerEvent| {
+            parts.pressed.set(Some(Pressed::Aside))
+        });
+        // Hidden, the aside lets the pointer through to the item, so that a finger, which can't
+        // see it, picks the item
+        let aside_css =
+            Computed::from(move |ctx| shown.get(ctx) && armed.get(ctx)).map(|reachable| {
+                match reachable {
+                    true => css! {"display: contents;"},
+                    false => css! {"display: contents; pointer-events: none;"},
+                }
+            });
+        // For an aside over the end of the button, whatever `item_box_css` says
+        let box_css = css! {"position: relative;"} + self.params.item_box_css.clone();
+        let item_box = dom_element! {
+            <span
+                css={box_css}
+                on_pointer_move={on_pointer_move}
+                on_mouse_leave={bind!(hovered, || hovered.set(false))}
+                on_click={on_click}
+            >
+                {button}
+                <span css={aside_css} on_pointer_down={on_aside_down}>
+                    {aside}
+                </span>
+            </span>
+        };
+        self.on_page.borrow_mut().push(OnPage {
+            item: this,
+            at,
+            button: button_ref,
+            area: item_box.get_ref(),
+        });
+        item_box.into()
+    }
+
+    /// Where the focus goes when the groups change to `groups`: the place of a group and of an
+    /// item in it, which takes the focus from the item which had it, or from "here".
+    fn where_focus_goes(&self, groups: &[DragGroup<G, I>]) -> Option<(usize, usize)> {
+        let on_page = self.on_page.take();
+        let had = match self.refocus.take() {
+            Some(put) => on_page.iter().find(|it| it.item == put),
+            // Looked for only when the focus is in the component
+            None if self.root.get().is_some_and(focus_within) => {
+                on_page.iter().find(|it| focus_within(&it.area))
+            }
+            None => None,
+        }?;
+        refocus(&had.item, had.at, groups)
+    }
+
+    /// Gives the focus to the button of `item`, where it stands on the page now.
+    fn focus_on(&self, item: &Picked<G, I>) {
+        let button = self
+            .on_page
+            .borrow()
+            .iter()
+            .find(|it| it.item == *item)
+            .map(|it| it.button.clone());
+        if let Some(button) = button {
+            js! { #button.focus() };
+        }
+    }
+
+    /// Enter or Space on "here" puts the picked item into its group, and "here" goes away: the
+    /// focus goes along with the item.
+    fn put_from_here(&self, to: &G) {
+        let Some(picked) = transaction(|ctx| self.held.get(ctx)) else {
+            return;
+        };
+        // For the groups rendered anew with the item, if `on_move` moves it at once
+        self.refocus.set(Some(picked));
+        self.put(to);
+        // Not moved yet, f. ex. till a server agrees: to the item where it stands, which the focus
+        // follows once it moves
+        if let Some(picked) = self.refocus.take() {
+            self.focus_on(&picked);
+        }
+    }
+
+    /// Escape on "here" puts the picked item down, and "here" goes away: the focus goes back to
+    /// the item.
+    fn put_down_from_here(&self) -> bool {
+        let Some(picked) = transaction(|ctx| self.held.get(ctx)) else {
+            return false;
+        };
+        put_down(&self.held);
+        self.focus_on(&picked);
+        true
     }
 
     /// A pointer pressed the component: it drags the item it pressed, if any.
     fn press(&self, event: &PointerEvent) {
-        let drag = self.pressed.take().map(|press| Drag {
-            pointer_id: event.pointer_id,
-            press,
-            start: Point::of_pointer(event),
-            copy_at: None,
-        });
+        let pressed = self.pressed.take();
+        self.aside_pressed.set(pressed == Some(Pressed::Aside));
+        let drag = match pressed {
+            Some(Pressed::Item(press)) => Some(Drag {
+                pointer_id: event.pointer_id,
+                press,
+                start: Point::of_pointer(event),
+                copy_at: None,
+            }),
+            _ => None,
+        };
         self.drag.set(drag);
     }
 
@@ -636,7 +905,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::{Drag, DragMove, Picked, Point, Press, pick, press_on, put};
+    use super::{Drag, DragGroup, DragMove, Picked, Point, Press, pick, press_on, put, refocus};
 
     fn point(x: f64, y: f64) -> Point {
         Point { x, y }
@@ -789,5 +1058,57 @@ mod tests {
         let mut held: Option<Picked<u8, &str>> = None;
 
         assert_eq!(put(&mut held, &2), None);
+    }
+
+    fn groups(groups: &[(u8, &[&'static str])]) -> Vec<DragGroup<u8, &'static str>> {
+        groups
+            .iter()
+            .map(|(key, items)| DragGroup {
+                key: *key,
+                items: items.to_vec(),
+            })
+            .collect()
+    }
+
+    #[test]
+    fn the_focus_follows_its_item_wherever_it_stands() {
+        let had = Picked { item: "b", from: 1 };
+
+        let moved = groups(&[(1, &["a", "c"]), (2, &["d", "b"])]);
+        assert_eq!(refocus(&had, 1, &moved), Some((1, 1)));
+
+        let moved_up = groups(&[(1, &["b", "a", "c"]), (2, &[])]);
+        assert_eq!(
+            refocus(&had, 1, &moved_up),
+            Some((0, 0)),
+            "also within its group"
+        );
+    }
+
+    #[test]
+    fn the_item_gone_the_focus_goes_to_the_one_in_its_place() {
+        let had = Picked { item: "b", from: 1 };
+
+        let gone = groups(&[(1, &["a", "c"]), (2, &["d"])]);
+        assert_eq!(refocus(&had, 1, &gone), Some((0, 1)));
+
+        let was_last = groups(&[(2, &["d"]), (1, &["a"])]);
+        assert_eq!(
+            refocus(&had, 1, &was_last),
+            Some((1, 0)),
+            "or to the last one of its group, which it came after"
+        );
+    }
+
+    #[test]
+    fn the_focus_goes_nowhere_without_an_item_in_the_group() {
+        let had = Picked { item: "b", from: 1 };
+
+        assert_eq!(refocus(&had, 0, &groups(&[(1, &[]), (2, &["d"])])), None);
+        assert_eq!(
+            refocus(&had, 0, &groups(&[(2, &["d"])])),
+            None,
+            "nor without the group"
+        );
     }
 }

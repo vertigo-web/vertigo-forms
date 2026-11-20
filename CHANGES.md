@@ -10,11 +10,24 @@
   it doesn't scroll, and a screen reader reads it as a dialog named by its title. Closed, it gives
   the focus back to the button that opened it. A `Modal` opened from another closes on its own
   Escape. With `ModalParams` and `RenderModalContent`
+* `DragGroupsParams::render_item_aside` - what stands at the end of an item, beside its button,
+  f. ex. a button of its own, which the button of an item can't hold; it's told whether the item
+  is picked, a mouse or a pen is over it or the keyboard on its button, and till then lets the
+  pointer through to the item. With `RenderItemAside` and `DragGroupsParams::item_box_css`
 
 ### Fixed
 
 * `PhotoPopup` left the focus nowhere once closed, so the keyboard started again from the top of
   the page - it gives it back to the thumbnail or button that opened it
+* `DragGroups` put the picked item down on Escape pressed anywhere in it, also in a `Modal` opened
+  from its header, which stayed open then - it hears Escape on its items and on "here" only
+* `DragGroups` left the focus nowhere once the groups changed, f. ex. after Enter on "here" - it
+  goes to the item it was on, wherever the item stands then, or to the one which took its place
+
+### Changed
+
+* `DragGroupsParams` takes the type of the items too, `DragGroupsParams<G, I>` - inferred where
+  it's built
 
 ## 0.2.4 - 2026-11-16
 
