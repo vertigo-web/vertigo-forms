@@ -13,6 +13,11 @@ pub struct TooltipParams {
     /// The bubble with the content. It keeps 8 pixels from the edges of the window, so
     /// a `max-width` wider than `calc(100vw - 16px)` doesn't fit.
     pub css: Css,
+    /// Whether the element is a control, f. ex. a button or what a tap picks up to drag: the
+    /// bubble shows only while a mouse or a pen is over it, a press does what the control does
+    /// and hides the bubble till the pointer leaves, and the element is no tab stop of its own,
+    /// so a tap, Enter and Space are the control's.
+    pub control: bool,
 }
 
 impl Default for TooltipParams {
@@ -33,6 +38,7 @@ impl Default for TooltipParams {
                 text-align: left;
                 box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
             "},
+            control: false,
         }
     }
 }
@@ -54,8 +60,9 @@ const GAP: f64 = 6.0;
 /// hidden, only out of sight, so a screen reader reads it with the element, and the server
 /// renders it too.
 ///
-/// It's for elements which only tell something, like a sign or a word. A tap on a button does
-/// what the button does, so a button keeps its `title`.
+/// On a control, f. ex. a button, a tap and the keys do what the control does: with
+/// [`TooltipParams::control`] the bubble shows only while a mouse or a pen is over it, a press
+/// hides it till the pointer leaves, and the element isn't a tab stop of its own.
 ///
 /// The bubble has `position: fixed`, so an ancestor with a `transform` takes it out of place.
 ///
@@ -86,6 +93,7 @@ pub fn Tooltip(
     t: AttrGroup,
 ) {
     let state = Rc::new(State::default());
+    let control = params.control;
 
     let style = Computed::from({
         let state = state.clone();
@@ -109,10 +117,16 @@ pub fn Tooltip(
         </span>
     };
     let container = dom_element! {
-        <span css={params.container_css} tabindex="0" {..c}>
+        <span css={params.container_css} {..c}>
             {element}
             {bubble}
         </span>
+    };
+    // A control is the tab stop itself
+    let container = if control {
+        container
+    } else {
+        container.attr("tabindex", "0")
     };
     let anchor = container.get_ref();
 
@@ -120,7 +134,10 @@ pub fn Tooltip(
         let (state, anchor) = (state.clone(), anchor.clone());
         move |event: PointerEvent| {
             // A finger moving over the element scrolls the page, or drags
-            if event.pointer_type != PointerType::Touch && state.opener().is_none() {
+            if event.pointer_type != PointerType::Touch
+                && !state.held.get()
+                && state.opener().is_none()
+            {
                 state.open(&anchor, Opener::Hover);
             }
         }
@@ -128,14 +145,23 @@ pub fn Tooltip(
     let on_mouse_leave = {
         let state = state.clone();
         move || {
+            state.held.set(false);
             if state.opener() == Some(Opener::Hover) {
                 state.close();
             }
         }
     };
+    // A press on a control does what the control does, f. ex. drags it, without the bubble
     let on_pointer_down = {
         let state = state.clone();
-        move |_: PointerEvent| state.pressed.set(true)
+        move |_: PointerEvent| {
+            if control {
+                state.held.set(true);
+                state.close();
+            } else {
+                state.pressed.set(true);
+            }
+        }
     };
     // Anywhere on the page, after the element heard it: a tap on the element shows or hides the
     // bubble, and a press elsewhere hides it, unless the mouse shows it by hovering
@@ -161,7 +187,7 @@ pub fn Tooltip(
                 state.close();
                 true
             }
-            "Enter" | " " => {
+            "Enter" | " " if !control => {
                 state.toggle(&anchor, Opener::Key);
                 true
             }
@@ -229,6 +255,8 @@ struct State {
     size: Value<Option<Size>>,
     /// A pointer was pressed on the element, and isn't let go yet.
     pressed: Cell<bool>,
+    /// A pointer pressed a control, which keeps the bubble hidden till it leaves.
+    held: Cell<bool>,
 }
 
 impl State {

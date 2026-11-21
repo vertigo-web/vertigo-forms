@@ -1,5 +1,5 @@
-use vertigo::{DomNode, css, dom};
-use vertigo_forms::Tooltip;
+use vertigo::{DomNode, Value, css, dom};
+use vertigo_forms::{Tooltip, TooltipParams};
 
 pub fn tooltip() -> DomNode {
     let row = css! {"
@@ -8,6 +8,12 @@ pub fn tooltip() -> DomNode {
         align-items: center;
         margin: 1em 0;
     "};
+    let fed = Value::new(0);
+    let feed = {
+        let fed = fed.clone();
+        move |_| fed.change(|fed| *fed += 1)
+    };
+    let fed_times = fed.map(|fed| format!("Fed {fed} times"));
 
     dom! {
         <div>
@@ -30,6 +36,17 @@ pub fn tooltip() -> DomNode {
                     params={}
                 />
             </div>
+            <p>
+                "A button with a hint: "
+                <Tooltip
+                    element={dom! { <button on_click={feed}>"Feed the cat"</button> }}
+                    content={dom! { <span>"The cat had its breakfast an hour ago"</span> }}
+                    params={TooltipParams { control: true, ..TooltipParams::default() }}
+                />
+                " "
+                <span>{fed_times}</span>
+                ". Point at it; a click feeds the cat."
+            </p>
         </div>
     }
 }
