@@ -42,6 +42,7 @@ fn main() {
         tooltip::tap_shows_hint_and_tap_elsewhere_hides_it,
         tooltip::tab_shows_hint_and_escape_hides_it,
         tooltip::hint_keeps_within_the_window,
+        tooltip::a_button_keeps_its_click_and_shows_its_hint_on_hover,
         modal::button_opens_window_named_by_its_title,
         modal::click_beside_or_close_button_closes,
         modal::press_in_window_let_go_beside_stays_open,

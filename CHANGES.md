@@ -14,6 +14,10 @@
   f. ex. a button of its own, which the button of an item can't hold; it's told whether the item
   is picked, a mouse or a pen is over it or the keyboard on its button or in it, and till then
   lets the pointer through to the item. With `RenderItemAside` and `DragGroupsParams::item_box_css`
+* `TooltipParams::control` - a `Tooltip` on a control, f. ex. a button or what a tap picks up to
+  drag: the bubble shows while a mouse or a pen is over it, a press does what the control does and
+  hides the bubble till the pointer leaves, and the element is no tab stop of its own, so a tap,
+  Enter and Space stay the control's
 
 ### Fixed
 
@@ -30,6 +34,8 @@
 
 * `DragGroupsParams` takes the type of the items too, `DragGroupsParams<G, I>` - inferred where
   it's built
+* `TooltipParams` has the field `control` - a struct literal without it needs
+  `..TooltipParams::default()`
 
 ## 0.2.4 - 2026-11-16
 

@@ -1,8 +1,12 @@
 //! Story "Drag Groups": chores in three groups, "To do", "Doing" and "Done", moved between them
 //! at once.
 
-use thirtyfour::common::command::{Actions, Command};
+use thirtyfour::{
+    common::command::{Actions, Command},
+    prelude::ElementQueryable,
+};
 use vertigo_forms_e2e::prelude::*;
+use vertigo_testing::POLL;
 
 const SUMMARY: &str = "//p[starts-with(normalize-space(.), 'Groups:')]";
 
@@ -104,22 +108,59 @@ pub async fn mouse_drags_item_to_another_group(ctx: Ctx) -> Result<()> {
     ctx.wait_for_none(here()).await
 }
 
+/// Opens the story and drags the chore `label` of `group_name` with the mouse, grabbed in its
+/// center, to the center of the group `to_group`, till a copy of the chore follows the pointer
+/// there: the center of the copy. With `E2E_HEADLESS=0` a drag doesn't always last: a window of
+/// a parallel test opening or closing under the system pointer moves the mouse of the page there,
+/// with no button held (see the story "Popup"), which lets the chore go - and leaves it picked. So
+/// the story opens anew for each try, with nothing picked.
+async fn open_and_drag_till_copy_follows(
+    ctx: &Ctx,
+    group_name: &str,
+    label: &str,
+    to_group: &str,
+) -> Result<(f64, f64)> {
+    ctx.wait_for(
+        &format!("the copy of {label:?} to follow the pointer"),
+        async || {
+            open_story(ctx).await?;
+            // The mouse may still hold the chore of the last try: it lets go away from the
+            // groups, where that does nothing
+            let away = ctx.find(By::XPath(SUMMARY.to_string())).await?;
+            ctx.action_chain()
+                .move_to_element_center(&away)
+                .release()
+                .perform()
+                .await?;
+
+            let from = ctx.find(item(group_name, label)).await?;
+            let to = ctx.find(group(to_group)).await?;
+            ctx.action_chain()
+                .click_and_hold_element(&from)
+                .move_to_element_center(&to)
+                .perform()
+                .await?;
+            // A moment for the copy, which a drag cut short doesn't show at all
+            let copy = ctx
+                .query(copy_of(label))
+                .wait(Duration::from_secs(1), POLL)
+                .first_opt()
+                .await?;
+            match copy {
+                Some(copy) => Ok(Some(center(&copy).await?)),
+                None => Ok(None),
+            }
+        },
+    )
+    .await
+}
+
 /// While a chore is dragged, a copy of it follows the pointer, held where it was grabbed. Let go
 /// outside of the groups, the copy goes away and the chore stays where it was, picked.
 pub async fn dragged_item_follows_the_pointer(ctx: Ctx) -> Result<()> {
-    open_story(&ctx).await?;
-
-    let from = ctx.find(item("To do", "Cook")).await?;
-    let to = ctx.find(group("Done")).await?;
-    ctx.action_chain()
-        .click_and_hold_element(&from)
-        .move_to_element_center(&to)
-        .perform()
-        .await?;
-
     // Grabbed in its center, the copy stands with its center under the pointer
-    let (x, y) = center(&ctx.find(copy_of("Cook")).await?).await?;
-    let (to_x, to_y) = center(&to).await?;
+    let (x, y) = open_and_drag_till_copy_follows(&ctx, "To do", "Cook", "Done").await?;
+    let (to_x, to_y) = center(&ctx.find(group("Done")).await?).await?;
     ensure!(
         (x - to_x).abs() < 2.0 && (y - to_y).abs() < 2.0,
         "the copy is centered at ({x}, {y}), the pointer at ({to_x}, {to_y})"

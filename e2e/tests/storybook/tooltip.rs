@@ -1,4 +1,5 @@
-//! Story "Tooltip": a word and a sign at the right edge, each with a hint.
+//! Story "Tooltip": a word and a sign at the right edge, each with a hint, and a button with
+//! a hint, which a click and a tap still press.
 
 use thirtyfour::common::command::{Actions, Command};
 use vertigo_forms_e2e::prelude::*;
@@ -8,6 +9,27 @@ const WORD_HINT: &str = "Clearly not a dog";
 const SIGN: &str = "★ 4.5";
 const SIGN_HINT: &str =
     "4.5 out of 5 stars from 120 reviews, most of them praising the friendly service";
+const BUTTON_HINT: &str = "The cat had its breakfast an hour ago";
+
+fn button() -> By {
+    By::XPath("//button[normalize-space(.)='Feed the cat']".to_string())
+}
+
+/// Waits until the story says the button fed the cat `times` times.
+async fn wait_fed(ctx: &Ctx, times: u32) -> Result<()> {
+    let expected = format!("Fed {times} times");
+    ctx.wait_for(&format!("{expected:?}"), async || {
+        let text = ctx
+            .find(By::XPath(
+                "//span[starts-with(normalize-space(.), 'Fed ')]".to_string(),
+            ))
+            .await?
+            .text()
+            .await?;
+        Ok((text == expected).then_some(()))
+    })
+    .await
+}
 
 /// The element with the hint, by its text.
 fn element(text: &str) -> By {
@@ -134,4 +156,42 @@ pub async fn hint_keeps_within_the_window(ctx: Ctx) -> Result<()> {
         hint.width
     );
     Ok(())
+}
+
+/// On a button the hint shows under the mouse, and a click does what the button does and hides
+/// the hint till the mouse leaves; a tap does it too, without the hint, and the button is the only
+/// tab stop, so Enter presses it.
+pub async fn a_button_keeps_its_click_and_shows_its_hint_on_hover(ctx: Ctx) -> Result<()> {
+    ctx.open("/tooltip").await?;
+    ctx.wait_for("the hint over the button", async || {
+        let button = ctx.find(button()).await?;
+        ctx.action_chain()
+            .move_to_element_center(&button)
+            .perform()
+            .await?;
+        Ok(in_sight(&ctx, BUTTON_HINT).await?.then_some(()))
+    })
+    .await?;
+    ctx.find(button()).await?.click().await?;
+    wait_fed(&ctx, 1).await?;
+    wait_in_sight(&ctx, BUTTON_HINT, false).await?;
+
+    let button = ctx.find(button()).await?;
+    tap(&ctx, &button).await?;
+    wait_fed(&ctx, 2).await?;
+    ensure!(
+        !in_sight(&ctx, BUTTON_HINT).await?,
+        "a tap on the button showed its hint"
+    );
+
+    let tab_stops = ctx
+        .js("return document.querySelectorAll('span[tabindex] > button').length")
+        .await?;
+    ensure!(
+        tab_stops.as_u64() == Some(0),
+        "the button's hint is a tab stop of its own"
+    );
+    button.focus().await?;
+    ctx.action_chain().send_keys(Key::Enter).perform().await?;
+    wait_fed(&ctx, 3).await
 }
