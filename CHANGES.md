@@ -12,8 +12,8 @@
   Escape. With `ModalParams` and `RenderModalContent`
 * `DragGroupsParams::render_item_aside` - what stands at the end of an item, beside its button,
   f. ex. a button of its own, which the button of an item can't hold; it's told whether the item
-  is picked, a mouse or a pen is over it or the keyboard on its button, and till then lets the
-  pointer through to the item. With `RenderItemAside` and `DragGroupsParams::item_box_css`
+  is picked, a mouse or a pen is over it or the keyboard on its button or in it, and till then
+  lets the pointer through to the item. With `RenderItemAside` and `DragGroupsParams::item_box_css`
 
 ### Fixed
 
@@ -22,7 +22,9 @@
 * `DragGroups` put the picked item down on Escape pressed anywhere in it, also in a `Modal` opened
   from its header, which stayed open then - it hears Escape on its items and on "here" only
 * `DragGroups` left the focus nowhere once the groups changed, f. ex. after Enter on "here" - it
-  goes to the item it was on, wherever the item stands then, or to the one which took its place
+  goes to the item it was on, wherever the item stands then, or to the one which took its place.
+  It renders anew only the items of a group which changed, and what stands above and below them
+  keeps the focus
 
 ### Changed
 

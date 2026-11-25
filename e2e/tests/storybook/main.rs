@@ -74,6 +74,7 @@ fn main() {
         drag_groups::aside_hides_once_the_mouse_leaves,
         drag_groups::tap_on_hidden_aside_picks_the_item,
         drag_groups::focus_stays_with_the_item_its_aside_moves,
+        drag_groups::focus_below_the_items_stays_as_they_change,
         drag_groups::escape_on_the_aside_is_left_to_the_page,
         drag_groups::stretched_item_fills_its_box,
         select_search::typing_filters_and_click_selects,

@@ -557,3 +557,30 @@ pub async fn stretched_item_fills_its_box(ctx: Ctx) -> Result<()> {
     );
     Ok(())
 }
+
+/// What stands below the items of a group stays as they change: the focus stays on "Add a chore",
+/// pressed with the keyboard again.
+pub async fn focus_below_the_items_stays_as_they_change(ctx: Ctx) -> Result<()> {
+    open_story(&ctx).await?;
+    ctx.find(By::XPath(
+        "//button[normalize-space(.)='Add a chore']".to_string(),
+    ))
+    .await?
+    .focus()
+    .await?;
+
+    ctx.action_chain().send_keys(Key::Enter).perform().await?;
+    wait_for_groups(
+        &ctx,
+        "To do: Wash, Cook, Sweep, Chore 1; Doing: Shop; Done: nothing",
+    )
+    .await?;
+    wait_for_focus(&ctx, "To do/Add a chore").await?;
+
+    ctx.action_chain().send_keys(Key::Enter).perform().await?;
+    wait_for_groups(
+        &ctx,
+        "To do: Wash, Cook, Sweep, Chore 1, Chore 2; Doing: Shop; Done: nothing",
+    )
+    .await
+}
