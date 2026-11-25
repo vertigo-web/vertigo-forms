@@ -16,8 +16,9 @@ pub type RenderGroupFooter<G> = Rc<dyn Fn(&G) -> Option<DomNode>>;
 pub type RenderDragItem<I> = Rc<dyn Fn(&I) -> DomNode>;
 /// Renders what stands at the end of an item of [`DragGroups`], beside its button, if anything:
 /// f. ex. a button of its own, which a button of an item can't hold. `shown` tells whether the
-/// item is picked, a mouse or a pen is over it, or the keyboard on its button - a finger, without
-/// a hover, picks the item to get to it. See [`DragGroupsParams::render_item_aside`].
+/// item is picked, a mouse or a pen is over it, or the keyboard on its button or in what it
+/// renders - a finger, without a hover, picks the item to get to it. See
+/// [`DragGroupsParams::render_item_aside`].
 pub type RenderItemAside<I> = Rc<dyn Fn(&I, Computed<bool>) -> Option<DomNode>>;
 /// Attributes of a group of [`DragGroups`] from its key.
 pub type DragGroupAttrs<G> = Rc<dyn Fn(&G) -> AttrGroup>;
@@ -49,12 +50,11 @@ pub struct DragGroupsParams<G, I> {
     /// `position: absolute`, as their box has `position: relative`. Nothing by default.
     ///
     /// Hidden till `shown`, it had better stay in the order of the Tab key - f. ex. with
-    /// `opacity: 0` rather than `display: none` - and show itself while the keyboard is in it, so
-    /// that the keyboard reaches it: with `:focus-visible` on a button, `:has(:focus-visible)` on
-    /// a box of a few. Till then the component lets the pointer through it to the item
-    /// (`pointer-events: none`), so that a hidden aside doesn't catch a tap - nor the click of the
-    /// tap which picks the item and shows it. One in sight for a reason of its own, f. ex. pinned,
-    /// sets `pointer-events: auto` itself.
+    /// `opacity: 0` rather than `display: none` - so that the keyboard reaches it: `shown` holds
+    /// while the keyboard is in it. Till then the component lets the pointer through it to the
+    /// item (`pointer-events: none`), so that a hidden aside doesn't catch a tap - nor the click
+    /// of the tap which picks the item and shows it. One in sight for a reason of its own,
+    /// f. ex. pinned, sets `pointer-events: auto` itself.
     pub render_item_aside: RenderItemAside<I>,
     /// The box of an item with something at its end, which stands in the group in place of its
     /// button: the button, and the aside beside it. The component puts `position: relative`
@@ -167,10 +167,12 @@ impl<G, I> Default for DragGroupsParams<G, I> {
 /// dragged. Escape elsewhere in the component, f. ex. in a `Modal` opened from what stands at the
 /// end of an item, is left to what it's pressed in.
 ///
-/// When the groups change, the focus on an item - on its button or on what stands at its end -
-/// goes to the button of the item, wherever it stands then, or, the item gone, to the one which
-/// took its place in its group. Enter or Space on "here" takes the focus along with the item it
-/// puts there, and Escape on "here" gives it back to the item.
+/// When the items of a group change, the group renders them anew, but not what stands above and
+/// below them, nor the other groups: the focus there stays. The focus on an item rendered anew -
+/// on its button or on what stands at its end - goes to the button of the item, wherever it
+/// stands then, or, the item gone, to the one which took its place in its group. Enter or Space
+/// on "here" takes the focus along with the item it puts there, and Escape on "here" gives it back
+/// to the item.
 ///
 /// The component doesn't move anything itself: `on_move` gets the item, where it was and where
 /// it goes, and the item moves when `groups` says so - f. ex. at once, changing the `Value` the
@@ -234,14 +236,23 @@ pub fn DragGroups<G, I>(
     G: Clone + PartialEq + 'static,
     I: Clone + PartialEq + 'static,
 {
+    let keys = groups.map(|groups| {
+        groups
+            .into_iter()
+            .map(|group| group.key)
+            .collect::<Vec<_>>()
+    });
     let parts = Rc::new(Parts {
         held: Value::default(),
         drag: Value::default(),
         pressed: Cell::new(None),
         aside_pressed: Cell::new(false),
+        groups,
         root: OnceCell::new(),
-        on_page: RefCell::default(),
-        refocus: Cell::new(None),
+        focus: RefCell::new(None),
+        focus_claimed: Cell::new(false),
+        buttons: RefCell::default(),
+        item_renders: Cell::new(0),
         render_header,
         render_item,
         on_move,
@@ -251,31 +262,33 @@ pub fn DragGroups<G, I>(
     });
 
     let on_pointer_down = bind!(parts, |event: PointerEvent| parts.press(&event));
+    let on_focus_in = bind!(parts, || parts.focus_came_in());
+    let on_focus_out = bind!(parts, || parts.focus_left());
     let css = css! {"position: relative;"} + parts.params.css.clone();
     let drag_layer = parts.render_drag_layer();
-    let groups = groups.render_value({
+    // Each group anew only when the groups themselves change: as its items change, what stands
+    // above and below them stays on the page, with the focus in it
+    let groups = keys.render_value({
         let parts = parts.clone();
-        move |groups| {
-            let focus = parts.where_focus_goes(&groups);
-            let groups = groups
-                .iter()
-                .enumerate()
-                .map(|(place, group)| {
-                    let focus = focus.and_then(|(at, item)| (at == place).then_some(item));
-                    parts.render_group(group, focus)
-                })
-                .collect();
+        move |keys| {
+            parts.buttons.borrow_mut().clear();
+            let groups = keys.iter().map(|key| parts.render_group(key)).collect();
             DomComment::dom_fragment(groups).into()
         }
     });
 
     let root = dom_element! {
-        <div css={css} on_pointer_down={on_pointer_down}>
+        <div
+            css={css}
+            on_pointer_down={on_pointer_down}
+            on_focus_in={on_focus_in}
+            on_focus_out={on_focus_out}
+        >
             {groups}
             {drag_layer}
         </div>
     };
-    // Set once, here: the first render of the groups, just above, has no focus to look for
+    // Set once, here: the first render of the items, just above, has no focus to give
     let _ = parts.root.set(root.get_ref());
     DomNode::from(root)
 }
@@ -410,10 +423,10 @@ fn put_down<G: Clone + PartialEq + 'static, I: Clone + PartialEq + 'static>(
     was
 }
 
-/// The element has the focus from the keyboard, or from a script after it - not from a click or
-/// a tap, as the browser tells with `:focus-visible`.
-fn focus_visible(element: &DomElementRef) -> bool {
-    let visible = js! { #element.matches(":focus-visible") };
+/// The element with the focus has it from the keyboard, or from a script after it - not from
+/// a click or a tap, as the browser tells with `:focus-visible`.
+fn focus_visible_on_page() -> bool {
+    let visible = js! { document.activeElement.matches(":focus-visible") };
     visible == JsJson::True
 }
 
@@ -421,16 +434,6 @@ fn focus_visible(element: &DomElementRef) -> bool {
 fn focus_within(element: &DomElementRef) -> bool {
     let within = js! { #element.matches(":focus-within") };
     within == JsJson::True
-}
-
-/// An item on the page, as the groups were rendered last.
-struct OnPage<G, I> {
-    item: Picked<G, I>,
-    /// Its place in its group.
-    at: usize,
-    button: DomElementRef,
-    /// What the focus on the item is in: its box with what stands at its end, or its button.
-    area: DomElementRef,
 }
 
 /// Where the focus goes once the groups changed, from the item which had it, `at` its place in
@@ -464,7 +467,8 @@ fn end_drag(drag: &Value<Option<Drag>>, event: &PointerEvent) -> Option<Drag> {
     ended
 }
 
-/// What each group is rendered with, anew whenever the groups change.
+/// What the groups are rendered with: each group anew when the keys of the groups change, and its
+/// items when they change.
 struct Parts<G: Clone + PartialEq + 'static, I: Clone + PartialEq + 'static> {
     held: Value<Option<Picked<G, I>>>,
     drag: Value<Option<Drag>>,
@@ -474,12 +478,20 @@ struct Parts<G: Clone + PartialEq + 'static, I: Clone + PartialEq + 'static> {
     /// The last press in the component was on what stands at the end of an item, and the group
     /// it's let go over didn't hear it yet.
     aside_pressed: Cell<bool>,
+    /// As they are now: where the item which had the focus stands once they change.
+    groups: Computed<Vec<DragGroup<G, I>>>,
     /// The component, which tells whether the focus is in it.
     root: OnceCell<DomElementRef>,
-    /// The items on the page, which tell which of them has the focus when the groups change.
-    on_page: RefCell<Vec<OnPage<G, I>>>,
-    /// The item "here" puts into its group, which takes the focus from "here", gone then.
-    refocus: Cell<Option<Picked<G, I>>>,
+    /// The item with the focus, on its button or in what stands at its end, and its place in its
+    /// group: known as the focus comes and goes, so that the item rendered anew takes it, wherever
+    /// it stands then - in a group rendered before or after its own one.
+    focus: RefCell<Option<(Picked<G, I>, usize)>>,
+    /// The focus came into an item in this event, which the component hears next.
+    focus_claimed: Cell<bool>,
+    /// The buttons of the items on the page, to give the focus to.
+    buttons: RefCell<Vec<(Picked<G, I>, DomElementRef)>>,
+    /// How many times the items of a group were rendered anew, taking the focus off an item.
+    item_renders: Cell<usize>,
     render_header: RenderGroupHeader<G>,
     render_item: RenderDragItem<I>,
     on_move: OnDragMove<G, I>,
@@ -493,9 +505,8 @@ where
     G: Clone + PartialEq + 'static,
     I: Clone + PartialEq + 'static,
 {
-    /// `focus` - the place of the item which takes the focus, if in this group.
-    fn render_group(self: &Rc<Self>, group: &DragGroup<G, I>, focus: Option<usize>) -> DomNode {
-        let key = group.key.clone();
+    fn render_group(self: &Rc<Self>, key: &G) -> DomNode {
+        let key = key.clone();
         let params = &self.params;
 
         let target = self.held.map({
@@ -547,26 +558,49 @@ where
             }
         });
 
-        let items = group
-            .items
-            .iter()
-            .enumerate()
-            .map(|(at, item)| self.render_item(item, &key, at, focus == Some(at)))
-            .collect::<Vec<_>>();
-        let empty = match (&params.empty_label, items.is_empty()) {
-            (Some(label), true) => Some(dom! { <span css={&params.empty_css}>{label}</span> }),
-            _ => None,
-        };
+        let items = self.groups.map({
+            let key = key.clone();
+            move |groups| {
+                let group = groups.into_iter().find(|group| group.key == key);
+                group.map(|group| group.items).unwrap_or_default()
+            }
+        });
+        let items = items.render_value({
+            let parts = self.clone();
+            let key = key.clone();
+            move |items| parts.render_items(&key, &items)
+        });
         let footer = (params.render_footer)(&key);
         let attrs = (params.group_attrs)(&key);
 
         dom! {
             <div css={group_css} on_pointer_up={on_pointer_up} {..attrs}>
                 {(self.render_header)(&key)}
-                <div css={&params.items_css}>{..items}{..empty}{here}</div>
+                <div css={&params.items_css}>{items}{here}</div>
                 {..footer}
             </div>
         }
+    }
+
+    /// The items of the group `key`, anew: the item which had the focus takes it, if it stands
+    /// here now, or the one which took its place.
+    fn render_items(self: &Rc<Self>, key: &G, items: &[I]) -> DomNode {
+        self.item_renders
+            .set(self.item_renders.get().wrapping_add(1));
+        let focus = self.focus_goes_to(key);
+        self.buttons
+            .borrow_mut()
+            .retain(|(item, _)| item.from != *key);
+
+        let mut items = items
+            .iter()
+            .enumerate()
+            .map(|(at, item)| self.render_item(item, key, at, focus == Some(at)))
+            .collect::<Vec<_>>();
+        if let (Some(label), true) = (&self.params.empty_label, items.is_empty()) {
+            items.push(dom! { <span css={&self.params.empty_css}>{label}</span> });
+        }
+        DomComment::dom_fragment(items).into()
     }
 
     /// `at` - its place in its group; `focus` - it takes the focus once on the page.
@@ -591,8 +625,9 @@ where
             })
         };
 
-        // A mouse or a pen over the item, the keyboard on its button, or the item picked - which
-        // is how a finger, without a hover, gets to it: what stands at its end may show
+        // A mouse or a pen over the item, the keyboard on its button or in what stands at its end,
+        // or the item picked - which is how a finger, without a hover, gets to it: what stands at
+        // its end may show
         let (hovered, focused) = (Value::new(false), Value::new(false));
         let shown = Computed::from({
             let (hovered, focused, picked) = (hovered.clone(), focused.clone(), picked.clone());
@@ -651,23 +686,23 @@ where
             // Which the driver gives the focus to, once the button is on the page
             button.add_attr_static("autofocus", "autofocus");
         }
+        self.buttons
+            .borrow_mut()
+            .push((this.clone(), button.get_ref()));
+        let parts = self.clone();
         let Some(aside) = aside else {
-            self.on_page.borrow_mut().push(OnPage {
-                item: this,
-                at,
-                button: button.get_ref(),
-                area: button.get_ref(),
-            });
-            return button.into();
+            let on_focus_in = bind!(parts, this, || parts.focus_came(&this, at));
+            return button.on_focus_in(on_focus_in).into();
         };
 
-        // The focus from the keyboard, as the browser tells it apart: a click or a tap focuses
-        // the button too, and leaving the item with the pointer has to hide the aside
-        let anchor = button.get_ref();
-        let button_ref = anchor.clone();
-        let button = button
-            .on_focus(bind!(focused, anchor, || focused.set(focus_visible(&anchor))))
-            .on_blur(bind!(focused, || focused.set(false)));
+        // The focus from the keyboard on the button or in the aside, as the browser tells it apart:
+        // a click or a tap focuses them too, and leaving the item with the pointer has to hide the
+        // aside. Going from one to the other, the focus leaves the box and comes back at once.
+        let on_focus_in = bind!(parts, this, focused, || {
+            parts.focus_came(&this, at);
+            focused.set(focus_visible_on_page());
+        });
+        let on_focus_out = bind!(focused, || focused.set(false));
         // Also a pointer which stood over the item before the page woke up. A finger moving over
         // it scrolls the page or drags an item, and a tap sends a mouse over it, which stays there
         let on_pointer_move = bind!(hovered, armed, |event: PointerEvent| {
@@ -681,7 +716,6 @@ where
         });
         // The click of the press, which went to the item: the next press may take the aside
         let on_click = bind!(armed, |_: ClickEvent| armed.set(true));
-        let parts = self.clone();
         let on_aside_down = bind!(parts, |_: PointerEvent| {
             parts.pressed.set(Some(Pressed::Aside))
         });
@@ -702,6 +736,8 @@ where
                 on_pointer_move={on_pointer_move}
                 on_mouse_leave={bind!(hovered, || hovered.set(false))}
                 on_click={on_click}
+                on_focus_in={on_focus_in}
+                on_focus_out={on_focus_out}
             >
                 {button}
                 <span css={aside_css} on_pointer_down={on_aside_down}>
@@ -709,38 +745,54 @@ where
                 </span>
             </span>
         };
-        self.on_page.borrow_mut().push(OnPage {
-            item: this,
-            at,
-            button: button_ref,
-            area: item_box.get_ref(),
-        });
         item_box.into()
     }
 
-    /// Where the focus goes when the groups change to `groups`: the place of a group and of an
-    /// item in it, which takes the focus from the item which had it, or from "here".
-    fn where_focus_goes(&self, groups: &[DragGroup<G, I>]) -> Option<(usize, usize)> {
-        let on_page = self.on_page.take();
-        let had = match self.refocus.take() {
-            Some(put) => on_page.iter().find(|it| it.item == put),
-            // Looked for only when the focus is in the component
-            None if self.root.get().is_some_and(focus_within) => {
-                on_page.iter().find(|it| focus_within(&it.area))
-            }
-            None => None,
-        }?;
-        refocus(&had.item, had.at, groups)
+    /// The focus came into the item `this`, `at` its place in its group - before the component
+    /// hears of it.
+    fn focus_came(&self, this: &Picked<G, I>, at: usize) {
+        *self.focus.borrow_mut() = Some((this.clone(), at));
+        self.focus_claimed.set(true);
+    }
+
+    /// The focus came into the component: into an item, which told of it already, or beside
+    /// them, f. ex. into a header.
+    fn focus_came_in(&self) {
+        if !self.focus_claimed.replace(false) {
+            self.focus.take();
+        }
+    }
+
+    /// The focus left an element of the component - for another one of it, which tells of it
+    /// next, or not.
+    fn focus_left(&self) {
+        self.focus.take();
+    }
+
+    /// The place of the item in the group `key` which takes the focus, once the items of the group
+    /// are rendered anew: the item which has the focus, wherever it stands now, or the one which
+    /// took its place.
+    fn focus_goes_to(&self, key: &G) -> Option<usize> {
+        let (had, at) = self.focus.borrow().clone()?;
+        // Lost without a word, f. ex. with its element taken off the page by an earlier render:
+        // not the component's to give back now, which would scroll the page to it
+        if !self.root.get().is_some_and(focus_within) {
+            self.focus.take();
+            return None;
+        }
+        let groups = transaction(|ctx| self.groups.get(ctx));
+        let (place, item) = refocus(&had, at, &groups)?;
+        (groups[place].key == *key).then_some(item)
     }
 
     /// Gives the focus to the button of `item`, where it stands on the page now.
-    fn focus_on(&self, item: &Picked<G, I>) {
+    fn focus_button(&self, item: &Picked<G, I>) {
         let button = self
-            .on_page
+            .buttons
             .borrow()
             .iter()
-            .find(|it| it.item == *item)
-            .map(|it| it.button.clone());
+            .find(|(it, _)| it == item)
+            .map(|(_, button)| button.clone());
         if let Some(button) = button {
             js! { #button.focus() };
         }
@@ -752,13 +804,20 @@ where
         let Some(picked) = transaction(|ctx| self.held.get(ctx)) else {
             return;
         };
-        // For the groups rendered anew with the item, if `on_move` moves it at once
-        self.refocus.set(Some(picked));
+        // For the items rendered anew with it, if `on_move` moves it at once
+        let at = transaction(|ctx| self.groups.get(ctx))
+            .into_iter()
+            .find(|group| group.key == picked.from)
+            .and_then(|group| group.items.iter().position(|item| *item == picked.item));
+        if let Some(at) = at {
+            *self.focus.borrow_mut() = Some((picked.clone(), at));
+        }
+        let item_renders = self.item_renders.get();
         self.put(to);
-        // Not moved yet, f. ex. till a server agrees: to the item where it stands, which the focus
-        // follows once it moves
-        if let Some(picked) = self.refocus.take() {
-            self.focus_on(&picked);
+        // Not rendered anew yet, f. ex. till a server agrees: to the item where it stands, which
+        // the focus follows once it moves
+        if self.item_renders.get() == item_renders {
+            self.focus_button(&picked);
         }
     }
 
@@ -769,7 +828,7 @@ where
             return false;
         };
         put_down(&self.held);
-        self.focus_on(&picked);
+        self.focus_button(&picked);
         true
     }
 

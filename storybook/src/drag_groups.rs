@@ -93,10 +93,6 @@ pub fn drag_groups() -> DomNode {
                     background: none;
                     opacity: {opacity};
                     pointer-events: {pointer_events};
-
-                    :focus-visible {
-                        opacity: 1;
-                    };
                 "}
             });
             let toggle = {
@@ -143,8 +139,29 @@ pub fn drag_groups() -> DomNode {
                 ("aria-label".to_string(), (*key).into()),
             ])
         }),
-        render_footer: Rc::new(|key: &&'static str| {
-            (*key == "Done").then(|| dom! { <small>"Well done!"</small> })
+        // A chore added renders the items of "To do" anew, not the button below them, which keeps
+        // the focus
+        render_footer: Rc::new({
+            let (groups, added) = (groups.clone(), Value::new(0));
+            move |key: &&'static str| match *key {
+                "To do" => {
+                    let add = {
+                        let (groups, added) = (groups.clone(), added.clone());
+                        move |_| {
+                            let number = transaction(|ctx| added.get(ctx)) + 1;
+                            added.set(number);
+                            groups.change(|groups| {
+                                if let Some(group) = groups.iter_mut().find(|g| g.key == "To do") {
+                                    group.items.push(format!("Chore {number}"));
+                                }
+                            });
+                        }
+                    };
+                    Some(dom! { <button type="button" on_click={add}>"Add a chore"</button> })
+                }
+                "Done" => Some(dom! { <small>"Well done!"</small> }),
+                _ => None,
+            }
         }),
         ..defaults
     };
