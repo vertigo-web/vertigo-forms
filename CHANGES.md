@@ -36,6 +36,8 @@
   it's built
 * `TooltipParams` has the field `control` - a struct literal without it needs
   `..TooltipParams::default()`
+* `PhotoPopup` moves a swiped photo, and `Tooltip` places its bubble, in whole pixels. A float
+  written into a style brought the formatting of floats into the app's wasm, about 20 KB of it
 
 ## 0.2.4 - 2026-11-16
 

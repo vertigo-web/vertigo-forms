@@ -243,7 +243,9 @@ fn bubble_style(shown: Option<Shown>, size: Option<Size>) -> String {
         (Some(_), None) => "left: 0; top: 0; visibility: hidden;".to_string(),
         (Some(shown), Some(size)) => {
             let Point { x, y } = place(shown.anchor, size, shown.window);
-            format!("left: {x}px; top: {y}px;")
+            // In whole pixels: a float written as text would bring the formatting of floats
+            // into the wasm, about 20 KB of it
+            format!("left: {}px; top: {}px;", x.round() as i32, y.round() as i32)
         }
     }
 }
