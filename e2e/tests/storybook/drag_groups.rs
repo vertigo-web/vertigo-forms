@@ -113,7 +113,9 @@ pub async fn mouse_drags_item_to_another_group(ctx: Ctx) -> Result<()> {
 /// there: the center of the copy. With `E2E_HEADLESS=0` a drag doesn't always last: a window of
 /// a parallel test opening or closing under the system pointer moves the mouse of the page there,
 /// with no button held (see the story "Popup"), which lets the chore go - and leaves it picked. So
-/// the story opens anew for each try, with nothing picked.
+/// the story opens anew for each try, with nothing picked. In a full run windows open and close
+/// all the time, so the mouse goes at once, not in 250 ms steps, and holds the chore as briefly
+/// as it can.
 async fn open_and_drag_till_copy_follows(
     ctx: &Ctx,
     group_name: &str,
@@ -135,7 +137,7 @@ async fn open_and_drag_till_copy_follows(
 
             let from = ctx.find(item(group_name, label)).await?;
             let to = ctx.find(group(to_group)).await?;
-            ctx.action_chain()
+            ctx.action_chain_with_delay(None, Some(Duration::ZERO))
                 .click_and_hold_element(&from)
                 .move_to_element_center(&to)
                 .perform()

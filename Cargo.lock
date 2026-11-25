@@ -3800,7 +3800,7 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 [[package]]
 name = "vertigo"
 version = "0.14.5"
-source = "git+https://github.com/vertigo-web/vertigo.git?branch=master#d3cc9103321d7388a7fcf632e17b24d4fe544f91"
+source = "git+https://github.com/vertigo-web/vertigo.git?branch=master#1a3c5be3745b8141932980247ea738f8641eeab4"
 dependencies = [
  "base64 0.23.1",
  "log",
@@ -3810,7 +3810,7 @@ dependencies = [
 [[package]]
 name = "vertigo-cli"
 version = "0.14.5"
-source = "git+https://github.com/vertigo-web/vertigo.git?branch=master#d3cc9103321d7388a7fcf632e17b24d4fe544f91"
+source = "git+https://github.com/vertigo-web/vertigo.git?branch=master#1a3c5be3745b8141932980247ea738f8641eeab4"
 dependencies = [
  "actix-cors",
  "actix-files",
@@ -3890,7 +3890,7 @@ dependencies = [
 [[package]]
 name = "vertigo-macro"
 version = "0.14.5"
-source = "git+https://github.com/vertigo-web/vertigo.git?branch=master#d3cc9103321d7388a7fcf632e17b24d4fe544f91"
+source = "git+https://github.com/vertigo-web/vertigo.git?branch=master#1a3c5be3745b8141932980247ea738f8641eeab4"
 dependencies = [
  "base64 0.23.1",
  "crc",
@@ -3910,7 +3910,7 @@ dependencies = [
 [[package]]
 name = "vertigo-testing"
 version = "0.14.5"
-source = "git+https://github.com/vertigo-web/vertigo.git?branch=master#d3cc9103321d7388a7fcf632e17b24d4fe544f91"
+source = "git+https://github.com/vertigo-web/vertigo.git?branch=master#1a3c5be3745b8141932980247ea738f8641eeab4"
 dependencies = [
  "actix-web",
  "anyhow",

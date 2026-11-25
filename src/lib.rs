@@ -10,6 +10,7 @@ pub mod login;
 mod modal;
 mod photo_popup;
 mod popup;
+mod prepare_image;
 pub mod resource_table;
 mod search_panel;
 mod select;
@@ -32,6 +33,7 @@ pub use {
     modal::{Modal, ModalParams, RenderModalContent},
     photo_popup::{Photo, PhotoGallery, PhotoGalleryParams, PhotoPopup, PhotoPopupParams},
     popup::{Popup, PopupOnHover, PopupParams},
+    prepare_image::{ImageKind, PrepareImage, PreparedImage, prepare_image},
     search_panel::{SearchPanel, SearchPanelParams, SearchResult},
     select::{
         DictSelect, MultiDropDown, MultiDropDownParams, MultiSelect, MultiSelectMode,
