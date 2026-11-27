@@ -225,7 +225,7 @@ fn render_overlay(
     let photo_style = swipe
         .shift
         .to_computed()
-        .map(|shift| (shift != 0.0).then(|| format!("transform: translateX({shift}px);")));
+        .map(|shift| (shift != 0).then(|| format!("transform: translateX({shift}px);")));
 
     // The browser handles two fingers (zoom), the component one (swipe)
     let overlay_css =
@@ -289,8 +289,9 @@ enum Direction {
 struct Swipe {
     /// Id of the pointer and where it touched the popup.
     start: Rc<Cell<Option<(i32, f64, f64)>>>,
-    /// How far the photo is moved after the pointer, in CSS pixels.
-    shift: Value<f64>,
+    /// How far the photo is moved after the pointer, in whole CSS pixels: a float written into
+    /// the style would bring the formatting of floats into the wasm, about 20 KB of it.
+    shift: Value<i32>,
     /// Whether the last pointer swiped, so the click it may end with doesn't close the popup.
     swiped: Rc<Cell<bool>>,
 }
@@ -303,21 +304,21 @@ impl Swipe {
         let starts = event.pointer_type != PointerType::Mouse && event.is_primary;
         self.start
             .set(starts.then_some((event.pointer_id, event.pointer_x, event.pointer_y)));
-        self.shift.set(0.0);
+        self.shift.set(0);
     }
 
     fn moved(&self, event: &PointerEvent) {
         if let Some((id, x, _)) = self.start.get()
             && id == event.pointer_id
         {
-            self.shift.set(event.pointer_x - x);
+            self.shift.set((event.pointer_x - x) as i32);
         }
     }
 
     /// Where the pointer swiped to, if it went far enough across rather than up or down.
     fn up(&self, event: &PointerEvent) -> Option<Direction> {
         let (id, x, y) = self.start.take()?;
-        self.shift.set(0.0);
+        self.shift.set(0);
         let (across, down) = (event.pointer_x - x, event.pointer_y - y);
         if id != event.pointer_id || across.abs() < SWIPE_DISTANCE || across.abs() <= down.abs() {
             return None;
@@ -333,7 +334,7 @@ impl Swipe {
     /// The browser took the pointer over, f. ex. to zoom.
     fn cancel(&self) {
         self.start.set(None);
-        self.shift.set(0.0);
+        self.shift.set(0);
     }
 }
 
@@ -440,7 +441,7 @@ mod tests {
         event
     }
 
-    fn shift(swipe: &Swipe) -> f64 {
+    fn shift(swipe: &Swipe) -> i32 {
         transaction(|ctx| swipe.shift.get(ctx))
     }
 
@@ -449,9 +450,9 @@ mod tests {
         let swipe = Swipe::default();
         swipe.down(&finger(300.0, 200.0));
         swipe.moved(&finger(220.0, 210.0));
-        assert_eq!(shift(&swipe), -80.0);
+        assert_eq!(shift(&swipe), -80);
         assert_eq!(swipe.up(&finger(200.0, 210.0)), Some(Direction::Next));
-        assert_eq!(shift(&swipe), 0.0);
+        assert_eq!(shift(&swipe), 0);
         assert!(swipe.swiped.get());
 
         swipe.down(&finger(100.0, 200.0));
@@ -479,7 +480,7 @@ mod tests {
         };
         swipe.down(&mouse(300.0));
         swipe.moved(&mouse(100.0));
-        assert_eq!(shift(&swipe), 0.0);
+        assert_eq!(shift(&swipe), 0);
         assert_eq!(swipe.up(&mouse(100.0)), None);
 
         swipe.down(&finger(300.0, 200.0));
@@ -492,7 +493,7 @@ mod tests {
         swipe.down(&finger(300.0, 200.0));
         swipe.moved(&finger(200.0, 200.0));
         swipe.cancel();
-        assert_eq!(shift(&swipe), 0.0);
+        assert_eq!(shift(&swipe), 0);
         assert_eq!(swipe.up(&finger(100.0, 200.0)), None);
     }
 

@@ -5,6 +5,12 @@
 
 ### Added
 
+* `prepare_image`: a picture made ready to send, by the browser - scaled down to a longest side
+  and made a JPEG, or left as it is when its format is one to keep and it fits. It tells what
+  became of the picture (`PreparedImage`: the sizes, whether it was encoded anew) for the app to
+  say in its own words. With vertigo's `image::resize` under it an app needs no `image` crate,
+  which is over 400 KB of wasm with JPEG, PNG, WebP and GIF. Needs a vertigo with
+  `vertigo::image`
 * `Modal` - a window over the whole page with a title and content rendered anew each time it opens,
   closed by Escape, its close button or a click beside it; the keyboard stays in it, the page under
   it doesn't scroll, and a screen reader reads it as a dialog named by its title. Closed, it gives
@@ -36,6 +42,8 @@
   it's built
 * `TooltipParams` has the field `control` - a struct literal without it needs
   `..TooltipParams::default()`
+* `PhotoPopup` moves a swiped photo, and `Tooltip` places its bubble, in whole pixels. A float
+  written into a style brought the formatting of floats into the app's wasm, about 20 KB of it
 
 ## 0.2.4 - 2026-11-16
 
